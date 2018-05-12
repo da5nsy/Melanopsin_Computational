@@ -15,29 +15,18 @@
 %       for which the melanopic signal is particularly effective or 
 %       ineffective at performing the above task
 
-% Answers:
-%
-% 1.    Melanopic signals, and signals from X,Y and Z tristimulus values
-%       are all poor at predicting chromaticity. Ratios between signals are
-%       all good at predicting chromaticity (apart from X:Y).
-
-% Update notes:
-%
-% messypup3 - started 20171103 (cleanup and add psychtoolbox functions)
-% messypup4 - swapped xyz for lms
-% messypup5 - started thinking about reflectances, and line slopes
-% messypup6 - added real object chromaticities
+% likes to save out files, should control better
 
 %% Set-up
-if ~exist('offset','var'); clear, clc, close all; end
+if ~exist('offset','var'); clear, clc, close all; end %clears everything, unless we're inside a function
 
-%Include reflectances?
-InclReflectances=0;
-%Only the natural ones?
-NatOnly = 1;
+% Include reflectances?
+InclReflectances=1;
+% Only the natural ones?
+NatOnly = 0;
 
-%Run the null condition? (Random data)
-NullCondition = 1;
+% Run the null condition? (Random data)
+NullCondition = 0;
 
 %% LOAD
 
@@ -56,22 +45,20 @@ S_daylight=[380,5,81];
 % Obs data
 load('T_cones_ss10')
 % load('T_cones_ss2')
-% S_cones_ss10=S_cones_ss2;
-% T_cones_ss10=T_cones_ss2;
 
-% figure, hold on;
-% for i=1:3
-%     plot(SToWls(S_cones_ss10),T_cones_ss10(i,:))
-%     pause(1)
-% end
+figure, hold on;
+for i=1:3
+    plot(SToWls(S_cones_ss10),T_cones_ss10(i,:))
+    drawnow, pause(0.3)
+end
 
 % Mel data
 load('T_melanopsin')
 if exist('offset','var')
     S_melanopsin(1)=S_melanopsin(1)+offset;
-% figure,
-% plot(SToWls(S_melanopsin),T_melanopsin)
 end
+%figure,
+plot(SToWls(S_melanopsin),T_melanopsin)
 
 if InclReflectances
     % Spectral Reflection Functions
@@ -81,6 +68,8 @@ if InclReflectances
         refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
         sur_vrhel=sur_vrhel(:,refs);
     end
+    figure,
+    plot(SToWls(S_vrhel),sur_vrhel)
 end
 
 %% Initial Calculations
@@ -157,60 +146,62 @@ dMEC=[.2 .2 .2];
 dMFC=[.8 .8 .9];
 dLW=.1;
 
-% %% What is the correlation between Mel and L/M/S?
-% 
-% % There is a strong correlation between Mel and all basic signals.
-% % This is unsurprsing as the first principal component daylight is very 
-% % broad.
-% 
-% plotOrder={'L','M','S','Mel'};
-% figure('units','normalized','outerposition',[0 0 1 1])
-% 
-% for i=1:4
-% sp(i)=subplot(2,2,i);
-% scatter(...
-%     sp(i),...
-%     LMSM(i,:),...
-%     LMSM(4,:),...
-%     dS,...
-%         'MarkerEdgeColor',dMEC,...
-%         'MarkerFaceColor',dMFC,...
-%         'LineWidth',dLW...
-%         )
-% xlabel(sp(i),plotOrder{i});ylabel('Mel');
-% 
-% end
-% set(subplot(2,2,4),'Color',[.8,.8,.8])
-% 
-% %% Do any signals predict MB chromaticity?
-% 
-% % No. They all suck at it.
-% % They all flatline as chromaticity changes, and then shoot up and slightly
-% % back on themselves in that boomerang shape.
-% 
-% plotOrder={'L','M','S','Mel'};
-% 
-% figure('units','normalized','outerposition',[0 0 1 1])
-% 
-% for i=1:4
-% sp(i)=subplot(2,2,i);
-% scatter3(...
-%     sp(i),...
-%     MB(1,:),...
-%     MB(2,:),...
-%     LMSM(i,:),...
-%     dS,...
-%     'MarkerEdgeColor',dMEC,...
-%     'MarkerFaceColor',dMFC,...
-%     'LineWidth',dLW...
-%     )
-% 
-% xlim([0 1]);ylim([0 1]);%zlim([0 20])
-% xlabel(sp(i),'MB1');ylabel(sp(i),'MB2');
-% zlabel(sp(i),plotOrder{i});
-% %view(sp(i),[70,16]);
-%  
-% end
+%% What is the correlation between Mel and L/M/S?
+
+% There is a strong correlation between Mel and all basic signals.
+% This is unsurprsing as the first principal component daylight is very 
+% broad.
+
+plotOrder={'L','M','S','Mel'};
+figure('units','normalized','outerposition',[0 0 1 1])
+
+for i=1:4
+sp(i)=subplot(2,2,i);
+scatter(...
+    sp(i),...
+    LMSM(i,:),...
+    LMSM(4,:),...
+    dS,...
+        'MarkerEdgeColor',dMEC,...
+        'MarkerFaceColor',dMFC,...
+        'LineWidth',dLW...
+        )
+xlabel(sp(i),plotOrder{i});ylabel('Mel');
+
+end
+set(subplot(2,2,4),'Color',[.8,.8,.8])
+
+% Calculate r^2 values?
+
+%% Do any signals predict MB chromaticity?
+
+% No. They all suck at it.
+% They all flatline as chromaticity changes, and then shoot up and slightly
+% back on themselves in that boomerang shape.
+
+plotOrder={'L','M','S','Mel'};
+
+figure('units','normalized','outerposition',[0 0 1 1])
+
+for i=1:4
+sp(i)=subplot(2,2,i);
+scatter3(...
+    sp(i),...
+    MB(1,:),...
+    MB(2,:),...
+    LMSM(i,:),...
+    dS,...
+    'MarkerEdgeColor',dMEC,...
+    'MarkerFaceColor',dMFC,...
+    'LineWidth',dLW...
+    )
+
+xlim([0 1]);ylim([0 1]);%zlim([0 20])
+xlabel(sp(i),'MB1');ylabel(sp(i),'MB2');
+zlabel(sp(i),plotOrder{i});
+%view(sp(i),[70,16]);
+ 
+end
 %% Does any combination of the above perform better? (Yes)
 
 % In the following graphs, I ask whether a ratio of any of the available
@@ -272,140 +263,140 @@ while i<360
     end
 end
 
-% %% MB axes
-% clear sp
-% 
-% filename = 'signalCombination.gif';
-% 
-% fig=figure('units','normalized','outerposition',[0 0 1 1]);
-% sp(1)=subplot(1,2,1);
-% scatter3(...
-%     sp(1),...
-%     MB(1,:),...
-%     MB(2,:),...
-%     LMSM(4,:)./MB(1,:),...
-%     dS,...
-%     'MarkerEdgeColor',dMEC,...
-%     'MarkerFaceColor',dMFC,...
-%     'LineWidth',dLW...
-%     )
-% 
-% %axis fill; grid off
-% zlabel('Mel/MB1');
-% set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
-% view(sp(1),[0,0]);
-% xlim([0,1]),ylim([0,1]),zlim([0,400])
-% %sp(i).PlotBoxAspectRatioMode='manual';
-% %sp(i).DataAspectRatioMode='manual';
-% 
-% sp(2)=subplot(1,2,2);
-% scatter3(...
-%     sp(2),...
-%     MB(1,:),...
-%     MB(2,:),...
-%     LMSM(4,:)./MB(2,:),...
-%     dS,...
-%     'MarkerEdgeColor',dMEC,...
-%     'MarkerFaceColor',dMFC,...
-%     'LineWidth',dLW...
-%     )
-% 
-% %axis fill; grid off
-% zlabel('Mel/MB2');
-% %set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
-% view(sp(2),[0,0]);
-% xlim([0,1]),ylim([0,1]),zlim([0,400])
-% %sp(i).PlotBoxAspectRatioMode='manual';
-% %sp(i).DataAspectRatioMode='manual';
-% 
-% 
-% for i = 1:35
-%     for j=1:numel(sp)
-%         camorbit(sp(j),10,0,'data',[0 0 1]);
-%     end
-%     drawnow    
-%     frame = getframe(1);
-%     im{i} = frame2im(frame);    
-%     [A,map] = rgb2ind(im{i},256);
-%     if i == 1
-%         imwrite(A,map,filename,'gif','LoopCount',Inf,'DelayTime',0.005);
-%     else
-%         imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',0.005);
-%     end
-% end
+%% MB axes
+clear sp
 
-% %% L vs L+M
-% 
-% plotOrder={'L','M','S','Mel'};
-% 
-% figure('units','normalized','outerposition',[0 0 1 1]), hold on
-% 
-% scatter3(...
-%     MB(1,:),...
-%     MB(2,:),...
-%     LMSM(1,:)./LMSM(4,:),...
-%     dS,...
-%     'MarkerEdgeColor',dMEC,...
-%     'MarkerFaceColor','r',...
-%     'LineWidth',dLW...
-%     )
-% xlabel('MB1');ylabel('MB2');
-% 
-% scatter3(...
-%     MB(1,:),...
-%     MB(2,:),...
-%     (LMSM(1,:)+LMSM(2,:))./LMSM(4,:),...
-%     dS,...
-%     'MarkerEdgeColor',dMEC,...
-%     'MarkerFaceColor','b',...
-%     'LineWidth',dLW...
-%     )
-% xlabel('MB1');ylabel('MB2');
-% view([0,0]);
-% 
-% legend('L/Mel','(L+M)/Mel')
-% xlim([0,1]),ylim([0,1]),zlim([0,4])
+filename = 'signalCombination.gif';
+
+fig=figure('units','normalized','outerposition',[0 0 1 1]);
+sp(1)=subplot(1,2,1);
+scatter3(...
+    sp(1),...
+    MB(1,:),...
+    MB(2,:),...
+    LMSM(4,:)./MB(1,:),...
+    dS,...
+    'MarkerEdgeColor',dMEC,...
+    'MarkerFaceColor',dMFC,...
+    'LineWidth',dLW...
+    )
+
+%axis fill; grid off
+zlabel('Mel/MB1');
+set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
+view(sp(1),[0,0]);
+xlim([0,1]),ylim([0,1]),zlim([0,400])
+%sp(i).PlotBoxAspectRatioMode='manual';
+%sp(i).DataAspectRatioMode='manual';
+
+sp(2)=subplot(1,2,2);
+scatter3(...
+    sp(2),...
+    MB(1,:),...
+    MB(2,:),...
+    LMSM(4,:)./MB(2,:),...
+    dS,...
+    'MarkerEdgeColor',dMEC,...
+    'MarkerFaceColor',dMFC,...
+    'LineWidth',dLW...
+    )
+
+%axis fill; grid off
+zlabel('Mel/MB2');
+%set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
+view(sp(2),[0,0]);
+xlim([0,1]),ylim([0,1]),zlim([0,400])
+%sp(i).PlotBoxAspectRatioMode='manual';
+%sp(i).DataAspectRatioMode='manual';
+
+
+for i = 1:35
+    for j=1:numel(sp)
+        camorbit(sp(j),10,0,'data',[0 0 1]);
+    end
+    drawnow    
+    frame = getframe(1);
+    im{i} = frame2im(frame);    
+    [A,map] = rgb2ind(im{i},256);
+    if i == 1
+        imwrite(A,map,filename,'gif','LoopCount',Inf,'DelayTime',0.005);
+    else
+        imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',0.005);
+    end
+end
+
+%% L vs L+M
+
+plotOrder={'L','M','S','Mel'};
+
+figure('units','normalized','outerposition',[0 0 1 1]), hold on
+
+scatter3(...
+    MB(1,:),...
+    MB(2,:),...
+    LMSM(1,:)./LMSM(4,:),...
+    dS,...
+    'MarkerEdgeColor',dMEC,...
+    'MarkerFaceColor','r',...
+    'LineWidth',dLW...
+    )
+xlabel('MB1');ylabel('MB2');
+
+scatter3(...
+    MB(1,:),...
+    MB(2,:),...
+    (LMSM(1,:)+LMSM(2,:))./LMSM(4,:),...
+    dS,...
+    'MarkerEdgeColor',dMEC,...
+    'MarkerFaceColor','b',...
+    'LineWidth',dLW...
+    )
+xlabel('MB1');ylabel('MB2');
+view([0,0]);
+
+legend('L/Mel','(L+M)/Mel')
+xlim([0,1]),ylim([0,1]),zlim([0,4])
 
 %% Reflectances
 
-% figure, hold on
-% for i=1:170
-%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
-%     ylim([0 1])
-%     drawnow; %pause(0.1)
-% end
+figure, hold on
+for i=1:170
+    plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
+    ylim([0 1])
+    drawnow; %pause(0.1)
+end
  
-% nonNat=[46;47;48;49;50;51;52;53;54;55;56;57;58;59;60;61;62;63;64;66;67;68;70;71;72;73;74;75;76;77;78;79;80;156;157;158;159;160;161;162;163;164;165;166;167;168;169;170;45;155];
-% Nat=[15;16;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;65;69;81;82;83;84;85;86;87;88;89;90;91;92;93;94;95;96;97;98;99;100;101;102;103;104;105;106;107;108;109;110;111;112;113;114;115;116;117;118;119;120;121;122;123;124;125;126;127;128;129;130;131;132;133;134;135;136;137;138;139;140;141;142;143;144;145;146;147;148;149;150;151;152;153;154];
+nonNat=[46;47;48;49;50;51;52;53;54;55;56;57;58;59;60;61;62;63;64;66;67;68;70;71;72;73;74;75;76;77;78;79;80;156;157;158;159;160;161;162;163;164;165;166;167;168;169;170;45;155];
+Nat=[15;16;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;65;69;81;82;83;84;85;86;87;88;89;90;91;92;93;94;95;96;97;98;99;100;101;102;103;104;105;106;107;108;109;110;111;112;113;114;115;116;117;118;119;120;121;122;123;124;125;126;127;128;129;130;131;132;133;134;135;136;137;138;139;140;141;142;143;144;145;146;147;148;149;150;151;152;153;154];
 
-% figure, hold on;
-% for i=[nonNat]
-%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
-%     ylim([0 1]);
-% end
-% title('nonNat')
-% 
-% figure, hold on;
-% for i=[Nat]
-%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
-%     ylim([0 1]);
-% end
-% title('Nat')
+figure, hold on;
+for i=[nonNat]
+    plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
+    ylim([0 1]);
+end
+title('nonNat')
+
+figure, hold on;
+for i=[Nat]
+    plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
+    ylim([0 1]);
+end
+title('Nat')
 
 % Picking skin colour data
 % 87 - 'skin -- caucasian'
 % 93 - 'skin -- African American'
 % 94 - 'skin -- Asian'
 
-% figure, hold on;
-% for i=83:117
-%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'k','LineWidth',1)
-%     ylim([0 1])
-% end
-% for i=[87,93,94]
-%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'LineWidth',4)
-%     ylim([0 1])
-% end
+figure, hold on;
+for i=83:117
+    plot(SToWls(S_vrhel),sur_vrhel(:,i),'k','LineWidth',1)
+    ylim([0 1])
+end
+for i=[87,93,94]
+    plot(SToWls(S_vrhel),sur_vrhel(:,i),'LineWidth',4)
+    ylim([0 1])
+end
 
 % Coloured objects - foliage or fruit
 % 134	apple yellow delicious
@@ -419,42 +410,42 @@ end
 % 140	cabbage 
 % 141	lettuce
 
-%Plot all chosen SFRs
-% figure, hold on;
-% for i=1:length(refs)
-%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'LineWidth',4)
-%     ylim([0 1])
-% end
+Plot all chosen SFRs
+figure, hold on;
+for i=1:length(refs)
+    plot(SToWls(S_vrhel),sur_vrhel(:,i),'LineWidth',4)
+    ylim([0 1])
+end
 
-% %% Create scaled MB (model?)
-% 
-% close all
-% filename1 = 'model1.gif';
-% figure, hold on
-% for i = 2:size(spectra,3)
-% scatter3(...
-%     MB(1,:,i),...
-%     MB(2,:,i),...
-%     LMSM(4,:,i)./(LMSM(1,:,i)+LMSM(2,:,i)),...
-%     'filled')
-% end
-% xlim([0 1]);ylim([0 2]);zlim([0 1]);
-% xlabel('MB1');ylabel('MB2');zlabel('Mel/(L+M)');
-% view(3)
-% grid on
-% 
-% for i = 1:359
-%     camorbit(1,0,'data',[0 0 1]);
-%     drawnow
-%     frame = getframe(1);
-%     im{i} = frame2im(frame);    
-%     [A,map] = rgb2ind(im{i},256);
-%     if i == 1
-%         imwrite(A,map,filename1,'gif','LoopCount',Inf,'DelayTime',0.005);
-%     else
-%         imwrite(A,map,filename1,'gif','WriteMode','append','DelayTime',0.005);
-%     end
-% end
+%% Create scaled MB (model?)
+
+close all
+filename1 = 'model1.gif';
+figure, hold on
+for i = 2:size(spectra,3)
+scatter3(...
+    MB(1,:,i),...
+    MB(2,:,i),...
+    LMSM(4,:,i)./(LMSM(1,:,i)+LMSM(2,:,i)),...
+    'filled')
+end
+xlim([0 1]);ylim([0 2]);zlim([0 1]);
+xlabel('MB1');ylabel('MB2');zlabel('Mel/(L+M)');
+view(3)
+grid on
+
+for i = 1:359
+    camorbit(1,0,'data',[0 0 1]);
+    drawnow
+    frame = getframe(1);
+    im{i} = frame2im(frame);    
+    [A,map] = rgb2ind(im{i},256);
+    if i == 1
+        imwrite(A,map,filename1,'gif','LoopCount',Inf,'DelayTime',0.005);
+    else
+        imwrite(A,map,filename1,'gif','WriteMode','append','DelayTime',0.005);
+    end
+end
 % 
 % 
 % close all

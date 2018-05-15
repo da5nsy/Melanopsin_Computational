@@ -1,4 +1,4 @@
-function [MB1_minSD,MB2_minSD]= melcomp(offset)
+function [MB1_minSD,MB2_minSD,melpeak,MB1_zeroSD,MB2_zeroSD]= melcomp(offset)
 
 %% Research questions:
 %
@@ -570,9 +570,9 @@ if plot_hc
             'filled')
     end
     axis equal
-    %xlim([-1 1]);ylim([-1 1]);
-    %xticks(-1:0.2:1)
-    %yticks(-1:0.2:1)
+    xlim([0 1]);ylim([-0.5 0.5]);
+    xticks(-1:0.2:1)
+    yticks(-1:0.2:1)
     xlabel('MBx1');ylabel('MBx2')
     grid on
     
@@ -593,7 +593,7 @@ end
 
 %% Iterations
 
-plot_it=    1;
+plot_it=    0;
 
 if ~exist('offset','var') && plot_it; figure, hold on; end
 
@@ -625,6 +625,11 @@ if plot_it
     ylabel('standard deviation')    
     title(sprintf('Mel peak-%d nm',melpeak))
 end
+
+MB1_minSD = min(MBx1std(2,:));
+MB2_minSD = min(MBx2std(2,:));
+MB1_zeroSD = MBx1std(2,MBx1std(1,:)==0);
+MB2_zeroSD = MBx2std(2,MBx2std(1,:)==0);
 
 
 % %% Iterations

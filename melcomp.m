@@ -23,12 +23,16 @@ if ~exist('offset','var'); clear, clc, close all; end %clears everything, unless
 % Include reflectances?
 InclReflectances=1;
 % Only the natural ones?
-NatOnly = 0;
+NatOnly = 1;
 
 % Run the null condition? (Random data)
 NullCondition = 0;
 
 %% LOAD
+
+plot_daylight=  0;
+plot_obs=       0;
+plot_refs=      0;
 
 % Load Daylight Data
 load('C:\Users\cege-user\Dropbox\UCL\Reference Data\Granada Data\Granada_daylight_2600_161.mat');
@@ -42,14 +46,29 @@ S_daylight=[380,5,81];
 %       spectroradiometric characteristics of narrow-field-of-view 
 %       clear skylight in Granada, Spain" (2001)
 
+if plot_daylight
+    figure, hold on;
+    for i=1:500
+        plot(SToWls(S_daylight),daylight(:,i),'LineWidth',4)
+        %drawnow, pause(0.3)
+    end
+    xlabel('Wavelength (nm)')
+    ylabel('Spectral Power Distribution (W m ^-^2 nm^-^1)')
+    xlim([min(SToWls(S_daylight)),max(SToWls(S_daylight))])
+end
+
 % Obs data
 load('T_cones_ss10')
 % load('T_cones_ss2')
 
-figure, hold on;
-for i=1:3
-    plot(SToWls(S_cones_ss10),T_cones_ss10(i,:))
-    drawnow, pause(0.3)
+if plot_obs
+    figure, hold on;
+    for i=1:3
+        plot(SToWls(S_cones_ss10),T_cones_ss10(i,:),'LineWidth',4)
+        %drawnow, pause(0.3)
+    end
+    xlabel('Wavelength (nm)')
+    ylabel('Normalised Spectral Sensitivity')
 end
 
 % Mel data
@@ -57,8 +76,12 @@ load('T_melanopsin')
 if exist('offset','var')
     S_melanopsin(1)=S_melanopsin(1)+offset;
 end
-%figure,
-plot(SToWls(S_melanopsin),T_melanopsin)
+if plot_obs
+    %figure,
+    plot(SToWls(S_melanopsin),T_melanopsin,'LineWidth',4)
+    
+    legend({'L','M','S','Mel'})
+end
 
 if InclReflectances
     % Spectral Reflection Functions
@@ -68,11 +91,20 @@ if InclReflectances
         refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
         sur_vrhel=sur_vrhel(:,refs);
     end
-    figure,
-    plot(SToWls(S_vrhel),sur_vrhel)
+    
+    if plot_refs
+        figure,
+        plot(SToWls(S_vrhel),sur_vrhel,'LineWidth',4)
+        if NatOnly
+            legend(string(refs))
+        end
+    end
 end
 
 %% Initial Calculations
+
+% Where InclReflectances is on, it fills in matrices but leaves the first
+% space in each matrix for the EE ill, filled in after
 
 if InclReflectances
     for i=1:size(sur_vrhel,2)
@@ -242,31 +274,33 @@ set(sp(11),'Color',[.8,.8,.8])
 set(sp(16),'Color',[.8,.8,.8])
 % 
 
-saveGif=0; %save a 360 gif?
-i=1;
-while i<360
-    for j=1:numel(sp)
-        camorbit(sp(j),1,0,'data',[0 0 1]);
-    end
-    drawnow
-    if saveGif
-        filename = 'signalCombination.gif';
-        frame = getframe(1);
-        im{i} = frame2im(frame);
-        [A,map] = rgb2ind(im{i},256);
-        if i == 1
-            imwrite(A,map,filename,'gif','LoopCount',Inf,'DelayTime',0.005);
-        else
-            imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',0.005);
+auto_rotate=    0;
+saveGif=        0; %save a 360 gif?
+
+if auto_rotate
+    i=1;
+    while i<360
+        for j=1:numel(sp)
+            camorbit(sp(j),1,0,'data',[0 0 1]);
         end
-        i=i+1;
+        drawnow
+        if saveGif
+            filename = sprintf('MC_SC_%s.gif',datestr(now,'yymmddHHMMSS')); %SC - 'signal combination'
+            frame = getframe(1);
+            im{i} = frame2im(frame);
+            [A,map] = rgb2ind(im{i},256);
+            if i == 1
+                imwrite(A,map,filename,'gif','LoopCount',Inf,'DelayTime',0.005);
+            else
+                imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',0.005);
+            end
+            i=i+1;
+        end
     end
 end
 
 %% MB axes
 clear sp
-
-filename = 'signalCombination.gif';
 
 fig=figure('units','normalized','outerposition',[0 0 1 1]);
 sp(1)=subplot(1,2,1);
@@ -309,19 +343,25 @@ xlim([0,1]),ylim([0,1]),zlim([0,400])
 %sp(i).PlotBoxAspectRatioMode='manual';
 %sp(i).DataAspectRatioMode='manual';
 
-
-for i = 1:35
-    for j=1:numel(sp)
-        camorbit(sp(j),10,0,'data',[0 0 1]);
-    end
-    drawnow    
-    frame = getframe(1);
-    im{i} = frame2im(frame);    
-    [A,map] = rgb2ind(im{i},256);
-    if i == 1
-        imwrite(A,map,filename,'gif','LoopCount',Inf,'DelayTime',0.005);
-    else
-        imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',0.005);
+auto_rotate=    0;
+saveGif=        0; %save a 360 gif?
+if auto_rotate
+    for i = 1:35
+        for j=1:numel(sp)
+            camorbit(sp(j),10,0,'data',[0 0 1]);
+        end
+        drawnow
+        if saveGif
+            filename = sprintf('MC_MB_%s.gif',datestr(now,'yymmddHHMMSS'));
+            frame = getframe(1);
+            im{i} = frame2im(frame);
+            [A,map] = rgb2ind(im{i},256);
+            if i == 1
+                imwrite(A,map,filename,'gif','LoopCount',Inf,'DelayTime',0.005);
+            else
+                imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',0.005);
+            end
+        end
     end
 end
 
@@ -355,48 +395,50 @@ xlabel('MB1');ylabel('MB2');
 view([0,0]);
 
 legend('L/Mel','(L+M)/Mel')
-xlim([0,1]),ylim([0,1]),zlim([0,4])
+%xlim([0,1]),ylim([0,1]),zlim([0,4])
 
 %% Reflectances
 
-figure, hold on
-for i=1:170
-    plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
-    ylim([0 1])
-    drawnow; %pause(0.1)
-end
- 
-nonNat=[46;47;48;49;50;51;52;53;54;55;56;57;58;59;60;61;62;63;64;66;67;68;70;71;72;73;74;75;76;77;78;79;80;156;157;158;159;160;161;162;163;164;165;166;167;168;169;170;45;155];
-Nat=[15;16;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;65;69;81;82;83;84;85;86;87;88;89;90;91;92;93;94;95;96;97;98;99;100;101;102;103;104;105;106;107;108;109;110;111;112;113;114;115;116;117;118;119;120;121;122;123;124;125;126;127;128;129;130;131;132;133;134;135;136;137;138;139;140;141;142;143;144;145;146;147;148;149;150;151;152;153;154];
-
-figure, hold on;
-for i=[nonNat]
-    plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
-    ylim([0 1]);
-end
-title('nonNat')
-
-figure, hold on;
-for i=[Nat]
-    plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
-    ylim([0 1]);
-end
-title('Nat')
+% % Plot all
+% figure, hold on
+% for i=1:170
+%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
+%     ylim([0 1])
+%     drawnow; %pause(0.1)
+% end
+%  
+% % Define natural and non-natural
+% nonNat=[46;47;48;49;50;51;52;53;54;55;56;57;58;59;60;61;62;63;64;66;67;68;70;71;72;73;74;75;76;77;78;79;80;156;157;158;159;160;161;162;163;164;165;166;167;168;169;170;45;155];
+% Nat=[15;16;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;65;69;81;82;83;84;85;86;87;88;89;90;91;92;93;94;95;96;97;98;99;100;101;102;103;104;105;106;107;108;109;110;111;112;113;114;115;116;117;118;119;120;121;122;123;124;125;126;127;128;129;130;131;132;133;134;135;136;137;138;139;140;141;142;143;144;145;146;147;148;149;150;151;152;153;154];
+% 
+% figure, hold on;
+% for i=[nonNat]
+%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
+%     ylim([0 1]);
+% end
+% title('nonNat')
+% 
+% figure, hold on;
+% for i=[Nat]
+%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
+%     ylim([0 1]);
+% end
+% title('Nat')
 
 % Picking skin colour data
 % 87 - 'skin -- caucasian'
 % 93 - 'skin -- African American'
 % 94 - 'skin -- Asian'
 
-figure, hold on;
-for i=83:117
-    plot(SToWls(S_vrhel),sur_vrhel(:,i),'k','LineWidth',1)
-    ylim([0 1])
-end
-for i=[87,93,94]
-    plot(SToWls(S_vrhel),sur_vrhel(:,i),'LineWidth',4)
-    ylim([0 1])
-end
+% figure, hold on;
+% for i=83:117
+%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'k','LineWidth',1)
+%     ylim([0 1])
+% end
+% for i=[87,93,94]
+%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'LineWidth',4)
+%     ylim([0 1])
+% end
 
 % Coloured objects - foliage or fruit
 % 134	apple yellow delicious
@@ -410,17 +452,24 @@ end
 % 140	cabbage 
 % 141	lettuce
 
-Plot all chosen SFRs
-figure, hold on;
-for i=1:length(refs)
-    plot(SToWls(S_vrhel),sur_vrhel(:,i),'LineWidth',4)
+%Plot all chosen SFRs 
+% This is redundant because similar is included in an earlier section
+plot_chosen_refs=   0;
+if plot_chosen_refs
+    figure, hold on;
+    for i=1:length(refs)
+        plot(SToWls(S_vrhel),sur_vrhel(:,i),'LineWidth',4)
+        
+    end
+    xlim([min(SToWls(S_vrhel)),max(SToWls(S_vrhel))])
     ylim([0 1])
+    xlabel('Wavelength (nm)')
+    ylabel('Relative Spectral Reflectance')
 end
 
-%% Create scaled MB (model?)
+%% Create scaled MB model
 
 close all
-filename1 = 'model1.gif';
 figure, hold on
 for i = 2:size(spectra,3)
 scatter3(...
@@ -429,8 +478,56 @@ scatter3(...
     LMSM(4,:,i)./(LMSM(1,:,i)+LMSM(2,:,i)),...
     'filled')
 end
-xlim([0 1]);ylim([0 2]);zlim([0 1]);
+axis equal
+xlim([0 1]);ylim([0 1]);zlim([0 1]);
+xticks(0:0.2:1)
+yticks(0:0.2:1)
 xlabel('MB1');ylabel('MB2');zlabel('Mel/(L+M)');
+view(2)
+grid on
+
+auto_rotate=0; 
+saveGif=0; %save a 360 gif?
+if auto_rotate
+    for i = 1:359
+        camorbit(1,0,'data',[0 0 1]);
+        drawnow
+        if saveGif
+            filename = sprintf('MC_M_%s.gif',datestr(now,'yymmddHHMMSS')); %M - 'model'
+            frame = getframe(1);
+            im{i} = frame2im(frame);
+            [A,map] = rgb2ind(im{i},256);
+            if i == 1
+                imwrite(A,map,filename1,'gif','LoopCount',Inf,'DelayTime',0.005);
+            else
+                imwrite(A,map,filename1,'gif','WriteMode','append','DelayTime',0.005);
+            end
+        end
+    end
+end
+
+% Plot spectral locus in MB space
+
+
+%%
+
+close all
+
+filename2 = 'model2.gif';
+MB2=MB;
+MB2(1,:,:)=MB(1,:,:)+.2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
+MB2(2,:,:)=MB(2,:,:)-1.4*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
+
+figure, hold on
+for i = 2:size(spectra,3)
+scatter3(...
+    MB2(1,:,i),...
+    MB2(2,:,i),...
+    LMSM(4,:,i)./(LMSM(1,:,i)+LMSM(2,:,i)),...
+    'filled')
+end
+xlabel('MBx1');ylabel('MBx2');zlabel('Mel/(L+M)');
+xlim([-1 1]);ylim([-1 1]);zlim([0 1]);
 view(3)
 grid on
 
@@ -441,77 +538,43 @@ for i = 1:359
     im{i} = frame2im(frame);    
     [A,map] = rgb2ind(im{i},256);
     if i == 1
-        imwrite(A,map,filename1,'gif','LoopCount',Inf,'DelayTime',0.005);
+        imwrite(A,map,filename2,'gif','LoopCount',Inf,'DelayTime',0.005);
     else
-        imwrite(A,map,filename1,'gif','WriteMode','append','DelayTime',0.005);
+        imwrite(A,map,filename2,'gif','WriteMode','append','DelayTime',0.005);
     end
 end
-% 
-% 
-% close all
-% 
-% filename2 = 'model2.gif';
-% MB2=MB;
-% MB2(1,:,:)=MB(1,:,:)+.2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
-% MB2(2,:,:)=MB(2,:,:)-1.4*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
-% 
-% figure, hold on
-% for i = 2:size(spectra,3)
-% scatter3(...
-%     MB2(1,:,i),...
-%     MB2(2,:,i),...
-%     LMSM(4,:,i)./(LMSM(1,:,i)+LMSM(2,:,i)),...
-%     'filled')
-% end
-% xlabel('MBx1');ylabel('MBx2');zlabel('Mel/(L+M)');
-% xlim([-1 1]);ylim([-1 1]);zlim([0 1]);
-% view(3)
-% grid on
-% 
-% for i = 1:359
-%     camorbit(1,0,'data',[0 0 1]);
-%     drawnow
-%     frame = getframe(1);
-%     im{i} = frame2im(frame);    
-%     [A,map] = rgb2ind(im{i},256);
-%     if i == 1
-%         imwrite(A,map,filename2,'gif','LoopCount',Inf,'DelayTime',0.005);
-%     else
-%         imwrite(A,map,filename2,'gif','WriteMode','append','DelayTime',0.005);
-%     end
-% end
 
 
-% %% Iterations
-% if ~exist('offset','var'); figure, hold on; end
-% 
-% MBx=MB;
-% MBx1std=[0;0];
-% MBx2std=[0;0];
-%  
-% for S1= -10:0.05:10%-1:0.01:1.5
-%     MBx(1,:,:)=MB(1,:,:)+S1*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
-%     MBx1std=[MBx1std,[S1;mean(std(MBx(1,:,2:end)))]];
-% end
-% MBx1std=MBx1std(:,2:end);
-% %figure, hold on
-% plot(MBx1std(1,:),MBx1std(2,:),'b')
-% 
-% for S2= -10:0.05:10%0:0.04:2.5
-%     MBx(2,:,:)=MB(2,:,:)-S2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
-%     MBx2std=[MBx2std,[S2;mean(std(MBx(2,:,2:end)))]];
-% end
-% MBx2std=MBx2std(:,2:end);
-% plot(MBx2std(1,:),MBx2std(2,:),'r')
-% 
-% xlabel('weight of factor')
-% ylabel('standard deviation')
-% 
-% [~,melpeakloc]=max(T_melanopsin);
-% melwavelength=SToWls(S_melanopsin);
-% melpeak=melwavelength(melpeakloc);
-% 
-% title(sprintf('Mel peak-%d nm',melpeak))
+%% Iterations
+if ~exist('offset','var'); figure, hold on; end
+
+MBx=MB;
+MBx1std=[0;0];
+MBx2std=[0;0];
+ 
+for S1= -10:0.05:10%-1:0.01:1.5
+    MBx(1,:,:)=MB(1,:,:)+S1*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
+    MBx1std=[MBx1std,[S1;mean(std(MBx(1,:,2:end)))]];
+end
+MBx1std=MBx1std(:,2:end);
+%figure, hold on
+plot(MBx1std(1,:),MBx1std(2,:),'b')
+
+for S2= -10:0.05:10%0:0.04:2.5
+    MBx(2,:,:)=MB(2,:,:)-S2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
+    MBx2std=[MBx2std,[S2;mean(std(MBx(2,:,2:end)))]];
+end
+MBx2std=MBx2std(:,2:end);
+plot(MBx2std(1,:),MBx2std(2,:),'r')
+
+xlabel('weight of factor')
+ylabel('standard deviation')
+
+[~,melpeakloc]=max(T_melanopsin);
+melwavelength=SToWls(S_melanopsin);
+melpeak=melwavelength(melpeakloc);
+
+title(sprintf('Mel peak-%d nm',melpeak))
 
 %% Iterations
 if ~exist('offset','var'); figure, hold on; end

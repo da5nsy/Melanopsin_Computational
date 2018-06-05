@@ -1,4 +1,4 @@
-function [MB1_minSD,MB2_minSD,melpeak,MB1_zeroSD,MB2_zeroSD]= melcomp(offset)
+function [MB1_minSD,MB2_minSD,melpeak,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melcomp(offset)
 
 %% Research questions:
 %
@@ -39,7 +39,7 @@ load('C:\Users\cege-user\Dropbox\UCL\Reference Data\Granada Data\Granada_dayligh
 granada=final; clear final
 % 300 - 1100nm, 5nm interval, unlabeled
 % 2600 samples
-daylight=granada(17:97,1:500); %match obs
+daylight=granada(17:97,:); %match obs
 S_daylight=[380,5,81];
 % http://colorimaginglab.ugr.es/pages/Data#__doku_granada_daylight_spectral_database
 % From: J. Hernández-Andrés, J. Romero& R.L. Lee, Jr., "Colorimetric and
@@ -48,10 +48,10 @@ S_daylight=[380,5,81];
 
 if plot_daylight
     figure, hold on;
-    for i=1:500
-        plot(SToWls(S_daylight),daylight(:,i),'LineWidth',4)
-        %drawnow, pause(0.3)
-    end
+    
+    plot(SToWls(S_daylight),daylight,'LineWidth',4)
+    %drawnow, pause(0.3)
+    
     xlabel('Wavelength (nm)')
     ylabel('Spectral Power Distribution (W m ^-^2 nm^-^1)')
     xlim([min(SToWls(S_daylight)),max(SToWls(S_daylight))])
@@ -67,6 +67,7 @@ if plot_obs
         plot(SToWls(S_cones_ss10),T_cones_ss10(i,:),'LineWidth',4)
         %drawnow, pause(0.3)
     end
+    xlim([380 780])
     xlabel('Wavelength (nm)')
     ylabel('Normalised Spectral Sensitivity')
 end
@@ -555,12 +556,20 @@ end
 plot_hc=    0;
 
 if plot_hc
-    fac1=   0.23;
-    fac2=   -1.7;
+    fac1=   0.25;
+    fac2=   -1.4;
     
     MB2=MB;
     MB2(1,:,:)=MB(1,:,:)+fac1*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
     MB2(2,:,:)=MB(2,:,:)+fac2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
+
+%     % multiplicative version
+%     fac1=   -0.23;
+%     fac2=   1.7;
+%     
+%     MB2=MB;
+%     MB2(1,:,:)=MB(1,:,:).*(1-fac1*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:))));
+%     MB2(2,:,:)=MB(2,:,:).*(1-fac2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:))));
     
     figure, hold on
     for i = 2:size(spectra,3)
@@ -598,7 +607,7 @@ plot_it=    0;
 if ~exist('offset','var') && plot_it; figure, hold on; end
 
 MBx=MB;
-MBx1std=[0;0];
+MBx1std=[0;0]; %Initialise variables so that they can be added to
 MBx2std=[0;0];
 
 for S1= -10:0.05:10%-1:0.01:1.5
@@ -608,7 +617,7 @@ end
 MBx1std=MBx1std(:,2:end);
 
 for S2= -10:0.05:10%0:0.04:2.5
-    MBx(2,:,:)=MB(2,:,:)-S2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
+    MBx(2,:,:)=MB(2,:,:)+S2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
     MBx2std=[MBx2std,[S2;mean(std(MBx(2,:,2:end)))]];
 end
 MBx2std=MBx2std(:,2:end);
@@ -626,8 +635,8 @@ if plot_it
     title(sprintf('Mel peak-%d nm',melpeak))
 end
 
-MB1_minSD = min(MBx1std(2,:));
-MB2_minSD = min(MBx2std(2,:));
+[MB1_minSD, MB1_minSD_loc] = min(MBx1std(2,:));
+[MB2_minSD, MB2_minSD_loc] = min(MBx2std(2,:));
 MB1_zeroSD = MBx1std(2,MBx1std(1,:)==0);
 MB2_zeroSD = MBx2std(2,MBx2std(1,:)==0);
 
@@ -650,3 +659,18 @@ MB2_zeroSD = MBx2std(2,MBx2std(1,:)==0);
 % melwavelength=SToWls(S_melanopsin);
 % melpeak=melwavelength(melpeakloc);
 % title(sprintf('Mel peak-%d nm',melpeak))
+
+%% What is the inter-object distance?
+
+S_vals=[MBx1std(1,MB1_minSD_loc),MBx2std(1,MB2_minSD_loc)];
+
+MBx(1,:,:)=MB(1,:,:)+S_vals(1)*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
+MBx(2,:,:)=MB(2,:,:)+S_vals(2)*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
+
+%scatter(MBx(1,:),MBx(2,:));
+
+MBx_m=squeeze(mean(MBx(:,:,2:end),2));
+%scatter(MBx_m(1,2:end),MBx_m(2,2:end),'k','filled')
+
+spread=[std(MBx_m(1,:)),std(MBx_m(2,:))];
+%disp(melpeak)

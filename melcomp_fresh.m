@@ -3,9 +3,17 @@ clear, clc, close all
 % A fresh attempt
 
 %% Load Image
+
 load sur_vrhel
 refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
 sur_vrhel=sur_vrhel(:,refs);
+
+% base = 'C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Foster Lab Images\';
+% im=load([base, '2002\scene',num2str(1),'.mat']); 
+% %im = im.reflectances(1:25,1:25,:);
+% im = im.reflectances(1:748,:,:);
+% S_im=[410,10,31];
+% %figure,imagesc(im.reflectances(:,:,17)); colormap('gray'); brighten(0.5);
 
 %% Load Daylight SPD
 D_CCT=1./linspace(1/3600,1/25000,20); %non-linear range, aiming to better reproduce observed variation

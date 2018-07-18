@@ -2,6 +2,10 @@ clear, clc, close all
 
 % A fresh attempt
 
+% TO DO
+% - check that lm work out the same when I calculate them without the PTB
+%   function, just for lolz (seriously - to be careful)
+
 %% Load Reflectances
 load sur_vrhel
 refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
@@ -36,6 +40,7 @@ for i=1:size(T_Dspd,1)
     T_rad(:,:,i) = T_vrhel.*T_Dspd(i,:);
     LMSRI(:,:,i) = T_rad(:,:,i)*T_LMSRI';
     ls(:,:,i)    = LMSToMacBoyn(LMSRI(:,1:3,i)');
+    m(1,:,i)     = LMSRI(:,5,i)./(0.6373*LMSRI(:,1,i)+0.3924*LMSRI(:,2,i)); % not called i because I use that for all the loopz :/
 end
 
 figure, hold on, axis equal, xlim([0 1]), ylim([0 1])
@@ -65,3 +70,21 @@ for i=1:4:size(T_Dspd,1)
     plot(ls4(1,:,i),ls4(2,:,i),'o-')
     title('Yes, it really is meant to just be a single point')
 end
+
+ls5 = ls./ls; %same as above, just being careful
+figure, hold on, axis equal, %xlim([0 1]), ylim([0 1])
+for i=1:4:size(T_Dspd,1)
+    plot(ls5(1,:,i),ls5(2,:,i),'o-')
+    title('Yes, it really is meant to just be a single point')
+end
+
+
+%% multiplying direct by m
+
+ls6 = ls./m;
+figure, hold on, axis equal, %xlim([0 1]), ylim([0 1])
+for i=1:4:size(T_Dspd,1)
+    plot(ls6(1,:,i),ls6(2,:,i),'o-')
+end
+
+% What would this ideally look like?

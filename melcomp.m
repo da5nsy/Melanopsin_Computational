@@ -15,8 +15,6 @@ function [MB1_minSD,MB2_minSD,melpeak,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melco
 %       for which the melanopic signal is particularly effective or
 %       ineffective at performing the above task
 
-% likes to save out files, should control better
-
 %% Set-up
 if ~exist('offset','var'); clear, clc, close all; end %clears everything, unless we're inside a function
 
@@ -633,6 +631,7 @@ if plot_it
     xlabel('weight of factor')
     ylabel('standard deviation')    
     title(sprintf('Mel peak-%d nm',melpeak))
+    legend({'MBx1','MBx2'})
 end
 
 [MB1_minSD, MB1_minSD_loc] = min(MBx1std(2,:));
@@ -667,10 +666,20 @@ S_vals=[MBx1std(1,MB1_minSD_loc),MBx2std(1,MB2_minSD_loc)];
 MBx(1,:,:)=MB(1,:,:)+S_vals(1)*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
 MBx(2,:,:)=MB(2,:,:)+S_vals(2)*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
 
-%scatter(MBx(1,:),MBx(2,:));
+% for i=2:12
+%     scatter(squeeze(MBx(1,:,i)),squeeze(MBx(2,:,i)));
+%     xlim([-10 10])
+%     ylim([-10 10])
+%     hold on
+%     axis equal
+% end
+% hold off
 
 MBx_m=squeeze(mean(MBx(:,:,2:end),2));
-%scatter(MBx_m(1,2:end),MBx_m(2,2:end),'k','filled')
+% scatter(MBx_m(1,2:end),MBx_m(2,2:end),'k','filled');
+% axis equal
+% xlim([0 1])
+% ylim([-1 2])
 
 spread=[std(MBx_m(1,:)),std(MBx_m(2,:))];
 %disp(melpeak)

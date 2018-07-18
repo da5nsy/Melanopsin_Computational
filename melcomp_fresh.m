@@ -58,3 +58,10 @@ figure, hold on, axis equal, %xlim([0 1]), ylim([0 1])
 for i=1:4:size(T_Dspd,1)
     plot(ls3(1,:,i),ls3(2,:,i),'o-')
 end
+
+ls4 = ls./[ls(1,:,:);ls(2,:,:)];
+figure, hold on, axis equal, %xlim([0 1]), ylim([0 1])
+for i=1:4:size(T_Dspd,1)
+    plot(ls4(1,:,i),ls4(2,:,i),'o-')
+    title('Yes, it really is meant to just be a single point')
+end

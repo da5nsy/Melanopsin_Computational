@@ -59,19 +59,14 @@ xlabel('l'),ylabel('s'),zlabel('m');
 view(188,46)
 
 %% Rotation of data
-clc
 
-m=m(:)';
-lsm=[ls(1:2,:);m]';
-
-% figure, hold on, axis equal, xlim([0 1]), ylim([0 1]), zlim([0,1])
-% plot3(lsm(1,:,:),lsm(2,:,:),lsm(3,:,:),'o')
+lsm=[ls(1:2,:);m(:)']';
 
 %rotation matrix
 
-figure, hold on, axis equal, 
-for a=pi/10:pi/40:pi*5
-%a=188; %angle
+
+
+a=0.8036; %angle in radians, just eyeballed
 rm=...
     [1,0,0;...
     0,cos(a),-sin(a);...
@@ -79,17 +74,12 @@ rm=...
 
 lsm_r=lsm*rm';
 
-clf, hold on
-xlim([-1 1]), ylim([-1 1]), zlim([-1,1])
+figure, hold on, axis equal, 
+xlim([0 1]), ylim([-1 1]), zlim([0,1])
 plot3(lsm(:,1),lsm(:,2),lsm(:,3),'bo')
 plot3(lsm_r(:,1),lsm_r(:,2),lsm_r(:,3),'ro')
 
-view(188,46)
-drawnow
-end
-
-
-
+%view(188,46)
 
 %% %-% %%
 %% Factors

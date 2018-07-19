@@ -9,8 +9,9 @@ clear, clc, close all
 %% Load Reflectances
 load sur_vrhel
 refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
-T_vrhel=sur_vrhel(:,refs)';
-T_vrhel=T_vrhel([2,1,3,6,5,4,8,9,11,10,7],:); %change order
+%T_vrhel = sur_vrhel';
+T_vrhel = sur_vrhel(:,refs)';
+T_vrhel = T_vrhel([2,1,3,6,5,4,8,9,11,10,7],:); %change order
 clear sur_vrhel refs
 
 %% Compute Daylight SPD
@@ -63,10 +64,7 @@ view(188,46)
 lsm=[ls(1:2,:);m(:)']';
 
 %rotation matrix
-
-
-
-a=0.8036; %angle in radians, just eyeballed
+a=0.8036; %angle in radians, just eyeballed, and in one dimension
 rm=...
     [1,0,0;...
     0,cos(a),-sin(a);...
@@ -75,9 +73,12 @@ rm=...
 lsm_r=lsm*rm';
 
 figure, hold on, axis equal, 
-xlim([0 1]), ylim([-1 1]), zlim([0,1])
+%xlim([0 1]), ylim([-1 1]), zlim([0,2])
 plot3(lsm(:,1),lsm(:,2),lsm(:,3),'bo')
 plot3(lsm_r(:,1),lsm_r(:,2),lsm_r(:,3),'ro')
+
+legend({'Original','Rotated'},'Location','best')
+xlabel('l'),ylabel('s2'),zlabel('m2'); %l stays the same
 
 %view(188,46)
 

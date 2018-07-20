@@ -484,7 +484,7 @@ end
 
 %% Basic MB plot
 
-plot_MBbas= 0;
+plot_MBbas= 1;
 
 if plot_MBbas
     figure, hold on
@@ -600,7 +600,7 @@ end
 
 %% Iterations
 
-plot_it=    0;
+plot_it=    1;
 
 if ~exist('offset','var') && plot_it; figure, hold on; end
 

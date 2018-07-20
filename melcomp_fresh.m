@@ -40,6 +40,8 @@ S_LMSRI=S_vrhel;
 
 %% Combine
 
+plt_locus = 1;
+
 for i=1:size(T_Dspd,1)
     T_rad(:,:,i) = T_vrhel.*T_Dspd(i,:);
     LMSRI(:,:,i) = T_rad(:,:,i)*T_LMSRI';
@@ -58,6 +60,12 @@ end
 xlabel('l'),ylabel('s'),zlabel('m');
 
 view(188,46)
+
+if plt_locus
+    MB_locus=LMSToMacBoyn(T_cones_sp);
+    %plot(MB_locus(1,:),MB_locus(2,:))
+    fill([MB_locus(1,5:65),MB_locus(1,5)],[MB_locus(2,5:65),MB_locus(2,5)],'k','LineStyle','none','FaceAlpha','0.1')
+end
 
 %% Correction through rotation
 
@@ -94,3 +102,4 @@ plot3(lsm_s(:,1),lsm_s(:,2),lsm_s(:,3),'ro')
 
 legend({'Original','Shifted'},'Location','best')
 xlabel('l'),ylabel('s2'),zlabel('m2');
+

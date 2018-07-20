@@ -80,8 +80,6 @@ plot3(lsm_r(:,1),lsm_r(:,2),lsm_r(:,3),'ro')
 legend({'Original','Rotated'},'Location','best')
 xlabel('l'),ylabel('s2'),zlabel('m2'); %l stays the same
 
-%view(188,46)
-
 %% Correction through shift
 
 lsm=[ls(1:2,:);m(:)']';
@@ -93,10 +91,6 @@ lsm_s(:,2) = lsm(:,2)-lsm_s(:,3);
 figure, hold on, axis equal, 
 plot3(lsm(:,1),lsm(:,2),lsm(:,3),'bo')
 plot3(lsm_s(:,1),lsm_s(:,2),lsm_s(:,3),'ro')
-%view(90,0)
-grid on
-
-xlabel('l'),ylabel('s2'),zlabel('m');
 
 legend({'Original','Shifted'},'Location','best')
-xlabel('l'),ylabel('s2'),zlabel('m');
+xlabel('l'),ylabel('s2'),zlabel('m2');

@@ -59,7 +59,7 @@ xlabel('l'),ylabel('s'),zlabel('m');
 
 view(188,46)
 
-%% Rotation of data
+%% Correction through rotation
 
 lsm=[ls(1:2,:);m(:)']';
 
@@ -81,6 +81,20 @@ legend({'Original','Rotated'},'Location','best')
 xlabel('l'),ylabel('s2'),zlabel('m2'); %l stays the same
 
 %view(188,46)
+
+%% Correction through shift
+
+lsm=[ls(1:2,:);m(:)']';
+
+lsm_s = lsm; %shifted
+
+figure, hold on, axis equal, 
+%xlim([0 1]), ylim([-1 1]), zlim([0,2])
+plot3(lsm(:,1),lsm(:,2),lsm(:,3),'bo')
+plot3(lsm_s(:,1),lsm_s(:,2),lsm_s(:,3),'ro')
+
+legend({'Original','Shifted'},'Location','best')
+xlabel('l'),ylabel('s2'),zlabel('m');
 
 %% %-% %%
 %% Factors
@@ -115,35 +129,39 @@ end
 
 
 %% calibrating by m
+clc
 
-ls6 = ls./[m(1,:,:);m(1,:,:)];
+ls6 = ls./[ones(size(ls(2,:,:)));m(1,:,:)];
+%ls6 = ls./[m(1,:,:);m(1,:,:)];
 %ls6(2,:)=(1./(ls6(2,:)+0.1245)).^(1/0.44);
 figure, hold on, axis equal, %xlim([0 1]), ylim([0 1])
 for i=1:4:size(T_Dspd,1)
-    plot(ls6(1,:,i),ls6(2,:,i),'o-')
+    plot3(ls6(1,:,i),ls6(2,:,i),m(1,:,i),'o-')
 end
 drawnow
 
+
+xlabel('l'),ylabel('s2'),zlabel('m2'); %l stays the same
+
 % What would this ideally look like?
 
-%% Trying to work out the equation
+%% Residual bend in ls after division by m
 
-a=squeeze(ls6(:,4,:));
+ls6 = ls./[m(1,:,:);m(1,:,:)];  % calibrate by m
+a=squeeze(ls6(:,4,:));          % pick out a single object at all daylights
+a2=a;                           % make a copy
 
-figure, hold on
-clf, hold on
-scatter(a(1,:),a(2,:))
 x=1:0.1:3.1;
-y=(1./(x.^0.44))-0.1245;
-plot(x,y)
+y=(1./(x.^0.44))-0.1245; % Create a roughly fitted line 
 
-% y2=(1./(y+0.1245)).^(1/0.44);
-% plot(x,y2)
-% %%
-% a2=a;
-% a2(2,:)=(1./(a2(2,:)+0.1245)).^(1/0.44);
-% 
-% figure,
-% scatter(a2(1,:),a2(2,:))
+a2(2,:)=(1./(a2(2,:)+0.1245)).^(1/0.44); %correct for the remaining shift
 
+figure, hold on, axis equal
+scatter(a(1,:),a(2,:),'r','DisplayName','Original')
+plot(x,y,'r','DisplayName','Line - fitted by eye')
+scatter(a2(1,:),a2(2,:),'b','DisplayName','Modified data')
+xlabel('l');ylabel('s');
 
+plot([0,max(xlim)],[0,max(xlim)],'k--','DisplayName','x=y')
+
+legend('Location','best')

@@ -5,6 +5,8 @@ clear, clc, close all
 % TO DO
 % - check that lm work out the same when I calculate them without the PTB
 %   function, just for lolz (seriously - to be careful)
+% - convert loop names so that I can use i for melanopsin variable name (OR
+%   never compute it alone, bundle it with other variables)
 
 %% Load Reflectances
 load sur_vrhel
@@ -40,7 +42,8 @@ S_LMSRI=S_vrhel;
 
 %% Combine
 
-plt_locus = 1;
+plt_fig     = 1;
+plt_locus   = 1;
 
 for i=1:size(T_Dspd,1)
     T_rad(:,:,i) = T_vrhel.*T_Dspd(i,:);
@@ -53,19 +56,36 @@ for i=1:size(T_Dspd,1)
     %   function - which relate to the Smith-Pokorny fundamentals
 end
 
-figure, hold on, axis equal, xlim([0 1]), ylim([0 1]), zlim([0,1])
-for i=1:size(T_Dspd,1)
-    plot3(ls(1,:,i),ls(2,:,i),m(1,:,i),'o-')
+% Compute colorimetry (just for display)
+load T_xyz1931.mat
+T_xyz1931=SplineCmf(S_xyz1931,T_xyz1931,S_vrhel);
+for i=[10, 1:size(T_Dspd,1)] %starts with 10 (arbitrary), so that a fixed white is already calculated in time for line 66
+    whiteXYZ(:,i) = T_Dspd(i,:) * T_xyz1931';
+    XYZ(:,:,i)    = T_rad(:,:,i) * T_xyz1931';
+    Lab(:,:,i)    = XYZToLab(squeeze(XYZ(:,:,i))',whiteXYZ(:,i));    
+    RGB(:,:,i)    = XYZToSRGBPrimary(LabToXYZ(Lab(:,:,i),whiteXYZ(:,10))); %Using fixed, arbitrary (mid-range), white.
+    RGB(:,:,i)    = RGB(:,:,i)/max(max(RGB(:,:,i)));
 end
-xlabel('l'),ylabel('s'),zlabel('m');
 
-view(188,46)
-
-if plt_locus
-    MB_locus=LMSToMacBoyn(T_cones_sp);
-    %plot(MB_locus(1,:),MB_locus(2,:))
-    fill([MB_locus(1,5:65),MB_locus(1,5)],[MB_locus(2,5:65),MB_locus(2,5)],'k','LineStyle','none','FaceAlpha','0.1')
+if plt_fig
+    figure, hold on, axis equal, xlim([0 1]), ylim([0 1]), zlim([0,1])
+    for i=1:size(T_Dspd,1)
+        plot3(ls(1,:,i),ls(2,:,i),m(1,:,i),'k')        
+        scatter3(ls(1,:,i),ls(2,:,i),m(1,:,i),[],RGB(:,:,i)','filled')
+    end
+    xlabel('l'),ylabel('s'),zlabel('m');
+    
+    view(188,46)
+    
+    if plt_locus
+        MB_locus=LMSToMacBoyn(T_cones_sp);
+        %plot(MB_locus(1,:),MB_locus(2,:))
+        fill([MB_locus(1,5:65),MB_locus(1,5)],[MB_locus(2,5:65),MB_locus(2,5)],'k','LineStyle','none','FaceAlpha','0.1')
+    end
 end
+
+
+
 
 %% Correction through rotation
 

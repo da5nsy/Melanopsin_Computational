@@ -71,7 +71,7 @@ if plt_fig
     figure, hold on, axis equal, xlim([0 1]), ylim([0 1]), zlim([0,1])
     for i=1:size(T_Dspd,1)
         plot3(ls(1,:,i),ls(2,:,i),m(1,:,i),'k')        
-        scatter3(ls(1,:,i),ls(2,:,i),m(1,:,i),[],RGB(:,:,i)','filled')
+        scatter3(ls(1,:,i),ls(2,:,i),m(1,:,i),[],RGB(:,:,i)','v','filled')
     end
     xlabel('l'),ylabel('s'),zlabel('m');
     
@@ -83,9 +83,6 @@ if plt_fig
         fill([MB_locus(1,5:65),MB_locus(1,5)],[MB_locus(2,5:65),MB_locus(2,5)],'k','LineStyle','none','FaceAlpha','0.1')
     end
 end
-
-
-
 
 %% Correction through rotation
 
@@ -102,8 +99,8 @@ lsm_r=lsm*rm';
 
 figure, hold on, axis equal, 
 %xlim([0 1]), ylim([-1 1]), zlim([0,2])
-plot3(lsm(:,1),lsm(:,2),lsm(:,3),'bo')
-plot3(lsm_r(:,1),lsm_r(:,2),lsm_r(:,3),'ro')
+scatter3(lsm(:,1),lsm(:,2),lsm(:,3),[],reshape(RGB,[3,220])','v','filled')
+scatter3(lsm_r(:,1),lsm_r(:,2),lsm_r(:,3),[],reshape(RGB,[3,220])','^','filled')
 
 legend({'Original','Rotated'},'Location','best')
 xlabel('l'),ylabel('s2'),zlabel('m2'); %l stays the same
@@ -117,8 +114,8 @@ lsm_s(:,3) = lsm(:,3)-0.27;
 lsm_s(:,2) = lsm(:,2)-lsm_s(:,3);
 
 figure, hold on, axis equal, 
-plot3(lsm(:,1),lsm(:,2),lsm(:,3),'bo')
-plot3(lsm_s(:,1),lsm_s(:,2),lsm_s(:,3),'ro')
+scatter3(lsm(:,1),lsm(:,2),lsm(:,3),[],reshape(RGB,[3,220])','v','filled')
+scatter3(lsm_s(:,1),lsm_s(:,2),lsm_s(:,3),[],reshape(RGB,[3,220])','^','filled')
 
 legend({'Original','Shifted'},'Location','best')
 xlabel('l'),ylabel('s2'),zlabel('m2');

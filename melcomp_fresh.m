@@ -85,15 +85,18 @@ xlabel('l'),ylabel('s2'),zlabel('m2'); %l stays the same
 %% Correction through shift
 
 lsm=[ls(1:2,:);m(:)']';
-
 lsm_s = lsm; %shifted
 
+lsm_s(:,3) = lsm(:,3)-0.27;
+lsm_s(:,2) = lsm(:,2)-lsm_s(:,3);
+
 figure, hold on, axis equal, 
-%xlim([0 1]), ylim([-1 1]), zlim([0,2])
 plot3(lsm(:,1),lsm(:,2),lsm(:,3),'bo')
 plot3(lsm_s(:,1),lsm_s(:,2),lsm_s(:,3),'ro')
+%view(90,0)
+grid on
+
+xlabel('l'),ylabel('s2'),zlabel('m');
 
 legend({'Original','Shifted'},'Location','best')
 xlabel('l'),ylabel('s2'),zlabel('m');
-
-

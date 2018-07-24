@@ -13,7 +13,7 @@ load sur_vrhel
 refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
 %T_vrhel = sur_vrhel';
 T_vrhel = sur_vrhel(:,refs)';
-T_vrhel = T_vrhel([2,1,3,6,5,4,8,9,11,10,7],:); %change order
+T_vrhel = T_vrhel([2,1,3,6,5,4,8,9,11,10,7],:); %change order for clearer plotting visualisation
 clear sur_vrhel refs
 
 %% Compute Daylight SPD
@@ -42,16 +42,15 @@ S_LMSRI=S_vrhel;
 
 %% Combine
 
-plt_fig     = 1;
-plt_locus   = 1;
+plt_fig     = 0;
+plt_locus   = 0;
 
 for i=1:size(T_Dspd,1)
     T_rad(:,:,i) = T_vrhel.*T_Dspd(i,:);
     LMSRI(:,:,i) = T_rad(:,:,i)*T_LMSRI';
-    ls(:,:,i)    = LMSToMacBoyn(LMSRI(:,1:3,i)');
-    
-    m(1,:,i)     = LMSRI(:,5,i)./(0.6373*LMSRI(:,1,i)+0.3924*LMSRI(:,2,i)); 
-    % not called 'i' because I use that for all the loops
+    lsri(1:2,:,i)  = LMSToMacBoyn(LMSRI(:,1:3,i)');    
+    lsri(3,:,i)    = LMSRI(:,4,i)./(0.6373*LMSRI(:,1,i)+0.3924*LMSRI(:,2,i)); 
+    lsri(4,:,i)    = LMSRI(:,5,i)./(0.6373*LMSRI(:,1,i)+0.3924*LMSRI(:,2,i)); 
     % used the same scalars for luminance as are in the LMSToMAcBoyn
     %   function - which relate to the Smith-Pokorny fundamentals
 end
@@ -70,8 +69,8 @@ end
 if plt_fig
     figure, hold on, axis equal, xlim([0 1]), ylim([0 1]), zlim([0,1])
     for i=1:size(T_Dspd,1)
-        plot3(ls(1,:,i),ls(2,:,i),m(1,:,i),'k')        
-        scatter3(ls(1,:,i),ls(2,:,i),m(1,:,i),[],RGB(:,:,i)','v','filled')
+        plot3(lsri(1,:,i),lsri(2,:,i),lsri(4,:,i),'k')        
+        scatter3(lsri(1,:,i),lsri(2,:,i),lsri(4,:,i),[],RGB(:,:,i)','v','filled')
     end
     xlabel('l'),ylabel('s'),zlabel('m');
     
@@ -84,9 +83,24 @@ if plt_fig
     end
 end
 
-%% Correction through rotation
+% if plt_fig
+%     figure, hold on, axis equal, xlim([0 1]), ylim([0 1]), zlim([0,1])
+%     for i=1:size(T_Dspd,1)
+%         plot3(ls(1,:,i),ls(2,:,i),m(1,:,i),'k')        
+%         scatter3(ls(1,:,i),ls(2,:,i),ls(1,:,i)+ls(2,:,i),[],RGB(:,:,i)','v','filled')
+%     end
+%     xlabel('l'),ylabel('s'),zlabel('m');
+%     
+%     view(188,46)
+%     
+%     if plt_locus
+%         MB_locus=LMSToMacBoyn(T_cones_sp);
+%         %plot(MB_locus(1,:),MB_locus(2,:))
+%         fill([MB_locus(1,5:65),MB_locus(1,5)],[MB_locus(2,5:65),MB_locus(2,5)],'k','LineStyle','none','FaceAlpha','0.1')
+%     end
+% end
 
-lsm=[ls(1:2,:);m(:)']';
+%% Correction through rotation
 
 %rotation matrix
 a=0.8036; %angle in radians, just eyeballed, and in one dimension
@@ -95,19 +109,21 @@ rm=...
     0,cos(a),-sin(a);...
     0,sin(a),cos(a)]; 
 
-lsm_r=lsm*rm';
+lsri_r=lsri([1,2,4],:)'*rm';
 
 figure, hold on, axis equal, 
-%xlim([0 1]), ylim([-1 1]), zlim([0,2])
-scatter3(lsm(:,1),lsm(:,2),lsm(:,3),[],reshape(RGB,[3,220])','v','filled')
-scatter3(lsm_r(:,1),lsm_r(:,2),lsm_r(:,3),[],reshape(RGB,[3,220])','^','filled')
+% %xlim([0 1]), ylim([-1 1]), zlim([0,2])
+ 
+% lsri=lsri([1,2,4],:)';
+scatter3(lsri(1,:),lsri(2,:),lsri(3,:),[],reshape(RGB,[3,220])','v','filled')
+scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,3),[],reshape(RGB,[3,220])','^','filled')
 
 legend({'Original','Rotated'},'Location','best')
 xlabel('l'),ylabel('s2'),zlabel('m2'); %l stays the same
 
 %% Correction through shift
 
-lsm=[ls(1:2,:);m(:)']';
+lsm=lsri([1,2,4],:)';
 lsm_s = lsm; %shifted
 
 lsm_s(:,3) = lsm(:,3)-0.27;

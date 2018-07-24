@@ -1,6 +1,6 @@
 clear, clc, close all;
 
-try load('results.mat')
+try load('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\results.mat')
 catch
 
     %figure, hold on %to get figure to plot, also turn on 'plot_it' in melcomp
@@ -15,7 +15,7 @@ catch
     end
     toc
 
-    save('results.mat')
+    save('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\results.mat')
 end
 
 %%

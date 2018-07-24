@@ -60,11 +60,11 @@ end
 % Compute colorimetry (just for display)
 load T_xyz1931.mat
 T_xyz1931=SplineCmf(S_xyz1931,T_xyz1931,S_vrhel);
-for i=[10, 1:size(T_Dspd,1)] %starts with 10 (arbitrary), so that a fixed white is already calculated in time for line 66
+for i=[11, 1:size(T_Dspd,1)] %starts with 11 (6551K, arbitrary), so that a fixed white is already calculated in time for the first 'plt_RGB' line
     plt_whiteXYZ(:,i) = T_Dspd(i,:) * T_xyz1931';
     plt_XYZ(:,:,i)    = T_rad(:,:,i) * T_xyz1931';
     plt_Lab(:,:,i)    = XYZToLab(squeeze(plt_XYZ(:,:,i))',plt_whiteXYZ(:,i));    
-    plt_RGB(:,:,i)    = XYZToSRGBPrimary(LabToXYZ(plt_Lab(:,:,i),plt_whiteXYZ(:,10))); %Using fixed, arbitrary (mid-range), white.
+    plt_RGB(:,:,i)    = XYZToSRGBPrimary(LabToXYZ(plt_Lab(:,:,i),plt_whiteXYZ(:,11))); %Using fixed, arbitrary (mid-range), white.
     plt_RGB(:,:,i)    = plt_RGB(:,:,i)/max(max(plt_RGB(:,:,i)));
 end
 

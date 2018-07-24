@@ -8,6 +8,7 @@ clear, clc, close all
 % - convert loop names so that I can use i for melanopsin variable name (OR
 %   never compute it alone, bundle it with other variables)
 % - what about log signals?
+% - Can the 'correction through shift' be done by division rather than subtraction?
 
 %% Load Reflectances
 load sur_vrhel
@@ -84,23 +85,6 @@ if plt_fig
     end
 end
 
-% if plt_fig
-%     figure, hold on, axis equal, xlim([0 1]), ylim([0 1]), zlim([0,1])
-%     for i=1:size(T_Dspd,1)
-%         plot3(ls(1,:,i),ls(2,:,i),m(1,:,i),'k')        
-%         scatter3(ls(1,:,i),ls(2,:,i),ls(1,:,i)+ls(2,:,i),[],RGB(:,:,i)','v','filled')
-%     end
-%     xlabel('l'),ylabel('s'),zlabel('m');
-%     
-%     view(188,46)
-%     
-%     if plt_locus
-%         MB_locus=LMSToMacBoyn(T_cones_sp);
-%         %plot(MB_locus(1,:),MB_locus(2,:))
-%         fill([MB_locus(1,5:65),MB_locus(1,5)],[MB_locus(2,5:65),MB_locus(2,5)],'k','LineStyle','none','FaceAlpha','0.1')
-%     end
-% end
-
 %% Correction through rotation
 
 %rotation matrix
@@ -122,41 +106,16 @@ scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,4),[],reshape(plt_RGB,[3,220])','^','f
 legend({'Original','Rotated'},'Location','best')
 xlabel('l'),ylabel('s2'),zlabel('m2'); %l stays the same
 
-
-%% Correction through rotation (with only 3 D)
-
-%rotation matrix
-ang=0.8036; %angle in radians, just eyeballed, and in one dimension
-rm=...
-    [1,0,0;...
-    0,cos(ang),sin(ang);...
-    0,-sin(ang),cos(ang)]; 
-
-%apply rotation
-lsri_r=lsri([1,2,4],:)'*rm;
-
-
-figure, hold on, axis equal, 
-% %xlim([0 1]), ylim([-1 1]), zlim([0,2])
-scatter3(lsri(1,:),lsri(2,:),lsri(3,:),[],reshape(plt_RGB,[3,220])','v','filled')
-scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,3),[],reshape(plt_RGB,[3,220])','^','filled')
-
-legend({'Original','Rotated'},'Location','best')
-xlabel('l'),ylabel('s2'),zlabel('m2'); %l stays the same
-
 %% Correction through shift
 
-%Can this be done by division rather than subtraction?
+lsri_s = lsri; %shifted
 
-lsm=lsri([1,2,4],:)';
-lsm_s = lsm; %shifted
-
-lsm_s(:,3) = lsm(:,3)-0.27;
-lsm_s(:,2) = lsm(:,2)-lsm_s(:,3);
+lsri_s(4,:) = lsri(4,:)-0.27;
+lsri_s(2,:) = lsri(2,:)-lsri_s(4,:);
 
 figure, hold on, axis equal, 
-scatter3(lsm(:,1),lsm(:,2),lsm(:,3),[],reshape(plt_RGB,[3,220])','v','filled')
-scatter3(lsm_s(:,1),lsm_s(:,2),lsm_s(:,3),[],reshape(plt_RGB,[3,220])','^','filled')
+scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],reshape(plt_RGB,[3,220])','v','filled')
+scatter3(lsri_s(1,:),lsri_s(2,:),lsri_s(4,:),[],reshape(plt_RGB,[3,220])','^','filled')
 
 legend({'Original','Shifted'},'Location','best')
 xlabel('l'),ylabel('s2'),zlabel('m2');

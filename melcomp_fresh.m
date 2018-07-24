@@ -106,11 +106,35 @@ end
 %rotation matrix
 ang=0.8036; %angle in radians, just eyeballed, and in one dimension
 rm=...
+    [1,0,0,0;...
+    0,cos(ang),0,sin(ang);...
+    0,0,1,0;...
+    0,-sin(ang),0,cos(ang)]; 
+
+%apply rotation
+lsri_r=lsri(:,:)'*rm;
+
+figure, hold on, axis equal, 
+% %xlim([0 1]), ylim([-1 1]), zlim([0,2])
+scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],reshape(plt_RGB,[3,220])','v','filled')
+scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,4),[],reshape(plt_RGB,[3,220])','^','filled')
+
+legend({'Original','Rotated'},'Location','best')
+xlabel('l'),ylabel('s2'),zlabel('m2'); %l stays the same
+
+
+%% Correction through rotation (with only 3 D)
+
+%rotation matrix
+ang=0.8036; %angle in radians, just eyeballed, and in one dimension
+rm=...
     [1,0,0;...
     0,cos(ang),sin(ang);...
     0,-sin(ang),cos(ang)]; 
 
+%apply rotation
 lsri_r=lsri([1,2,4],:)'*rm;
+
 
 figure, hold on, axis equal, 
 % %xlim([0 1]), ylim([-1 1]), zlim([0,2])

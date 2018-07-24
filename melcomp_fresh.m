@@ -7,6 +7,7 @@ clear, clc, close all
 %   function, just for lolz (seriously - to be careful)
 % - convert loop names so that I can use i for melanopsin variable name (OR
 %   never compute it alone, bundle it with other variables)
+% - what about log signals?
 
 %% Load Reflectances
 load sur_vrhel
@@ -59,18 +60,18 @@ end
 load T_xyz1931.mat
 T_xyz1931=SplineCmf(S_xyz1931,T_xyz1931,S_vrhel);
 for i=[10, 1:size(T_Dspd,1)] %starts with 10 (arbitrary), so that a fixed white is already calculated in time for line 66
-    whiteXYZ(:,i) = T_Dspd(i,:) * T_xyz1931';
-    XYZ(:,:,i)    = T_rad(:,:,i) * T_xyz1931';
-    Lab(:,:,i)    = XYZToLab(squeeze(XYZ(:,:,i))',whiteXYZ(:,i));    
-    RGB(:,:,i)    = XYZToSRGBPrimary(LabToXYZ(Lab(:,:,i),whiteXYZ(:,10))); %Using fixed, arbitrary (mid-range), white.
-    RGB(:,:,i)    = RGB(:,:,i)/max(max(RGB(:,:,i)));
+    plt_whiteXYZ(:,i) = T_Dspd(i,:) * T_xyz1931';
+    plt_XYZ(:,:,i)    = T_rad(:,:,i) * T_xyz1931';
+    plt_Lab(:,:,i)    = XYZToLab(squeeze(plt_XYZ(:,:,i))',plt_whiteXYZ(:,i));    
+    plt_RGB(:,:,i)    = XYZToSRGBPrimary(LabToXYZ(plt_Lab(:,:,i),plt_whiteXYZ(:,10))); %Using fixed, arbitrary (mid-range), white.
+    plt_RGB(:,:,i)    = plt_RGB(:,:,i)/max(max(plt_RGB(:,:,i)));
 end
 
 if plt_fig
     figure, hold on, axis equal, xlim([0 1]), ylim([0 1]), zlim([0,1])
     for i=1:size(T_Dspd,1)
         plot3(lsri(1,:,i),lsri(2,:,i),lsri(4,:,i),'k')        
-        scatter3(lsri(1,:,i),lsri(2,:,i),lsri(4,:,i),[],RGB(:,:,i)','v','filled')
+        scatter3(lsri(1,:,i),lsri(2,:,i),lsri(4,:,i),[],plt_RGB(:,:,i)','v','filled')
     end
     xlabel('l'),ylabel('s'),zlabel('m');
     
@@ -103,25 +104,25 @@ end
 %% Correction through rotation
 
 %rotation matrix
-a=0.8036; %angle in radians, just eyeballed, and in one dimension
+ang=0.8036; %angle in radians, just eyeballed, and in one dimension
 rm=...
     [1,0,0;...
-    0,cos(a),-sin(a);...
-    0,sin(a),cos(a)]; 
+    0,cos(ang),sin(ang);...
+    0,-sin(ang),cos(ang)]; 
 
-lsri_r=lsri([1,2,4],:)'*rm';
+lsri_r=lsri([1,2,4],:)'*rm;
 
 figure, hold on, axis equal, 
 % %xlim([0 1]), ylim([-1 1]), zlim([0,2])
- 
-% lsri=lsri([1,2,4],:)';
-scatter3(lsri(1,:),lsri(2,:),lsri(3,:),[],reshape(RGB,[3,220])','v','filled')
-scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,3),[],reshape(RGB,[3,220])','^','filled')
+scatter3(lsri(1,:),lsri(2,:),lsri(3,:),[],reshape(plt_RGB,[3,220])','v','filled')
+scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,3),[],reshape(plt_RGB,[3,220])','^','filled')
 
 legend({'Original','Rotated'},'Location','best')
 xlabel('l'),ylabel('s2'),zlabel('m2'); %l stays the same
 
 %% Correction through shift
+
+%Can this be done by division rather than subtraction?
 
 lsm=lsri([1,2,4],:)';
 lsm_s = lsm; %shifted
@@ -130,8 +131,8 @@ lsm_s(:,3) = lsm(:,3)-0.27;
 lsm_s(:,2) = lsm(:,2)-lsm_s(:,3);
 
 figure, hold on, axis equal, 
-scatter3(lsm(:,1),lsm(:,2),lsm(:,3),[],reshape(RGB,[3,220])','v','filled')
-scatter3(lsm_s(:,1),lsm_s(:,2),lsm_s(:,3),[],reshape(RGB,[3,220])','^','filled')
+scatter3(lsm(:,1),lsm(:,2),lsm(:,3),[],reshape(plt_RGB,[3,220])','v','filled')
+scatter3(lsm_s(:,1),lsm_s(:,2),lsm_s(:,3),[],reshape(plt_RGB,[3,220])','^','filled')
 
 legend({'Original','Shifted'},'Location','best')
 xlabel('l'),ylabel('s2'),zlabel('m2');

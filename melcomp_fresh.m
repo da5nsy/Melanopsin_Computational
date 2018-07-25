@@ -8,7 +8,8 @@ clear, clc, close all
 % - what about log signals?
 % - Can the 'correction through shift' be done by division rather than subtraction?
 
-%% Pre-flight checks
+
+% Pre-flight checks
 % Setting things here controls what data is used and in what way
 
 PF_SPD = 1;
@@ -24,7 +25,6 @@ PF_obs = 1;
 % 1 = PTB Smith-Pokorny
 
 %% Compute Daylight SPD
-
 if PF_SPD == 1
     D_CCT=1./linspace(1/3600,1/25000,20); %non-linear range, aiming to better reproduce observed variation
     load B_cieday
@@ -36,7 +36,6 @@ elseif PF_SPD == 2
 else 
     error('SPD selection failed')
 end
-
 
 % Load Reflectances
 if PF_refs == 1
@@ -57,7 +56,6 @@ end
 
 
 % Observer
-
 if PF_SPD == 1
     % Smith-Pokorny, for use with MacLeod Boynton diagram
     load T_cones_sp
@@ -67,54 +65,65 @@ if PF_SPD == 1
 else
     error('obs selection failed')
 end
-
 load T_rods
 load T_melanopsin
+T_melanopsin = SplineCmf(S_melanopsin,T_melanopsin, S_melanopsin - [10, 0, 0],1); %Increasing the range of this function in case it ends up limiting the range of S_sh
+S_melanopsin = S_melanopsin - [10, 0, 0];
 
 % For messing with hypothetical spectral sensitivity of melanopsin
 %S_melanopsin(1)=S_melanopsin(1)+30;
 
-
 %% Pull them all together
 
-% % Insert some code which works out which data has the smallest interval:
-% % spd/refs/obs
-% T_Dspd = SplineSpd(S_SPD,T_Dspd,S_refs,2)'; % '2' flag -> Linear interp, linear extend
-% 
-% T_LMSRI=[(SplineCmf(S_obs,T_obs,S_refs));...
-%     (SplineCmf(S_rods,T_rods,S_refs));...
-%     (SplineCmf(S_melanopsin,T_melanopsin,S_refs))];
-% S_LMSRI=S_refs;
+S_sh = [max([S_SPD(1),S_refs(1),S_obs(1)]),max([S_SPD(2),S_refs(2),S_obs(2)]),min([S_SPD(3),S_refs(3),S_obs(3)])]; %S_shared
+
+T_SPD = SplineSpd(S_SPD,T_SPD,S_sh,1); % extend == 1: Cubic spline, extends with last value in that direction
+S_SPD=S_sh;
+
+T_refs = SplineSrf(S_refs,T_refs',S_sh,1);
+S_refs=S_sh;
+
+T_obs = SplineCmf(S_obs,T_obs,S_sh,1)';
+S_refs=S_sh;
+
+T_rods = SplineCmf(S_rods,T_rods,S_sh)';
+S_rods=S_sh;
+
+T_melanopsin = SplineCmf(S_melanopsin,T_melanopsin,S_sh)';
+S_melanopsin=S_sh;
+
+T_LMSRI=[T_obs,T_rods,T_melanopsin];
+S_LMSRI=S_sh;
 
 %% Combine
 
-plt_fig     = 0;
-plt_locus   = 0;
+plt_fig     = 1;
+plt_locus   = 1;
 
-for i=1:size(T_SPD,1)
-    T_rad(:,:,i) = T_refs.*T_SPD(i,:);
-    LMSRI(:,:,i) = T_rad(:,:,i)*T_LMSRI';
-    lsri(1:2,:,i)  = LMSToMacBoyn(LMSRI(:,1:3,i)');    
-    lsri(3,:,i)    = LMSRI(:,4,i)./(0.6373*LMSRI(:,1,i)+0.3924*LMSRI(:,2,i)); 
-    lsri(4,:,i)    = LMSRI(:,5,i)./(0.6373*LMSRI(:,1,i)+0.3924*LMSRI(:,2,i)); 
+for i=1:size(T_SPD,2)
+    T_rad(:,:,i)  = T_refs.*T_SPD(:,i);
+    LMSRI(:,:,i)  = T_LMSRI'*T_rad(:,:,i);
+    lsri(1:2,:,i) = LMSToMacBoyn(LMSRI(1:3,:,i));    
+    lsri(3,:,i)   = LMSRI(4,:,i)./(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)); 
+    lsri(4,:,i)   = LMSRI(5,:,i)./(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)); 
     % used the same scalars for luminance as are in the LMSToMAcBoyn
     %   function - which relate to the Smith-Pokorny fundamentals
 end
 
 % Compute colorimetry (just for display)
 load T_xyz1931.mat
-T_xyz1931=SplineCmf(S_xyz1931,T_xyz1931,S_refs); %!!!!!!!!!!! Here it should be whichever has smallest wavelength interval
-for i=[11, 1:size(T_SPD,1)] %starts with 11 (6551K, arbitrary), so that a fixed white is already calculated in time for the first 'plt_RGB' line
-    plt_whiteXYZ(:,i) = T_SPD(i,:) * T_xyz1931';
-    plt_XYZ(:,:,i)    = T_rad(:,:,i) * T_xyz1931';
-    plt_Lab(:,:,i)    = XYZToLab(squeeze(plt_XYZ(:,:,i))',plt_whiteXYZ(:,i));    
+T_xyz1931=SplineCmf(S_xyz1931,T_xyz1931,S_refs)';
+for i=[11, 1:size(T_SPD,2)] %starts with 11 (6551K, arbitrary), so that a fixed white is already calculated in time for the first 'plt_RGB' line
+    plt_whiteXYZ(:,i) = T_xyz1931' * T_SPD(:,i);
+    plt_XYZ(:,:,i)    = T_xyz1931' * T_rad(:,:,i);
+    plt_Lab(:,:,i)    = XYZToLab(squeeze(plt_XYZ(:,:,i)),plt_whiteXYZ(:,i));    
     plt_RGB(:,:,i)    = XYZToSRGBPrimary(LabToXYZ(plt_Lab(:,:,i),plt_whiteXYZ(:,11))); %Using fixed, arbitrary (mid-range), white.
     plt_RGB(:,:,i)    = plt_RGB(:,:,i)/max(max(plt_RGB(:,:,i)));
 end
 
 if plt_fig
     figure, hold on, axis equal, xlim([0 1]), ylim([0 1]), zlim([0,1])
-    for i=1:size(T_SPD,1)
+    for i=1:size(T_SPD,2)
         plot3(lsri(1,:,i),lsri(2,:,i),lsri(4,:,i),'k')        
         scatter3(lsri(1,:,i),lsri(2,:,i),lsri(4,:,i),[],plt_RGB(:,:,i)','v','filled')
     end
@@ -123,7 +132,7 @@ if plt_fig
     view(188,46)
     
     if plt_locus
-        MB_locus=LMSToMacBoyn(T_obs);
+        MB_locus=LMSToMacBoyn(T_obs');
         %plot(MB_locus(1,:),MB_locus(2,:))
         fill([MB_locus(1,5:65),MB_locus(1,5)],[MB_locus(2,5:65),MB_locus(2,5)],'k','LineStyle','none','FaceAlpha','0.1')
     end

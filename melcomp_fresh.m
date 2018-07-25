@@ -95,23 +95,7 @@ S_LMSRI=S_sh;
 
 plt_fig     = 1;
 plt_locus   = 0;
-plt_ps      = 0.05; %plot pause
-
-if ~exist('Z_ax','var') %if Z_ax isn't already defined, ie if we are not inside a function
-    Z_ax = 9; %variable to visually test different hypothesese, 9 is default
-    % 1 = L
-    % 2 = M
-    % 3 = S
-    % 4 = R
-    % 5 = I
-    % 6 = l
-    % 7 = s
-    % 8 = r
-    % 9 = i
-    % 10 = L+M
-    % 11 = (0.6373*L)+(0.3924*M)
-    % 12 = r + i
-end
+plt_ps      = 0.1; %plot pause
 
 for i=1:size(T_SPD,2)
     T_rad(:,:,i)  = T_refs.*T_SPD(:,i);
@@ -134,48 +118,48 @@ for i=[11, 1:size(T_SPD,2)] %starts with 11 (6551K, arbitrary), so that a fixed 
     plt_RGB(:,:,i)    = plt_RGB(:,:,i)/max(max(plt_RGB(:,:,i)));
 end
 
+if ~exist('Z_ax','var') %if Z_ax isn't already defined, i.e. if we are not inside a function
+    Z_ax = 9; %variable to visually test different hypothesese, 9 is default
+end
+
+plt_lbls{1}  = 'L'; %writing out this way so that there's a quick reference as to which value of Z_ax does what
+plt_lbls{2}  = 'M';
+plt_lbls{3}  = 'S';
+plt_lbls{4}  = 'R';
+plt_lbls{5}  = 'I';
+plt_lbls{6}  = 'l';
+plt_lbls{7}  = 's';
+plt_lbls{8}  = 'r';
+plt_lbls{9}  = 'i';
+plt_lbls{10} = 'L+M';
+plt_lbls{11} = '(0.6373*L)+(0.3924*M)';
+plt_lbls{12} = 'r + i';
+
 if plt_fig
-    figure, hold on, 
+    figure, hold on, grid on
     %axis equal
-    plt_lbls = 'LMSRIlsri'; %plot labels
     xlim([0 1]), ylim([0 1])
-    xlabel('l'),ylabel('s')
-    view(3) %view(188,46)
+    xlabel('l'),ylabel('s'), title(plt_lbls{Z_ax})
+    %view(3) %view(188,46)
+    
     if ismember(Z_ax,1:5)
-        for i=1:size(T_SPD,2)
-            plot3(lsri(1,:,i),lsri(2,:,i),LMSRI(Z_ax,:,i),'k')
-            scatter3(lsri(1,:,i),lsri(2,:,i),LMSRI(Z_ax,:,i),[],plt_RGB(:,:,i)','v','filled')
-            zlabel(plt_lbls(Z_ax)),
-            pause(plt_ps),drawnow
-        end
+        t_Z = LMSRI(Z_ax,:,:); %temp Z
     elseif ismember(Z_ax,6:9)
-        for i=1:size(T_SPD,2)
-            plot3(lsri(1,:,i),lsri(2,:,i),lsri(Z_ax-5,:,i),'k')
-            scatter3(lsri(1,:,i),lsri(2,:,i),lsri(Z_ax-5,:,i),[],plt_RGB(:,:,i)','v','filled')
-            zlabel(plt_lbls(Z_ax));
-            pause(plt_ps),drawnow
-        end
+        t_Z = lsri(Z_ax-5,:,:);
     elseif Z_ax == 10
-        for i=1:size(T_SPD,2)
-            plot3(lsri(1,:,i),lsri(2,:,i),LMSRI(1,:,i)+LMSRI(2,:,i),'k')
-            scatter3(lsri(1,:,i),lsri(2,:,i),LMSRI(1,:,i)+LMSRI(2,:,i),[],plt_RGB(:,:,i)','v','filled')
-            zlabel('L+M');
-            pause(plt_ps),drawnow
-        end
+        t_Z = LMSRI(1,:,:)+LMSRI(2,:,:);
     elseif Z_ax == 11
-        for i=1:size(T_SPD,2)
-            plot3(lsri(1,:,i),lsri(2,:,i),(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)),'k')
-            scatter3(lsri(1,:,i),lsri(2,:,i),(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)),[],plt_RGB(:,:,i)','v','filled')
-            zlabel('(0.6373*L)+(0.3924*M)');
-            pause(plt_ps),drawnow
-        end
+        t_Z = 0.6373*LMSRI(1,:,:)+0.3924*LMSRI(2,:,:);
     elseif Z_ax == 12
-        for i=1:size(T_SPD,2)
-            plot3(lsri(1,:,i),lsri(2,:,i),lsri(3,:,i)+lsri(4,:,i),'k')
-            scatter3(lsri(1,:,i),lsri(2,:,i),lsri(3,:,i)+lsri(4,:,i),[],plt_RGB(:,:,i)','v','filled')
-            zlabel('r+i');
-            pause(plt_ps),drawnow
-        end
+        t_Z = lsri(3,:,:)+lsri(4,:,:);
+    end
+    
+    for i=1:size(T_SPD,2)
+        plot3(lsri(1,:,i),lsri(2,:,i),t_Z(1,:,i),'k')
+        scatter3(lsri(1,:,i),lsri(2,:,i),t_Z(1,:,i),[],plt_RGB(:,:,i)','v','filled')
+        zlabel(plt_lbls{Z_ax}),
+        view(i*5,i)
+        pause(plt_ps),drawnow
     end
     
     if plt_locus

@@ -5,8 +5,6 @@ clear, clc, close all
 % TO DO
 % - check that lm work out the same when I calculate them without the PTB
 %   function, just for lolz (seriously - to be careful)
-% - convert loop names so that I can use i for melanopsin variable name (OR
-%   never compute it alone, bundle it with other variables)
 % - what about log signals?
 % - Can the 'correction through shift' be done by division rather than subtraction?
 
@@ -30,23 +28,25 @@ PF_obs = 1;
 if PF_SPD == 1
     D_CCT=1./linspace(1/3600,1/25000,20); %non-linear range, aiming to better reproduce observed variation
     load B_cieday
-    T_Dspd = GenerateCIEDay(D_CCT,[B_cieday]); %these appear to be linearly upsampled from 10nm intervals (see 'cieday investigation.m' https://github.com/da5nsy/General-Purpose-Functions/blob/3ee587429e9c4f3dd52d64acd95acf82d7e05f47/cieday%20investigation.m)
-    T_Dspd = (T_Dspd./repmat(max(T_Dspd),81,1)); %normalise
-    T_Dspd = SplineSpd(S_cieday,T_Dspd,S_vrhel,2)'; % '2' flag -> Linear interp, linear extend
+    T_SPD = GenerateCIEDay(D_CCT,[B_cieday]); %these appear to be linearly upsampled from 10nm intervals (see 'cieday investigation.m' https://github.com/da5nsy/General-Purpose-Functions/blob/3ee587429e9c4f3dd52d64acd95acf82d7e05f47/cieday%20investigation.m)
+    T_SPD = (T_SPD./repmat(max(T_SPD),81,1)); %normalise
+    S_SPD = S_cieday;
 elseif PF_SPD == 2
     error('Danny still needs to write the section that pulled in the Hernández-Andrés+ data')
 else 
     error('SPD selection failed')
 end
 
-%% Load Reflectances
+
+% Load Reflectances
 if PF_refs == 1
     load sur_vrhel
     refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
     %T_vrhel = sur_vrhel';
-    T_vrhel = sur_vrhel(:,refs)';
-    T_vrhel = T_vrhel([2,1,3,6,5,4,8,9,11,10,7],:); %change order for clearer plotting visualisation
-    clear sur_vrhel refs
+    T_refs = sur_vrhel(:,refs)';
+    T_refs = T_refs([2,1,3,6,5,4,8,9,11,10,7],:); %change order for clearer plotting visualisation
+    S_refs = S_vrhel;
+    clear sur_vrhel refs S_vrhel 
 elseif PF_SPD == 2
     error('Danny still needs to write the section that pulled in the Ennis+ data')
 elseif PF_SPD == 2
@@ -55,11 +55,15 @@ else
     error('refs selection failed')
 end
 
-%% Observer
+
+% Observer
 
 if PF_SPD == 1
     % Smith-Pokorny, for use with MacLeod Boynton diagram
-    load T_cones_sp %should use a different version (see 'PTB_SP.m': https://github.com/da5nsy/General-Purpose-Functions/blob/3ee587429e9c4f3dd52d64acd95acf82d7e05f47/PTB_SP.m)
+    load T_cones_sp
+    T_obs = T_cones_sp;
+    S_obs = S_cones_sp;
+    clear T_cones_sp S_cones_sp
 else
     error('obs selection failed')
 end
@@ -70,19 +74,25 @@ load T_melanopsin
 % For messing with hypothetical spectral sensitivity of melanopsin
 %S_melanopsin(1)=S_melanopsin(1)+30;
 
-% Pull them all together
-T_LMSRI=[(SplineCmf(S_cones_sp,T_cones_sp,S_vrhel));...
-    (SplineCmf(S_rods,T_rods,S_vrhel));...
-    (SplineCmf(S_melanopsin,T_melanopsin,S_vrhel))];
-S_LMSRI=S_vrhel;
+
+%% Pull them all together
+
+% % Insert some code which works out which data has the smallest interval:
+% % spd/refs/obs
+% T_Dspd = SplineSpd(S_SPD,T_Dspd,S_refs,2)'; % '2' flag -> Linear interp, linear extend
+% 
+% T_LMSRI=[(SplineCmf(S_obs,T_obs,S_refs));...
+%     (SplineCmf(S_rods,T_rods,S_refs));...
+%     (SplineCmf(S_melanopsin,T_melanopsin,S_refs))];
+% S_LMSRI=S_refs;
 
 %% Combine
 
 plt_fig     = 0;
 plt_locus   = 0;
 
-for i=1:size(T_Dspd,1)
-    T_rad(:,:,i) = T_vrhel.*T_Dspd(i,:);
+for i=1:size(T_SPD,1)
+    T_rad(:,:,i) = T_refs.*T_SPD(i,:);
     LMSRI(:,:,i) = T_rad(:,:,i)*T_LMSRI';
     lsri(1:2,:,i)  = LMSToMacBoyn(LMSRI(:,1:3,i)');    
     lsri(3,:,i)    = LMSRI(:,4,i)./(0.6373*LMSRI(:,1,i)+0.3924*LMSRI(:,2,i)); 
@@ -93,9 +103,9 @@ end
 
 % Compute colorimetry (just for display)
 load T_xyz1931.mat
-T_xyz1931=SplineCmf(S_xyz1931,T_xyz1931,S_vrhel);
-for i=[11, 1:size(T_Dspd,1)] %starts with 11 (6551K, arbitrary), so that a fixed white is already calculated in time for the first 'plt_RGB' line
-    plt_whiteXYZ(:,i) = T_Dspd(i,:) * T_xyz1931';
+T_xyz1931=SplineCmf(S_xyz1931,T_xyz1931,S_refs); %!!!!!!!!!!! Here it should be whichever has smallest wavelength interval
+for i=[11, 1:size(T_SPD,1)] %starts with 11 (6551K, arbitrary), so that a fixed white is already calculated in time for the first 'plt_RGB' line
+    plt_whiteXYZ(:,i) = T_SPD(i,:) * T_xyz1931';
     plt_XYZ(:,:,i)    = T_rad(:,:,i) * T_xyz1931';
     plt_Lab(:,:,i)    = XYZToLab(squeeze(plt_XYZ(:,:,i))',plt_whiteXYZ(:,i));    
     plt_RGB(:,:,i)    = XYZToSRGBPrimary(LabToXYZ(plt_Lab(:,:,i),plt_whiteXYZ(:,11))); %Using fixed, arbitrary (mid-range), white.
@@ -104,7 +114,7 @@ end
 
 if plt_fig
     figure, hold on, axis equal, xlim([0 1]), ylim([0 1]), zlim([0,1])
-    for i=1:size(T_Dspd,1)
+    for i=1:size(T_SPD,1)
         plot3(lsri(1,:,i),lsri(2,:,i),lsri(4,:,i),'k')        
         scatter3(lsri(1,:,i),lsri(2,:,i),lsri(4,:,i),[],plt_RGB(:,:,i)','v','filled')
     end
@@ -113,7 +123,7 @@ if plt_fig
     view(188,46)
     
     if plt_locus
-        MB_locus=LMSToMacBoyn(T_cones_sp);
+        MB_locus=LMSToMacBoyn(T_obs);
         %plot(MB_locus(1,:),MB_locus(2,:))
         fill([MB_locus(1,5:65),MB_locus(1,5)],[MB_locus(2,5:65),MB_locus(2,5)],'k','LineStyle','none','FaceAlpha','0.1')
     end

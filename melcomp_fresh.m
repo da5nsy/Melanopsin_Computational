@@ -10,26 +10,60 @@ clear, clc, close all
 % - what about log signals?
 % - Can the 'correction through shift' be done by division rather than subtraction?
 
-%% Load Reflectances
-load sur_vrhel
-refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
-%T_vrhel = sur_vrhel';
-T_vrhel = sur_vrhel(:,refs)';
-T_vrhel = T_vrhel([2,1,3,6,5,4,8,9,11,10,7],:); %change order for clearer plotting visualisation
-clear sur_vrhel refs
+%% Pre-flight checks
+% Setting things here controls what data is used and in what way
+
+PF_SPD = 1;
+% 1 = CIE D series
+% 2 = Hernández-Andrés+
+
+PF_refs = 1;
+% 1 = Vhrel+
+% 2 = Ennis+
+% 3 = Foster+
+
+PF_obs = 1;
+% 1 = PTB Smith-Pokorny
 
 %% Compute Daylight SPD
 
-D_CCT=1./linspace(1/3600,1/25000,20); %non-linear range, aiming to better reproduce observed variation
-load B_cieday
-T_Dspd = GenerateCIEDay(D_CCT,[B_cieday]); %these appear to be linearly upsampled from 10nm intervals (see 'cieday investigation.m' https://github.com/da5nsy/General-Purpose-Functions/blob/3ee587429e9c4f3dd52d64acd95acf82d7e05f47/cieday%20investigation.m)
-T_Dspd = (T_Dspd./repmat(max(T_Dspd),81,1)); %normalise
-T_Dspd = SplineSpd(S_cieday,T_Dspd,S_vrhel,2)'; % '2' flag -> Linear interp, linear extend
+if PF_SPD == 1
+    D_CCT=1./linspace(1/3600,1/25000,20); %non-linear range, aiming to better reproduce observed variation
+    load B_cieday
+    T_Dspd = GenerateCIEDay(D_CCT,[B_cieday]); %these appear to be linearly upsampled from 10nm intervals (see 'cieday investigation.m' https://github.com/da5nsy/General-Purpose-Functions/blob/3ee587429e9c4f3dd52d64acd95acf82d7e05f47/cieday%20investigation.m)
+    T_Dspd = (T_Dspd./repmat(max(T_Dspd),81,1)); %normalise
+    T_Dspd = SplineSpd(S_cieday,T_Dspd,S_vrhel,2)'; % '2' flag -> Linear interp, linear extend
+elseif PF_SPD == 2
+    error('Danny still needs to write the section that pulled in the Hernández-Andrés+ data')
+else 
+    error('SPD selection failed')
+end
+
+%% Load Reflectances
+if PF_refs == 1
+    load sur_vrhel
+    refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
+    %T_vrhel = sur_vrhel';
+    T_vrhel = sur_vrhel(:,refs)';
+    T_vrhel = T_vrhel([2,1,3,6,5,4,8,9,11,10,7],:); %change order for clearer plotting visualisation
+    clear sur_vrhel refs
+elseif PF_SPD == 2
+    error('Danny still needs to write the section that pulled in the Ennis+ data')
+elseif PF_SPD == 2
+    error('Danny still needs to write the section that pulled in the Foster+ data')
+else
+    error('refs selection failed')
+end
 
 %% Observer
 
-% Smith-Pokorny, for use with MacLeod Boynton diagram
-load T_cones_sp %should use a different version (see 'PTB_SP.m': https://github.com/da5nsy/General-Purpose-Functions/blob/3ee587429e9c4f3dd52d64acd95acf82d7e05f47/PTB_SP.m)
+if PF_SPD == 1
+    % Smith-Pokorny, for use with MacLeod Boynton diagram
+    load T_cones_sp %should use a different version (see 'PTB_SP.m': https://github.com/da5nsy/General-Purpose-Functions/blob/3ee587429e9c4f3dd52d64acd95acf82d7e05f47/PTB_SP.m)
+else
+    error('obs selection failed')
+end
+
 load T_rods
 load T_melanopsin
 

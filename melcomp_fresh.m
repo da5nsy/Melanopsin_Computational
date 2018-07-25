@@ -185,22 +185,7 @@ if plt_fig
     %scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_RGB(:,:)','v','filled') %with colours of objects
     scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_alt(:,:)','v','filled') %with arbitrary colours
     zlabel(plt_lbls{Z_ax})
- 
-    %Old version : good for rotating as plotting
-%          for i=1:size(T_SPD,2)
-%         plot3(lsri(1,:,i),lsri(2,:,i),t_Z(1,:,i),'Color',[0,0,0,0.2]) %transulent lines
-%         scatter3(lsri(1,:,i),lsri(2,:,i),t_Z(1,:,i),[],pltc_RGB(:,:,i)','v','filled') %with colours of objects
-%         scatter3(lsri(1,:,i),lsri(2,:,i),t_Z(1,:,i),[],pltc_RGB(:,:,i)','v','filled') %with colours of objects
-%         zlabel(plt_lbls{Z_ax}),
-%         if PF_SPD ~= 2
-%             view(i*5,i)
-%             pause(0.1),drawnow
-%         elseif mod(i,100)==0 %this would only be true where size(T_SPD,2)>100, aka where PF_SPD == 2
-%             disp(i)
-%         end
-%     end
-    
-    
+
     if plt_locus
         MB_locus=LMSToMacBoyn(T_obs');
         %plot(MB_locus(1,:),MB_locus(2,:))

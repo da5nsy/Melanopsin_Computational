@@ -1,4 +1,4 @@
-clear, clc, close all
+function melcomp_fresh(Z_ax)
 
 % A fresh attempt
 
@@ -9,8 +9,10 @@ clear, clc, close all
 % - Can the 'correction through shift' be done by division rather than subtraction?
 
 
-% Pre-flight checks
+%% Pre-flight checks
 % Setting things here controls what data is used and in what way
+
+%clear, clc, close all
 
 PF_SPD = 1;
 % 1 = CIE D series
@@ -67,38 +69,49 @@ else
 end
 load T_rods
 load T_melanopsin
-T_melanopsin = SplineCmf(S_melanopsin,T_melanopsin, S_melanopsin - [10, 0, 0],1); %Increasing the range of this function in case it ends up limiting the range of S_sh
-S_melanopsin = S_melanopsin - [10, 0, 0];
+T_mel = SplineCmf(S_melanopsin,T_melanopsin, S_melanopsin - [10, 0, 0],1); %Increasing the range of this function in case it ends up limiting the range of S_sh, and shorten variable names
+S_mel = S_melanopsin - [10, 0, 0];
 
 % For messing with hypothetical spectral sensitivity of melanopsin
-%S_melanopsin(1)=S_melanopsin(1)+30;
+%S_mel(1)=S_melanopsin(1)+30;
 
 %% Pull them all together
 
-S_sh = [max([S_SPD(1),S_refs(1),S_obs(1)]),max([S_SPD(2),S_refs(2),S_obs(2)]),min([S_SPD(3),S_refs(3),S_obs(3)])]; %S_shared
+S_sh = [max([S_SPD(1),S_refs(1),S_obs(1)]),max([S_SPD(2),S_refs(2),S_obs(2)]),min([S_SPD(3),S_refs(3),S_obs(3)])]; %S_shared: work out what the lowest common denominator for the range/interval of the data is
 
-T_SPD = SplineSpd(S_SPD,T_SPD,S_sh,1); % extend == 1: Cubic spline, extends with last value in that direction
-S_SPD=S_sh;
-
+%reduce all data down to the common range/interval
+T_SPD  = SplineSpd(S_SPD,T_SPD,S_sh,1); % extend == 1: Cubic spline, extends with last value in that direction
 T_refs = SplineSrf(S_refs,T_refs',S_sh,1);
-S_refs=S_sh;
-
-T_obs = SplineCmf(S_obs,T_obs,S_sh,1)';
-S_refs=S_sh;
-
+T_obs  = SplineCmf(S_obs,T_obs,S_sh,1)';
 T_rods = SplineCmf(S_rods,T_rods,S_sh)';
-S_rods=S_sh;
+T_mel  = SplineCmf(S_mel,T_mel,S_sh)';
+[S_SPD, S_refs, S_obs, S_rods, S_mel] = deal(S_sh);
 
-T_melanopsin = SplineCmf(S_melanopsin,T_melanopsin,S_sh)';
-S_melanopsin=S_sh;
-
-T_LMSRI=[T_obs,T_rods,T_melanopsin];
+% combine sensitivity data
+T_LMSRI=[T_obs,T_rods,T_mel];
 S_LMSRI=S_sh;
 
 %% Combine
 
 plt_fig     = 1;
-plt_locus   = 1;
+plt_locus   = 0;
+plt_ps      = 0.05; %plot pause
+
+if ~exist('Z_ax','var') %if Z_ax isn't already defined, ie if we are not inside a function
+    Z_ax = 9; %variable to visually test different hypothesese, 9 is default
+    % 1 = L
+    % 2 = M
+    % 3 = S
+    % 4 = R
+    % 5 = I
+    % 6 = l
+    % 7 = s
+    % 8 = r
+    % 9 = i
+    % 10 = L+M
+    % 11 = (0.6373*L)+(0.3924*M)
+    % 12 = r + i
+end
 
 for i=1:size(T_SPD,2)
     T_rad(:,:,i)  = T_refs.*T_SPD(:,i);
@@ -122,14 +135,48 @@ for i=[11, 1:size(T_SPD,2)] %starts with 11 (6551K, arbitrary), so that a fixed 
 end
 
 if plt_fig
-    figure, hold on, axis equal, xlim([0 1]), ylim([0 1]), zlim([0,1])
-    for i=1:size(T_SPD,2)
-        plot3(lsri(1,:,i),lsri(2,:,i),lsri(4,:,i),'k')        
-        scatter3(lsri(1,:,i),lsri(2,:,i),lsri(4,:,i),[],plt_RGB(:,:,i)','v','filled')
+    figure, hold on, 
+    %axis equal
+    plt_lbls = 'LMSRIlsri'; %plot labels
+    xlim([0 1]), ylim([0 1])
+    xlabel('l'),ylabel('s')
+    view(3) %view(188,46)
+    if ismember(Z_ax,1:5)
+        for i=1:size(T_SPD,2)
+            plot3(lsri(1,:,i),lsri(2,:,i),LMSRI(Z_ax,:,i),'k')
+            scatter3(lsri(1,:,i),lsri(2,:,i),LMSRI(Z_ax,:,i),[],plt_RGB(:,:,i)','v','filled')
+            zlabel(plt_lbls(Z_ax)),
+            pause(plt_ps),drawnow
+        end
+    elseif ismember(Z_ax,6:9)
+        for i=1:size(T_SPD,2)
+            plot3(lsri(1,:,i),lsri(2,:,i),lsri(Z_ax-5,:,i),'k')
+            scatter3(lsri(1,:,i),lsri(2,:,i),lsri(Z_ax-5,:,i),[],plt_RGB(:,:,i)','v','filled')
+            zlabel(plt_lbls(Z_ax));
+            pause(plt_ps),drawnow
+        end
+    elseif Z_ax == 10
+        for i=1:size(T_SPD,2)
+            plot3(lsri(1,:,i),lsri(2,:,i),LMSRI(1,:,i)+LMSRI(2,:,i),'k')
+            scatter3(lsri(1,:,i),lsri(2,:,i),LMSRI(1,:,i)+LMSRI(2,:,i),[],plt_RGB(:,:,i)','v','filled')
+            zlabel('L+M');
+            pause(plt_ps),drawnow
+        end
+    elseif Z_ax == 11
+        for i=1:size(T_SPD,2)
+            plot3(lsri(1,:,i),lsri(2,:,i),(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)),'k')
+            scatter3(lsri(1,:,i),lsri(2,:,i),(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)),[],plt_RGB(:,:,i)','v','filled')
+            zlabel('(0.6373*L)+(0.3924*M)');
+            pause(plt_ps),drawnow
+        end
+    elseif Z_ax == 12
+        for i=1:size(T_SPD,2)
+            plot3(lsri(1,:,i),lsri(2,:,i),lsri(3,:,i)+lsri(4,:,i),'k')
+            scatter3(lsri(1,:,i),lsri(2,:,i),lsri(3,:,i)+lsri(4,:,i),[],plt_RGB(:,:,i)','v','filled')
+            zlabel('r+i');
+            pause(plt_ps),drawnow
+        end
     end
-    xlabel('l'),ylabel('s'),zlabel('m');
-    
-    view(188,46)
     
     if plt_locus
         MB_locus=LMSToMacBoyn(T_obs');
@@ -139,6 +186,8 @@ if plt_fig
 end
 
 %% Correction through rotation
+
+plt_CTR = 0;
 
 %rotation matrix
 ang=0.8036; %angle in radians, just eyeballed, and in one dimension
@@ -151,25 +200,32 @@ rm=...
 %apply rotation
 lsri_r=lsri(:,:)'*rm;
 
-figure, hold on, axis equal, 
-% %xlim([0 1]), ylim([-1 1]), zlim([0,2])
-scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],reshape(plt_RGB,[3,220])','v','filled')
-scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,4),[],reshape(plt_RGB,[3,220])','^','filled')
-
-legend({'Original','Rotated'},'Location','best')
-xlabel('l'),ylabel('s2'),zlabel('m2'); %l stays the same
+if plt_CTR
+    figure, hold on, axis equal,
+    % %xlim([0 1]), ylim([-1 1]), zlim([0,2])
+    scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],reshape(plt_RGB,[3,220])','v','filled')
+    scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,4),[],reshape(plt_RGB,[3,220])','^','filled')
+    
+    legend({'Original','Rotated'},'Location','best')
+    xlabel('l'),ylabel('s2'),zlabel('i2'); %l stays the same
+end
 
 %% Correction through shift
+
+plt_CTS = 0;
 
 lsri_s = lsri; %shifted
 
 lsri_s(4,:) = lsri(4,:)-0.27;
 lsri_s(2,:) = lsri(2,:)-lsri_s(4,:);
 
-figure, hold on, axis equal, 
-scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],reshape(plt_RGB,[3,220])','v','filled')
-scatter3(lsri_s(1,:),lsri_s(2,:),lsri_s(4,:),[],reshape(plt_RGB,[3,220])','^','filled')
+if plt_CTS
+    figure, hold on, axis equal,
+    scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],reshape(plt_RGB,[3,220])','v','filled')
+    scatter3(lsri_s(1,:),lsri_s(2,:),lsri_s(4,:),[],reshape(plt_RGB,[3,220])','^','filled')
+    
+    legend({'Original','Shifted'},'Location','best')
+    xlabel('l'),ylabel('s2'),zlabel('i2');
+end
 
-legend({'Original','Shifted'},'Location','best')
-xlabel('l'),ylabel('s2'),zlabel('m2');
-
+end

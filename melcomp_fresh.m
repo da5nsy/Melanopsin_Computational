@@ -11,7 +11,12 @@ function melcomp_fresh(Z_ax)
 %% Pre-flight checks
 % Setting things here controls what data is used and in what way
 
-clear, clc, close all
+try 
+    nargin; 
+catch
+    clear, clc, close all 
+end
+%clears everything, unless we're inside a function
 
 PF_SPD = 2;
 % 1 = CIE D series
@@ -112,9 +117,9 @@ S_LMSRI=S_sh;
 
 %% Combine
 
-plt_fig     = 1;
-plt_locus   = 0;
-plt_ps      = 0.1; %plot pause
+plt_fig     = 1; % 0 = off, 1 = on
+plt_locus   = 0; % plot spectral locus in the MB diagram, 0 = off, 1 = on
+real_cols   = 0; % 0 = colormap, 1 = colours calculated from SPD and refs
 
 for i=1:size(T_SPD,2)
     T_rad(:,:,i)  = T_refs.*T_SPD(:,i);
@@ -138,6 +143,7 @@ for i=[11, 1:size(T_SPD,2)] %starts with 11 (6551K, arbitrary), so that a fixed 
 end
 pltc_RGB = pltc_RGB/max(pltc_RGB(:));
 pltc_alt = repmat(jet(size(T_refs,2))',1,1,size(T_SPD,2)); %despite the effort gone through above to calculate the actual colours, this seems more useful for differentiating different reflectances from eachother
+rng(7); pltc_alt=pltc_alt(:,randperm(11),:); %this particular random permutation seems to generate colours in an order which means that when plotted (Hernández-Andrés+, Vrhel+) the different refs are most easily distinguishable.
 
 if ~exist('Z_ax','var') %if Z_ax isn't already defined, i.e. if we are not inside a function
     Z_ax = 9; %variable to visually test different hypothesese, 9 is default
@@ -175,25 +181,25 @@ if plt_fig
         t_Z = lsri(3,:,:)+lsri(4,:,:);
     end
     
-%     for i=1:size(T_SPD,2)
+    plot3(lsri(1,:),lsri(2,:),t_Z(1,:),'Color',[0,0,0,0.2]) %transulent lines
+    %scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_RGB(:,:)','v','filled') %with colours of objects
+    scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_alt(:,:)','v','filled') %with arbitrary colours
+    zlabel(plt_lbls{Z_ax})
+ 
+    %Old version : good for rotating as plotting
+%          for i=1:size(T_SPD,2)
 %         plot3(lsri(1,:,i),lsri(2,:,i),t_Z(1,:,i),'Color',[0,0,0,0.2]) %transulent lines
 %         scatter3(lsri(1,:,i),lsri(2,:,i),t_Z(1,:,i),[],pltc_RGB(:,:,i)','v','filled') %with colours of objects
 %         scatter3(lsri(1,:,i),lsri(2,:,i),t_Z(1,:,i),[],pltc_RGB(:,:,i)','v','filled') %with colours of objects
 %         zlabel(plt_lbls{Z_ax}),
 %         if PF_SPD ~= 2
 %             view(i*5,i)
-%             pause(plt_ps),drawnow
+%             pause(0.1),drawnow
 %         elseif mod(i,100)==0 %this would only be true where size(T_SPD,2)>100, aka where PF_SPD == 2
 %             disp(i)
 %         end
 %     end
-
-
-        plot3(lsri(1,:),lsri(2,:),t_Z(1,:),'Color',[0,0,0,0.2]) %transulent lines
-        %scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_RGB(:,:)','v','filled') %with colours of objects
-        scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_alt(:,:)','v','filled') %with arbitrary colours
-        zlabel(plt_lbls{Z_ax}),
-
+    
     
     if plt_locus
         MB_locus=LMSToMacBoyn(T_obs');
@@ -204,7 +210,7 @@ end
 
 %% Correction through rotation
 
-plt_CTR = 1;
+plt_CTR = 0;
 
 %rotation matrix
 ang=0.8036; %angle in radians, just eyeballed, and in one dimension
@@ -218,7 +224,7 @@ rm=...
 lsri_r=lsri(:,:)'*rm;
 
 if plt_CTR
-    figure, hold on, axis equal,
+    figure, hold on, axis equal, grid on
     % %xlim([0 1]), ylim([-1 1]), zlim([0,2])
     scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
     scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,4),[],pltc_alt(:,:)','^','filled')
@@ -229,7 +235,7 @@ end
 
 %% Correction through shift
 
-plt_CTS = 1;
+plt_CTS = 0;
 
 lsri_s = lsri; %shifted
 
@@ -237,7 +243,7 @@ lsri_s(4,:) = lsri(4,:)-0.27;
 lsri_s(2,:) = lsri(2,:)-lsri_s(4,:);
 
 if plt_CTS
-    figure, hold on, axis equal,
+    figure, hold on, axis equal, grid on
     scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
     scatter3(lsri_s(1,:),lsri_s(2,:),lsri_s(4,:),[],pltc_alt(:,:)','^','filled')
     

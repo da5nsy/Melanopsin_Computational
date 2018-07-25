@@ -8,18 +8,18 @@ function melcomp_fresh(Z_ax)
 % - what about log signals?
 % - Can the 'correction through shift' be done by division rather than subtraction?
 
-
 %% Pre-flight checks
 % Setting things here controls what data is used and in what way
 
-%clear, clc, close all
+clear, clc, close all
 
-PF_SPD = 1;
+PF_SPD = 2;
 % 1 = CIE D series
 % 2 = Hernández-Andrés+
 
 PF_refs = 1;
 % 1 = Vhrel+
+PF_refs_on = 1; %Only Natural (else, all)
 % 2 = Ennis+
 % 3 = Foster+
 
@@ -27,6 +27,8 @@ PF_obs = 1;
 % 1 = PTB Smith-Pokorny
 
 %% Compute Daylight SPD
+plt_SPD = 0;
+
 if PF_SPD == 1
     D_CCT=1./linspace(1/3600,1/25000,20); %non-linear range, aiming to better reproduce observed variation
     load B_cieday
@@ -34,7 +36,22 @@ if PF_SPD == 1
     T_SPD = (T_SPD./repmat(max(T_SPD),81,1)); %normalise
     S_SPD = S_cieday;
 elseif PF_SPD == 2
-    error('Danny still needs to write the section that pulled in the Hernández-Andrés+ data')
+    load('C:\Users\cege-user\Dropbox\UCL\Reference Data\Granada Data\Granada_daylight_2600_161.mat');
+    % http://colorimaginglab.ugr.es/pages/Data#__doku_granada_daylight_spectral_database
+    % From: J. Hernández-Andrés, J. Romero& R.L. Lee, Jr., "Colorimetric and
+    %       spectroradiometric characteristics of narrow-field-of-view
+    %       clear skylight in Granada, Spain" (2001)
+    T_SPD=final; clear final
+    S_SPD=[300,5,161];
+    
+    if plt_SPD
+        figure, hold on;        
+        plot(SToWls(S_SPD),T_SPD)
+        %drawnow, pause(0.3)        
+        xlabel('Wavelength (nm)')
+        ylabel('Spectral Power Distribution (W m ^-^2 nm^-^1)')
+        xlim([S_SPD(1),max(SToWls(S_SPD))]), ylim([0 max(T_SPD(:))]);
+    end
 else 
     error('SPD selection failed')
 end
@@ -43,9 +60,11 @@ end
 if PF_refs == 1
     load sur_vrhel
     refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
-    %T_vrhel = sur_vrhel';
-    T_refs = sur_vrhel(:,refs)';
-    T_refs = T_refs([2,1,3,6,5,4,8,9,11,10,7],:); %change order for clearer plotting visualisation
+    T_refs = sur_vrhel';
+    if PF_refs_on
+        T_refs = sur_vrhel(:,refs)';
+        T_refs = T_refs([2,1,3,6,5,4,8,9,11,10,7],:); %change order for clearer plotting visualisation
+    end
     S_refs = S_vrhel;
     clear sur_vrhel refs S_vrhel 
 elseif PF_SPD == 2
@@ -58,7 +77,7 @@ end
 
 
 % Observer
-if PF_SPD == 1
+if PF_obs == 1
     % Smith-Pokorny, for use with MacLeod Boynton diagram
     load T_cones_sp
     T_obs = T_cones_sp;
@@ -70,7 +89,7 @@ end
 load T_rods
 load T_melanopsin
 T_mel = SplineCmf(S_melanopsin,T_melanopsin, S_melanopsin - [10, 0, 0],1); %Increasing the range of this function in case it ends up limiting the range of S_sh, and shorten variable names
-S_mel = S_melanopsin - [10, 0, 0];
+S_mel = S_melanopsin - [10, 0, 0]; clear S_melanopsin T_melanopsin
 
 % For messing with hypothetical spectral sensitivity of melanopsin
 %S_mel(1)=S_melanopsin(1)+30;
@@ -111,12 +130,14 @@ end
 load T_xyz1931.mat
 T_xyz1931=SplineCmf(S_xyz1931,T_xyz1931,S_refs)';
 for i=[11, 1:size(T_SPD,2)] %starts with 11 (6551K, arbitrary), so that a fixed white is already calculated in time for the first 'plt_RGB' line
-    plt_whiteXYZ(:,i) = T_xyz1931' * T_SPD(:,i);
-    plt_XYZ(:,:,i)    = T_xyz1931' * T_rad(:,:,i);
-    plt_Lab(:,:,i)    = XYZToLab(squeeze(plt_XYZ(:,:,i)),plt_whiteXYZ(:,i));    
-    plt_RGB(:,:,i)    = XYZToSRGBPrimary(LabToXYZ(plt_Lab(:,:,i),plt_whiteXYZ(:,11))); %Using fixed, arbitrary (mid-range), white.
-    plt_RGB(:,:,i)    = plt_RGB(:,:,i)/max(max(plt_RGB(:,:,i)));
+    pltc_whiteXYZ(:,i) = T_xyz1931' * T_SPD(:,i);
+    pltc_XYZ(:,:,i)    = T_xyz1931' * T_rad(:,:,i);
+    pltc_Lab(:,:,i)    = XYZToLab(squeeze(pltc_XYZ(:,:,i)),pltc_whiteXYZ(:,i));    
+    pltc_RGB(:,:,i)    = XYZToSRGBPrimary(LabToXYZ(pltc_Lab(:,:,i),pltc_whiteXYZ(:,11))); %Using fixed, arbitrary (mid-range), white.
+    %pltc_RGB(:,:,i)    = pltc_RGB(:,:,i)/max(max(pltc_RGB(:,:,i)));
 end
+pltc_RGB = pltc_RGB/max(pltc_RGB(:));
+pltc_alt = repmat(jet(size(T_refs,2))',1,1,size(T_SPD,2)); %despite the effort gone through above to calculate the actual colours, this seems more useful for differentiating different reflectances from eachother
 
 if ~exist('Z_ax','var') %if Z_ax isn't already defined, i.e. if we are not inside a function
     Z_ax = 9; %variable to visually test different hypothesese, 9 is default
@@ -154,13 +175,25 @@ if plt_fig
         t_Z = lsri(3,:,:)+lsri(4,:,:);
     end
     
-    for i=1:size(T_SPD,2)
-        plot3(lsri(1,:,i),lsri(2,:,i),t_Z(1,:,i),'k')
-        scatter3(lsri(1,:,i),lsri(2,:,i),t_Z(1,:,i),[],plt_RGB(:,:,i)','v','filled')
+%     for i=1:size(T_SPD,2)
+%         plot3(lsri(1,:,i),lsri(2,:,i),t_Z(1,:,i),'Color',[0,0,0,0.2]) %transulent lines
+%         scatter3(lsri(1,:,i),lsri(2,:,i),t_Z(1,:,i),[],pltc_RGB(:,:,i)','v','filled') %with colours of objects
+%         scatter3(lsri(1,:,i),lsri(2,:,i),t_Z(1,:,i),[],pltc_RGB(:,:,i)','v','filled') %with colours of objects
+%         zlabel(plt_lbls{Z_ax}),
+%         if PF_SPD ~= 2
+%             view(i*5,i)
+%             pause(plt_ps),drawnow
+%         elseif mod(i,100)==0 %this would only be true where size(T_SPD,2)>100, aka where PF_SPD == 2
+%             disp(i)
+%         end
+%     end
+
+
+        plot3(lsri(1,:),lsri(2,:),t_Z(1,:),'Color',[0,0,0,0.2]) %transulent lines
+        %scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_RGB(:,:)','v','filled') %with colours of objects
+        scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_alt(:,:)','v','filled') %with arbitrary colours
         zlabel(plt_lbls{Z_ax}),
-        view(i*5,i)
-        pause(plt_ps),drawnow
-    end
+
     
     if plt_locus
         MB_locus=LMSToMacBoyn(T_obs');
@@ -171,7 +204,7 @@ end
 
 %% Correction through rotation
 
-plt_CTR = 0;
+plt_CTR = 1;
 
 %rotation matrix
 ang=0.8036; %angle in radians, just eyeballed, and in one dimension
@@ -187,8 +220,8 @@ lsri_r=lsri(:,:)'*rm;
 if plt_CTR
     figure, hold on, axis equal,
     % %xlim([0 1]), ylim([-1 1]), zlim([0,2])
-    scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],reshape(plt_RGB,[3,220])','v','filled')
-    scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,4),[],reshape(plt_RGB,[3,220])','^','filled')
+    scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
+    scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,4),[],pltc_alt(:,:)','^','filled')
     
     legend({'Original','Rotated'},'Location','best')
     xlabel('l'),ylabel('s2'),zlabel('i2'); %l stays the same
@@ -196,7 +229,7 @@ end
 
 %% Correction through shift
 
-plt_CTS = 0;
+plt_CTS = 1;
 
 lsri_s = lsri; %shifted
 
@@ -205,8 +238,8 @@ lsri_s(2,:) = lsri(2,:)-lsri_s(4,:);
 
 if plt_CTS
     figure, hold on, axis equal,
-    scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],reshape(plt_RGB,[3,220])','v','filled')
-    scatter3(lsri_s(1,:),lsri_s(2,:),lsri_s(4,:),[],reshape(plt_RGB,[3,220])','^','filled')
+    scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
+    scatter3(lsri_s(1,:),lsri_s(2,:),lsri_s(4,:),[],pltc_alt(:,:)','^','filled')
     
     legend({'Original','Shifted'},'Location','best')
     xlabel('l'),ylabel('s2'),zlabel('i2');

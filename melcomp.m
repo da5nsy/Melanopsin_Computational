@@ -213,7 +213,7 @@ end
 % They all flatline as chromaticity changes, and then shoot up and slightly
 % back on themselves in that boomerang shape.
 
-plot_predict=   0;
+plot_predict=   1;
 if plot_predict
     plotOrder={'L','M','S','Mel'};
     

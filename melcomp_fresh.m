@@ -195,7 +195,7 @@ end
 
 %% Correction through rotation
 
-plt_CTR = 0;
+plt_CTR = 1;
 
 %rotation matrix
 ang=0.8036; %angle in radians, just eyeballed, and in one dimension
@@ -220,12 +220,13 @@ end
 
 %% Correction through shift
 
-plt_CTS = 0;
+plt_CTS = 1;
 
 lsri_s = lsri; %shifted
 
 lsri_s(4,:) = lsri(4,:)-0.27;
 lsri_s(2,:) = lsri(2,:)-lsri_s(4,:);
+lsri_s(4,:) = lsri_s(4,:)+0.27;
 
 if plt_CTS
     figure, hold on, axis equal, grid on
@@ -235,5 +236,7 @@ if plt_CTS
     legend({'Original','Shifted'},'Location','best')
     xlabel('l'),ylabel('s2'),zlabel('i2');
 end
+
+view(90,0)
 
 end

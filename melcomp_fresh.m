@@ -7,6 +7,12 @@ function melcomp_fresh(Z_ax)
 %   function, just for lolz (seriously - to be careful)
 % - what about log signals?
 % - Can the 'correction through shift' be done by division rather than subtraction?
+% - Should I include Foster+'s "Levada scene"
+%   (https://personalpages.manchester.ac.uk/staff/d.h.foster/Time-Lapse_HSIs/Time-Lapse_HSIs_2015.html)
+%   I'd want to crop the houses out, and then we just have foliage, is this
+%   neccessarily a 'salient object'?
+% - Include the Foster+ 2004 images (slightly difficult because of
+%   different sampling ranges/intervals)
 
 %% Pre-flight checks
 % Setting things here controls what data is used and in what way
@@ -22,11 +28,11 @@ PF_SPD = 2;
 % 1 = CIE D series
 % 2 = Hernández-Andrés+
 
-PF_refs = 1;
+PF_refs = 3;
 % 1 = Vhrel+
 PF_refs_on = 1; %Only Natural (else, all)
 % 2 = Ennis+
-% 3 = Foster+
+% 3 = Foster+ 
 
 PF_obs = 1;
 % 1 = PTB Smith-Pokorny
@@ -41,7 +47,7 @@ if PF_SPD == 1
     T_SPD = (T_SPD./repmat(max(T_SPD),81,1)); %normalise
     S_SPD = S_cieday;
 elseif PF_SPD == 2
-    load('C:\Users\cege-user\Dropbox\UCL\Reference Data\Granada Data\Granada_daylight_2600_161.mat');
+    load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_daylight_2600_161.mat');
     % http://colorimaginglab.ugr.es/pages/Data#__doku_granada_daylight_spectral_database
     % From: J. Hernández-Andrés, J. Romero& R.L. Lee, Jr., "Colorimetric and
     %       spectroradiometric characteristics of narrow-field-of-view
@@ -72,10 +78,27 @@ if PF_refs == 1
     end
     S_refs = S_vrhel;
     clear sur_vrhel refs S_vrhel 
-elseif PF_SPD == 2
+elseif PF_refs == 2
     error('Danny still needs to write the section that pulled in the Ennis+ data')
-elseif PF_SPD == 2
-    error('Danny still needs to write the section that pulled in the Foster+ data')
+elseif PF_refs == 3
+    base = 'C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Foster Images\';
+    for i=1:4 %2002 images
+        ims(i)=load([base, '2002\scene',num2str(i),'.mat']); %imageS
+    end
+%     %2004 images
+%     ims(5)=load([base,'2004\scene1\ref_crown3bb_reg1.mat']);
+%     ims(6)=load([base,'2004\scene2\ref_ruivaes1bb_reg1.mat']);
+%     ims(7)=load([base,'2004\scene3\ref_mosteiro4bb_reg1.mat']);
+%     ims(8)=load([base,'2004\scene4\ref_cyflower1bb_reg1.mat']);
+%     ims(9)=load([base,'2004\scene5\ref_cbrufefields1bb_reg1.mat']);
+    
+    [r, c, w] = size(ims(1).reflectances);
+    T_refs = reshape(ims(1).reflectances, r*c, w);
+    for i=2:4%length(ims)
+        [r, c, w] = size(ims(i).reflectances);
+        T_refs = [T_refs; reshape(ims(i).reflectances, r*c, w)];
+    end
+    S_refs=[410,10,31];
 else
     error('refs selection failed')
 end
@@ -105,7 +128,13 @@ S_sh = [max([S_SPD(1),S_refs(1),S_obs(1)]),max([S_SPD(2),S_refs(2),S_obs(2)]),mi
 
 %reduce all data down to the common range/interval
 T_SPD  = SplineSpd(S_SPD,T_SPD,S_sh,1); % extend == 1: Cubic spline, extends with last value in that direction
-T_refs = SplineSrf(S_refs,T_refs',S_sh,1);
+T_SPD = T_SPD(:,1:30:end); %temporary(?) downsampling for use with Foster+ refs
+if or((PF_refs == 1),(PF_refs == 2))
+    T_refs = SplineSrf(S_refs,T_refs',S_sh,1);
+elseif PF_refs == 3 %It would theoretically be fine to run the Foster data through the above, I'm certain nothing would change, but it takes an incredibly long time (to do nothing, since the Foster data is probably always going to be the lowest resolution thing that is being handled, thus S_Sh should == S_refs)
+    T_refs = T_refs';
+    T_refs = T_refs(:,1:10000:end); %temporary(?) downsampling for speed in testing
+end
 T_obs  = SplineCmf(S_obs,T_obs,S_sh,1)';
 T_rods = SplineCmf(S_rods,T_rods,S_sh)';
 T_mel  = SplineCmf(S_mel,T_mel,S_sh)';
@@ -143,7 +172,8 @@ for i=[11, 1:size(T_SPD,2)] %starts with 11 (6551K, arbitrary), so that a fixed 
 end
 pltc_RGB = pltc_RGB/max(pltc_RGB(:));
 pltc_alt = repmat(jet(size(T_refs,2))',1,1,size(T_SPD,2)); %despite the effort gone through above to calculate the actual colours, this seems more useful for differentiating different reflectances from eachother
-rng(7); pltc_alt=pltc_alt(:,randperm(11),:); %this particular random permutation seems to generate colours in an order which means that when plotted (Hernández-Andrés+, Vrhel+) the different refs are most easily distinguishable.
+rng(7); 
+pltc_alt=pltc_alt(:,randperm(size(T_refs,2)),:); %this particular random permutation seems to generate colours in an order which means that when plotted (Hernández-Andrés+, Vrhel+) the different refs are most easily distinguishable.
 
 if ~exist('Z_ax','var') %if Z_ax isn't already defined, i.e. if we are not inside a function
     Z_ax = 9; %variable to visually test different hypothesese, 9 is default

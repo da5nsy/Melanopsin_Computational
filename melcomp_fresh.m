@@ -28,7 +28,7 @@ PF_SPD = 2;
 % 1 = CIE D series
 % 2 = Hernández-Andrés+
 
-PF_refs = 3;
+PF_refs = 1;
 % 1 = Vhrel+
 PF_refs_on = 1; %Only Natural (else, all)
 % 2 = Ennis+

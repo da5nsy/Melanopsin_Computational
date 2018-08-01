@@ -1,685 +1,288 @@
-function [MB1_minSD,MB2_minSD,melpeak,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melcomp(offset)
+function melcomp_fresh(PF_SPD,PF_refs,PF_obs,Z_ax)
 
-%% Research questions:
-%
-% 1.	Considering only daylight spectra (excluding reflective surfaces),
-%       can a melanopic signal predict the chromaticity of daylight more
-%       precisely than signals provided by other retinal cell populations?
-%
-% 2.	Now considering also object reflectances, does a melanopic signal
-%       provide a means of calculating a sign and weight of shift required
-%       to counteract the chromatic shift induced upon objects by a change
-%       in daylight conditions?
-%
-% 3.	Are there objects, or luminance levels, or daylight chromaticities
-%       for which the melanopic signal is particularly effective or
-%       ineffective at performing the above task
+% A fresh attempt
 
-%% Set-up
-if ~exist('offset','var'); clear, clc, close all; end %clears everything, unless we're inside a function
+% TO DO
+% - check that lm work out the same when I calculate them without the PTB
+%   function, just for lolz (seriously - to be careful)
+% - what about log signals?
+% - Can the 'correction through shift' be done by division rather than subtraction?
+% - Should I include Foster+'s "Levada scene"
+%   (https://personalpages.manchester.ac.uk/staff/d.h.foster/Time-Lapse_HSIs/Time-Lapse_HSIs_2015.html)
+%   I'd want to crop the houses out, and then we just have foliage, is this
+%   neccessarily a 'salient object'?
+% - Include the Foster+ 2004 images (slightly difficult because of
+%   different sampling ranges/intervals)
 
-% Include reflectances?
-InclReflectances=1;
-% Only the natural ones?
-NatOnly = 1;
+%% Pre-flight checks
+% Setting things here controls what data is used and in what way
+% If we're inside a function, it is assumed that all are set, otherwise it
+%   looks for them to be set manually
 
-% Run the null condition? (Random data)
-NullCondition = 0;
-
-%% LOAD
-
-plot_daylight=  0;
-plot_obs=       0;
-plot_refs=      0;
-
-% Load Daylight Data
-load('C:\Users\cege-user\Dropbox\UCL\Reference Data\Granada Data\Granada_daylight_2600_161.mat');
-granada=final; clear final
-% 300 - 1100nm, 5nm interval, unlabeled
-% 2600 samples
-daylight=granada(17:97,:); %match obs
-S_daylight=[380,5,81];
-% http://colorimaginglab.ugr.es/pages/Data#__doku_granada_daylight_spectral_database
-% From: J. Hernández-Andrés, J. Romero& R.L. Lee, Jr., "Colorimetric and
-%       spectroradiometric characteristics of narrow-field-of-view
-%       clear skylight in Granada, Spain" (2001)
-
-if plot_daylight
-    figure, hold on;
+try
+    nargin;
+catch
+    clear, clc, close all
     
-    plot(SToWls(S_daylight),daylight,'LineWidth',4)
-    %drawnow, pause(0.3)
+    PF_SPD = 1;
+    % 1 = CIE D series
+    % 2 = Hernández-Andrés+
     
-    xlabel('Wavelength (nm)')
-    ylabel('Spectral Power Distribution (W m ^-^2 nm^-^1)')
-    xlim([min(SToWls(S_daylight)),max(SToWls(S_daylight))])
+    PF_refs = 1;
+    % 1 = Vhrel+ (natural only)
+    % 2 = Vhrel+ (all)
+    % 3 = Foster+
+    
+    PF_obs = 1;
+    % 1 = PTB Smith-Pokorny
 end
 
-% Obs data
-load('T_cones_ss10')
-% load('T_cones_ss2')
+%% Load Daylight SPD
+plt_SPD = 0;
 
-if plot_obs
-    figure, hold on;
-    for i=1:3
-        plot(SToWls(S_cones_ss10),T_cones_ss10(i,:),'LineWidth',4)
-        %drawnow, pause(0.3)
+if PF_SPD == 1
+    D_CCT=1./linspace(1/3600,1/25000,20); %non-linear range, aiming to better reproduce observed variation
+    load B_cieday
+    T_SPD = GenerateCIEDay(D_CCT,[B_cieday]); %these appear to be linearly upsampled from 10nm intervals (see 'cieday investigation.m' https://github.com/da5nsy/General-Purpose-Functions/blob/3ee587429e9c4f3dd52d64acd95acf82d7e05f47/cieday%20investigation.m)
+    T_SPD = (T_SPD./repmat(max(T_SPD),81,1)); %normalise
+    S_SPD = S_cieday;
+elseif PF_SPD == 2
+    load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_daylight_2600_161.mat');
+    % http://colorimaginglab.ugr.es/pages/Data#__doku_granada_daylight_spectral_database
+    % From: J. Hernández-Andrés, J. Romero& R.L. Lee, Jr., "Colorimetric and
+    %       spectroradiometric characteristics of narrow-field-of-view
+    %       clear skylight in Granada, Spain" (2001)
+    T_SPD=final; clear final
+    S_SPD=[300,5,161];
+    
+    if plt_SPD
+        figure, hold on;        
+        plot(SToWls(S_SPD),T_SPD)
+        %drawnow, pause(0.3)        
+        xlabel('Wavelength (nm)')
+        ylabel('Spectral Power Distribution (W m ^-^2 nm^-^1)')
+        xlim([S_SPD(1),max(SToWls(S_SPD))]), ylim([0 max(T_SPD(:))]);
     end
-    xlim([380 780])
-    xlabel('Wavelength (nm)')
-    ylabel('Normalised Spectral Sensitivity')
+else 
+    error('SPD selection failed')
 end
 
-% Mel data
-load('T_melanopsin')
-if exist('offset','var')
-    S_melanopsin(1)=S_melanopsin(1)+offset;
-end
-if plot_obs
-    %figure,
-    plot(SToWls(S_melanopsin),T_melanopsin,'LineWidth',4)
-    
-    legend({'L','M','S','Mel'})
-end
-
-if InclReflectances
-    % Spectral Reflection Functions
+% Load Reflectances
+if or((PF_refs == 1),(PF_refs == 2))
     load sur_vrhel
-    
-    if NatOnly
-        refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
-        sur_vrhel=sur_vrhel(:,refs);
+    refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
+    T_refs = sur_vrhel';
+    if PF_refs == 1
+        T_refs = sur_vrhel(:,refs)';
+        T_refs = T_refs([2,1,3,6,5,4,8,9,11,10,7],:); %change order for clearer plotting visualisation
     end
-    
-    if plot_refs
-        figure,
-        plot(SToWls(S_vrhel),sur_vrhel,'LineWidth',4)
-        if NatOnly
-            legend(string(refs))
-        end
+    S_refs = S_vrhel;
+    clear sur_vrhel refs S_vrhel 
+elseif PF_refs == 3
+    base = 'C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Foster Images\';
+    for i=1:4 %2002 images
+        ims(i)=load([base, '2002\scene',num2str(i),'.mat']); %imageS
     end
+%     %2004 images
+%     ims(5)=load([base,'2004\scene1\ref_crown3bb_reg1.mat']);
+%     ims(6)=load([base,'2004\scene2\ref_ruivaes1bb_reg1.mat']);
+%     ims(7)=load([base,'2004\scene3\ref_mosteiro4bb_reg1.mat']);
+%     ims(8)=load([base,'2004\scene4\ref_cyflower1bb_reg1.mat']);
+%     ims(9)=load([base,'2004\scene5\ref_cbrufefields1bb_reg1.mat']);
+    
+    [r, c, w] = size(ims(1).reflectances);
+    T_refs = reshape(ims(1).reflectances, r*c, w);
+    for i=2:4%length(ims)
+        [r, c, w] = size(ims(i).reflectances);
+        T_refs = [T_refs; reshape(ims(i).reflectances, r*c, w)];
+    end
+    S_refs=[410,10,31];
+else
+    error('refs selection failed')
 end
 
-%% Initial Calculations
 
-% Where InclReflectances is on, it fills in matrices but leaves the first
-% space in each matrix for the EE ill, filled in after
-
-if InclReflectances
-    for i=1:size(sur_vrhel,2)
-        
-        %Interpolate to match daylight
-        SFR(:,i)= interp1(SToWls(S_vrhel),sur_vrhel(:,i),SToWls(S_daylight),'linear','extrap');
-        
-        % %Check interpolation
-        % figure, hold on
-        % scatter(SToWls(S_vrhel),sur_vrhel(:,134),'r','filled')
-        % scatter(SToWls(S_daylight),SFR,'g','filled')
-        
-        %Factor daylight by SFR
-        spectra(:,:,i+1) =  repmat(SFR(:,i),1,size(daylight,2)).*daylight(:,:,1);
-        
-        % %Plot SFR, daylight1 and daylight 2, same graph
-        % figure, hold on
-        % plot(SToWls(S_daylight),SFR,'r')
-        % plot(SToWls(S_daylight),daylight(:,1)*(1/(max(daylight(:,1)))),'g')
-        % plot(SToWls(S_daylight),daylight2(:,1)*(1/(max(daylight2(:,1)))),'b')
-        % legend({'SFR','Daylight','Daylight 2'})
-        %
-        % %Plot SFR, daylight1 and daylight 2, seperate graph
-        % figure,
-        % plot(SToWls(S_daylight),SFR,'r');ylim([0 1]);
-        % figure,
-        % plot(SToWls(S_daylight),daylight(:,1),'g');ylim([0 .01]);
-        % figure,
-        % plot(SToWls(S_daylight),daylight2(:,1),'b');ylim([0 .01]);
-        
-        % Calculate LMS of daylight samples
-        LMS(:,:,i+1)=SplineSpd(S_cones_ss10,T_cones_ss10',S_daylight)'*spectra(:,:,i+1);
-        
-        % Calculate MacLeod - Boynton chromaticities of daylight samples
-        MB(:,:,i+1)=LMSToMacBoyn(LMS(:,:,i+1));
-        %figure,scatter(daylight_MB(1,:),daylight_MB(2,:),'k.')
-        
-        % Calulate M of daylight samples
-        Mel(:,:,i+1)=SplineSpd(S_melanopsin,T_melanopsin',S_daylight)'*spectra(:,:,i+1);
-        
-    end
-    
+% Load Observer
+if PF_obs == 1
+    % Smith-Pokorny, for use with MacLeod Boynton diagram
+    load T_cones_sp
+    T_obs = T_cones_sp;
+    S_obs = S_cones_sp;
+    clear T_cones_sp S_cones_sp
+else
+    error('obs selection failed')
 end
-% Calculate LMS of daylight samples
-LMS(:,:,1)=SplineSpd(S_cones_ss10,T_cones_ss10',S_daylight)'*daylight;
-if NullCondition; LMS=(randn(3,500)+5)*20; end
+load T_rods
+load T_melanopsin
+T_mel = SplineCmf(S_melanopsin,T_melanopsin, S_melanopsin - [10, 0, 0],1); %Increasing the range of this function in case it ends up limiting the range of S_sh, and shorten variable names
+S_mel = S_melanopsin - [10, 0, 0]; clear S_melanopsin T_melanopsin
 
-% Calculate MacLeod - Boynton chromaticities of daylight samples
-MB(:,:,1)=LMSToMacBoyn(LMS(:,:,1));
-%figure,scatter(daylight_MB(1,:),daylight_MB(2,:),'k.')
+% For messing with hypothetical spectral sensitivity of melanopsin
+%S_mel(1)=S_melanopsin(1)+30;
 
-% Calulate M of daylight samples
-Mel(:,:,1)=SplineSpd(S_melanopsin,T_melanopsin',S_daylight)'*daylight(:,:,1);
-if NullCondition; Mel=(randn(1,500)+5)*20; end
+% Pull all observer elements together
 
-% % Calculate LMS of daylight samples
-% LMS=SplineSpd(S_cones_ss10,T_cones_ss10',S_daylight)'*daylight;
-%
-% % Calculate MacLeod - Boynton chromaticities of daylight samples
-% MB=LMSToMacBoyn(LMS);
-% %figure,scatter(daylight_MB(1,:),daylight_MB(2,:),'k.')
-%
-% % Calulate M of daylight samples
-% mel=SplineSpd(S_melanopsin,T_melanopsin',S_daylight)'*daylight;
+S_sh = [max([S_SPD(1),S_refs(1),S_obs(1)]),max([S_SPD(2),S_refs(2),S_obs(2)]),min([S_SPD(3),S_refs(3),S_obs(3)])]; %S_shared: work out what the lowest common denominator for the range/interval of the data is
 
-LMSM=[LMS;Mel];
-
-%Display Settings
-dS=15;
-dMEC=[.2 .2 .2];
-dMFC=[.8 .8 .9];
-dLW=.1;
-
-%% What is the correlation between Mel and L/M/S?
-
-% There is a strong correlation between Mel and all basic signals.
-% This is unsurprsing as the first principal component daylight is very
-% broad.
-
-plot_corr=   0;
-if plot_corr
-    plotOrder={'L','M','S','Mel'};
-    figure('units','normalized','outerposition',[0 0 1 1])
-    
-    for i=1:4
-        sp(i)=subplot(2,2,i);
-        scatter(...
-            sp(i),...
-            LMSM(i,:),...
-            LMSM(4,:),...
-            dS,...
-            'MarkerEdgeColor',dMEC,...
-            'MarkerFaceColor',dMFC,...
-            'LineWidth',dLW...
-            )
-        xlabel(sp(i),plotOrder{i});ylabel('Mel');
-        
-    end
-    set(subplot(2,2,4),'Color',[.8,.8,.8])
-end
-
-% Calculate r^2 values?
-
-%% Do any signals predict MB chromaticity?
-
-% No. They all suck at it.
-% They all flatline as chromaticity changes, and then shoot up and slightly
-% back on themselves in that boomerang shape.
-
-plot_predict=   1;
-if plot_predict
-    plotOrder={'L','M','S','Mel'};
-    
-    figure('units','normalized','outerposition',[0 0 1 1])
-    
-    for i=1:4
-        sp(i)=subplot(2,2,i);
-        scatter3(...
-            sp(i),...
-            MB(1,:),...
-            MB(2,:),...
-            LMSM(i,:),...
-            dS,...
-            'MarkerEdgeColor',dMEC,...
-            'MarkerFaceColor',dMFC,...
-            'LineWidth',dLW...
-            )
-        
-        xlim([0 1]);ylim([0 1]);%zlim([0 20])
-        xlabel(sp(i),'MB1');ylabel(sp(i),'MB2');
-        zlabel(sp(i),plotOrder{i});
-        %view(sp(i),[70,16]);
-        
+%reduce all data down to the common range/interval
+T_SPD  = SplineSpd(S_SPD,T_SPD,S_sh,1); % extend == 1: Cubic spline, extends with last value in that direction
+if or((PF_refs == 1),(PF_refs == 2))
+    T_refs = SplineSrf(S_refs,T_refs',S_sh,1);
+elseif PF_refs == 3 %It would theoretically be fine to run the Foster data through the above, I'm certain nothing would change, but it takes an incredibly long time (to do nothing, since the Foster data is probably always going to be the lowest resolution thing that is being handled, thus S_Sh should == S_refs)
+    T_refs = T_refs';
+    T_refs = T_refs(:,1:10000:end); %temporary(?) downsampling for speed in testing
+    if PF_SPD == 2
+        T_SPD = T_SPD(:,1:30:end);  %temporary(?) downsampling of SPD data for use with Foster+ refs
     end
 end
-%% Does any combination of the above perform better? (Yes)
+T_obs  = SplineCmf(S_obs,T_obs,S_sh,1)';
+T_rods = SplineCmf(S_rods,T_rods,S_sh)';
+T_mel  = SplineCmf(S_mel,T_mel,S_sh)';
+[S_SPD, S_refs, S_obs, S_rods, S_mel] = deal(S_sh);
 
-% In the following graphs, I ask whether a ratio of any of the available
-% signals against any of the other available signals improves the ability
-% to signal chromaticity as a one dimensional variable.
+% combine sensitivity data
+T_LMSRI=[T_obs,T_rods,T_mel];
+S_LMSRI=S_sh;
 
-plot_comb=  0;
-if plot_comb
-    plotOrder={'L','M','S','Mel'};
-    ScalePlot=0;
+%% Compute colorimetry
+
+plt_fig       = 1; % 0 = off, 1 = on
+plt_locus     = 0; % plot spectral locus in the MB diagram, 0 = off, 1 = on
+plt_real_cols = 0; % 0 = colormap, 1 = colours calculated from SPD and refs
+plt_lines     = 0; %plot lines on the graph connecting points (good for when using low numbers of reflectances for seeing shapes through the data) 
+
+for i=1:size(T_SPD,2)
+    T_rad(:,:,i)  = T_refs.*T_SPD(:,i);
+    LMSRI(:,:,i)  = T_LMSRI'*T_rad(:,:,i);
+    lsri(1:2,:,i) = LMSToMacBoyn(LMSRI(1:3,:,i));    
+    lsri(3,:,i)   = LMSRI(4,:,i)./(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)); 
+    lsri(4,:,i)   = LMSRI(5,:,i)./(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)); 
+    % used the same scalars for luminance as are in the LMSToMAcBoyn
+    %   function - which relate to the Smith-Pokorny fundamentals
+end
+
+if plt_real_cols
+    % Compute colorimetry (just for display)
+    load T_xyz1931.mat
+    T_xyz1931=SplineCmf(S_xyz1931,T_xyz1931,S_refs)';
+    for i=[11, 1:size(T_SPD,2)] %starts with 11 (6551K, arbitrary), so that a fixed white is already calculated in time for the first 'plt_RGB' line
+        pltc_whiteXYZ(:,i) = T_xyz1931' * T_SPD(:,i);
+        pltc_XYZ(:,:,i)    = T_xyz1931' * T_rad(:,:,i);
+        pltc_Lab(:,:,i)    = XYZToLab(squeeze(pltc_XYZ(:,:,i)),pltc_whiteXYZ(:,i));
+        pltc_RGB(:,:,i)    = XYZToSRGBPrimary(LabToXYZ(pltc_Lab(:,:,i),pltc_whiteXYZ(:,11))); %Using fixed, arbitrary (mid-range), white.
+        %pltc_RGB(:,:,i)    = pltc_RGB(:,:,i)/max(max(pltc_RGB(:,:,i)));
+    end
+    pltc_RGB = pltc_RGB/max(pltc_RGB(:));
+end
+pltc_alt = repmat(jet(size(T_refs,2))',1,1,size(T_SPD,2)); %despite the effort gone through above to calculate the actual colours, this seems more useful for differentiating different reflectances from eachother
+rng(7);
+pltc_alt=pltc_alt(:,randperm(size(T_refs,2)),:); %this particular random permutation seems to generate colours in an order which means that when plotted (Hernández-Andrés+, Vrhel+) the different refs are most easily distinguishable.
+
+
+if nargin == 4    
+else
+    Z_ax = 9; 
+    disp('default: Z-axis is ''i''')
+end
+
+plt_lbls{1}  = 'L'; %writing out this way so that there's a quick reference as to which value of Z_ax does what
+plt_lbls{2}  = 'M';
+plt_lbls{3}  = 'S';
+plt_lbls{4}  = 'R';
+plt_lbls{5}  = 'I';
+plt_lbls{6}  = 'l';
+plt_lbls{7}  = 's';
+plt_lbls{8}  = 'r';
+plt_lbls{9}  = 'i';
+plt_lbls{10} = 'L+M';
+plt_lbls{11} = '(0.6373*L)+(0.3924*M)';
+plt_lbls{12} = 'r + i';
+
+if plt_fig
+    figure, hold on, grid on
+    %axis equal
+    xlim([0 1]), ylim([0 1])
+    xlabel('l'),ylabel('s'), 
+    %title(plt_lbls{Z_ax})
+    %view(3) %view(188,46)
     
-    figure('units','normalized','outerposition',[0 0 1 1])
-    
-    for i=1:16
-        sp(i)=subplot(4,4,i);
-        scatter3(...
-            sp(i),...
-            MB(1,:),...
-            MB(2,:),...
-            LMSM(ceil(i/4),:)./LMSM(mod(i-1,4)+1,:),...
-            dS,...
-            'MarkerEdgeColor',dMEC,...
-            'MarkerFaceColor',dMFC,...
-            'LineWidth',dLW...
-            )
-        % xlabel(sp(i),'MB1');ylabel(sp(i),'MB2');
-        zlabel(sprintf('%s/%s',plotOrder{ceil(i/4)},plotOrder{mod(i-1,4)+1}));
-        %axis fill; grid off
-        view(sp(i),[0,0]);
-        if ~ScalePlot
-            xlim([0,1]),ylim([0,1]),zlim([0,4])
-        end
-        %     set(gca,'XTickLabel',[]);
-        %     set(gca,'YTickLabel',[]);
+    if ismember(Z_ax,1:5)
+        t_Z = LMSRI(Z_ax,:,:); %temp Z
+    elseif ismember(Z_ax,6:9)
+        t_Z = lsri(Z_ax-5,:,:);
+    elseif Z_ax == 10
+        t_Z = LMSRI(1,:,:)+LMSRI(2,:,:);
+    elseif Z_ax == 11
+        t_Z = 0.6373*LMSRI(1,:,:)+0.3924*LMSRI(2,:,:);
+    elseif Z_ax == 12
+        t_Z = lsri(3,:,:)+lsri(4,:,:);
     end
     
-    set(sp(1),'Color',[.8,.8,.8])
-    set(sp(6),'Color',[.8,.8,.8])
-    set(sp(11),'Color',[.8,.8,.8])
-    set(sp(16),'Color',[.8,.8,.8])
-    %
-    
-    auto_rotate=    0;
-    saveGif=        0; %save a 360 gif?
-    
-    if auto_rotate
-        i=1;
-        while i<360
-            for j=1:numel(sp)
-                camorbit(sp(j),1,0,'data',[0 0 1]);
-            end
-            drawnow
-            if saveGif
-                filename = sprintf('MC_SC_%s.gif',datestr(now,'yymmddHHMMSS')); %SC - 'signal combination'
-                frame = getframe(1);
-                im{i} = frame2im(frame);
-                [A,map] = rgb2ind(im{i},256);
-                if i == 1
-                    imwrite(A,map,filename,'gif','LoopCount',Inf,'DelayTime',0.005);
-                else
-                    imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',0.005);
-                end
-                i=i+1;
-            end
-        end
+    if plt_lines
+        plot3(lsri(1,:),lsri(2,:),t_Z(1,:),'Color',[0,0,0,0.2]) %transulent lines
+    end
+    if plt_real_cols == 1
+        scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_RGB(:,:)','v','filled') %with colours of objects
+    else
+        scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_alt(:,:)','v','filled') %with arbitrary colours
+    end
+    zlabel(plt_lbls{Z_ax})
+
+    if plt_locus
+        MB_locus = LMSToMacBoyn(T_obs');
+        %plot(MB_locus(1,:),MB_locus(2,:))
+        fill([MB_locus(1,5:65),MB_locus(1,5)],[MB_locus(2,5:65),MB_locus(2,5)],'k','LineStyle','none','FaceAlpha','0.1')
     end
 end
 
-%% MB axes
-
-plot_MBa=   0;
-if plot_MBa
-    clear sp
-    
-    fig=figure('units','normalized','outerposition',[0 0 1 1]);
-    sp(1)=subplot(1,2,1);
-    scatter3(...
-        sp(1),...
-        MB(1,:),...
-        MB(2,:),...
-        LMSM(4,:)./MB(1,:),...
-        dS,...
-        'MarkerEdgeColor',dMEC,...
-        'MarkerFaceColor',dMFC,...
-        'LineWidth',dLW...
-        )
-    
-    %axis fill; grid off
-    zlabel('Mel/MB1');
-    set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
-    view(sp(1),[0,0]);
-    xlim([0,1]),ylim([0,1]),zlim([0,400])
-    %sp(i).PlotBoxAspectRatioMode='manual';
-    %sp(i).DataAspectRatioMode='manual';
-    
-    sp(2)=subplot(1,2,2);
-    scatter3(...
-        sp(2),...
-        MB(1,:),...
-        MB(2,:),...
-        LMSM(4,:)./MB(2,:),...
-        dS,...
-        'MarkerEdgeColor',dMEC,...
-        'MarkerFaceColor',dMFC,...
-        'LineWidth',dLW...
-        )
-    
-    %axis fill; grid off
-    zlabel('Mel/MB2');
-    %set(gca,'XTickLabel',[]); set(gca,'YTickLabel',[]);
-    view(sp(2),[0,0]);
-    xlim([0,1]),ylim([0,1]),zlim([0,400])
-    %sp(i).PlotBoxAspectRatioMode='manual';
-    %sp(i).DataAspectRatioMode='manual';
-    
-    auto_rotate=    0;
-    saveGif=        0; %save a 360 gif?
-    if auto_rotate
-        for i = 1:35
-            for j=1:numel(sp)
-                camorbit(sp(j),10,0,'data',[0 0 1]);
-            end
-            drawnow
-            if saveGif
-                filename = sprintf('MC_MB_%s.gif',datestr(now,'yymmddHHMMSS'));
-                frame = getframe(1);
-                im{i} = frame2im(frame);
-                [A,map] = rgb2ind(im{i},256);
-                if i == 1
-                    imwrite(A,map,filename,'gif','LoopCount',Inf,'DelayTime',0.005);
-                else
-                    imwrite(A,map,filename,'gif','WriteMode','append','DelayTime',0.005);
-                end
-            end
-        end
-    end
+if nargin %ends function here
+    return
 end
 
-%% L vs L+M
+%% Correction through rotation
 
-plot_LvsLM= 0;
-if plot_LvsLM
-    plotOrder={'L','M','S','Mel'};
+plt_CTR = 0;
+
+%rotation matrix
+ang=0.8036; %angle in radians, just eyeballed, and in one dimension
+rm=...
+    [1,0,0,0;...
+    0,cos(ang),0,sin(ang);...
+    0,0,1,0;...
+    0,-sin(ang),0,cos(ang)]; 
+
+%apply rotation
+lsri_r=lsri(:,:)'*rm;
+
+if plt_CTR
+    figure, hold on, axis equal, grid on
+    % %xlim([0 1]), ylim([-1 1]), zlim([0,2])
+    scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
+    scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,4),[],pltc_alt(:,:)','^','filled')
     
-    figure('units','normalized','outerposition',[0 0 1 1]), hold on
-    
-    scatter3(...
-        MB(1,:),...
-        MB(2,:),...
-        LMSM(1,:)./LMSM(4,:),...
-        dS,...
-        'MarkerEdgeColor',dMEC,...
-        'MarkerFaceColor','r',...
-        'LineWidth',dLW...
-        )
-    xlabel('MB1');ylabel('MB2');
-    
-    scatter3(...
-        MB(1,:),...
-        MB(2,:),...
-        (LMSM(1,:)+LMSM(2,:))./LMSM(4,:),...
-        dS,...
-        'MarkerEdgeColor',dMEC,...
-        'MarkerFaceColor','b',...
-        'LineWidth',dLW...
-        )
-    xlabel('MB1');ylabel('MB2');
-    view([0,0]);
-    
-    legend('L/Mel','(L+M)/Mel')
-    %xlim([0,1]),ylim([0,1]),zlim([0,4])
+    legend({'Original','Rotated'},'Location','best')
+    xlabel('l'),ylabel('s2'),zlabel('i2'); %l stays the same
 end
 
-%% Reflectances
+%% Correction through shift
 
-% % Plot all
-% figure, hold on
-% for i=1:170
-%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
-%     ylim([0 1])
-%     drawnow; %pause(0.1)
-% end
-%
-% % Define natural and non-natural
-% nonNat=[46;47;48;49;50;51;52;53;54;55;56;57;58;59;60;61;62;63;64;66;67;68;70;71;72;73;74;75;76;77;78;79;80;156;157;158;159;160;161;162;163;164;165;166;167;168;169;170;45;155];
-% Nat=[15;16;17;18;19;20;21;22;23;24;25;26;27;28;29;30;31;32;33;34;35;36;37;38;39;40;41;42;43;44;65;69;81;82;83;84;85;86;87;88;89;90;91;92;93;94;95;96;97;98;99;100;101;102;103;104;105;106;107;108;109;110;111;112;113;114;115;116;117;118;119;120;121;122;123;124;125;126;127;128;129;130;131;132;133;134;135;136;137;138;139;140;141;142;143;144;145;146;147;148;149;150;151;152;153;154];
-%
-% figure, hold on;
-% for i=[nonNat]
-%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
-%     ylim([0 1]);
-% end
-% title('nonNat')
-%
-% figure, hold on;
-% for i=[Nat]
-%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'k')
-%     ylim([0 1]);
-% end
-% title('Nat')
+plt_CTS = 0;
 
-% Picking skin colour data
-% 87 - 'skin -- caucasian'
-% 93 - 'skin -- African American'
-% 94 - 'skin -- Asian'
+lsri_s = lsri; %shifted
 
-% figure, hold on;
-% for i=83:117
-%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'k','LineWidth',1)
-%     ylim([0 1])
-% end
-% for i=[87,93,94]
-%     plot(SToWls(S_vrhel),sur_vrhel(:,i),'LineWidth',4)
-%     ylim([0 1])
-% end
+lsri_s(4,:) = lsri(4,:)-0.27;
+lsri_s(2,:) = lsri(2,:)-lsri_s(4,:);
+lsri_s(4,:) = lsri_s(4,:)+0.27;
 
-% Coloured objects - foliage or fruit
-% 134	apple yellow delicious
-% 137	peach skin -- ywllow
-% 138	peach skin -- red
-% 65	banana yellow (just turned)
-% 69	ribe brown banana - [excluded as appears very smooth, possibly
-% erroneous data]
-% 19	Tree leaf
-% 24	Bush fern-like leaf
-% 140	cabbage
-% 141	lettuce
-
-%Plot all chosen SFRs
-% This is redundant because similar is included in an earlier section
-plot_chosen_refs=   0;
-if plot_chosen_refs
-    figure, hold on;
-    for i=1:length(refs)
-        plot(SToWls(S_vrhel),sur_vrhel(:,i),'LineWidth',4)
-        
-    end
-    xlim([min(SToWls(S_vrhel)),max(SToWls(S_vrhel))])
-    ylim([0 1])
-    xlabel('Wavelength (nm)')
-    ylabel('Relative Spectral Reflectance')
+if plt_CTS
+    figure, hold on, axis equal, grid on
+    scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
+    scatter3(lsri_s(1,:),lsri_s(2,:),lsri_s(4,:),[],pltc_alt(:,:)','^','filled')
+    
+    legend({'Original','Shifted'},'Location','best')
+    xlabel('l'),ylabel('s2'),zlabel('i2');
 end
 
-%% Basic MB plot
+view(90,0)
 
-plot_MBbas= 1;
-
-if plot_MBbas
-    figure, hold on
-    % Plot spectral locus in MB space
-    
-    LMS_locus=SplineSpd(S_cones_ss10,T_cones_ss10',S_daylight);
-    MB_locus=LMSToMacBoyn(LMS_locus');
-    fill([MB_locus(1,3:end),MB_locus(1,3)],[MB_locus(2,3:end),MB_locus(2,3)],'k','LineStyle','none','FaceAlpha','0.1')
-    text_nm=string(SToWls(S_daylight))';
-    text(MB_locus(1,[3:26,27,30,36,41:4:52]),MB_locus(2,[3:26,27,30,36,41:4:52]),text_nm([3:26,27,30,36,41:4:52]))
-    
-    
-    for i = 2:size(spectra,3)
-        scatter(...
-            MB(1,:,i),...
-            MB(2,:,i),...
-            'filled')
-    end
-    axis equal
-    xlim([0 1]);ylim([0 1]);
-    xticks(0:0.2:1)
-    yticks(0:0.2:1)
-    xlabel('MB1');ylabel('MB2');
-    grid on
-    
-    % % Previous 3D model
-    % figure, hold on
-    % for i = 2:size(spectra,3)
-    % scatter3(...
-    %     MB(1,:,i),...
-    %     MB(2,:,i),...
-    %     LMSM(4,:,i)./(LMSM(1,:,i)+LMSM(2,:,i)),...
-    %     'filled')
-    % end
-    % axis equal
-    % xlim([0 1]);ylim([0 1]);zlim([0 1]);
-    % xticks(0:0.2:1)
-    % yticks(0:0.2:1)
-    % xlabel('MB1');ylabel('MB2');zlabel('Mel/(L+M)');
-    % view(2)
-    % grid on
-    %
-    % auto_rotate=0;
-    % saveGif=0; %save a 360 gif?
-    % if auto_rotate
-    %     for i = 1:359
-    %         camorbit(1,0,'data',[0 0 1]);
-    %         drawnow
-    %         if saveGif
-    %             filename = sprintf('MC_M_%s.gif',datestr(now,'yymmddHHMMSS')); %M - 'model'
-    %             frame = getframe(1);
-    %             im{i} = frame2im(frame);
-    %             [A,map] = rgb2ind(im{i},256);
-    %             if i == 1
-    %                 imwrite(A,map,filename1,'gif','LoopCount',Inf,'DelayTime',0.005);
-    %             else
-    %                 imwrite(A,map,filename1,'gif','WriteMode','append','DelayTime',0.005);
-    %             end
-    %         end
-    %     end
-    % end
-    
 end
-
-
-%% Hard code factors
-plot_hc=    0;
-
-if plot_hc
-    fac1=   0.25;
-    fac2=   -1.4;
-    
-    MB2=MB;
-    MB2(1,:,:)=MB(1,:,:)+fac1*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
-    MB2(2,:,:)=MB(2,:,:)+fac2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
-
-%     % multiplicative version
-%     fac1=   -0.23;
-%     fac2=   1.7;
-%     
-%     MB2=MB;
-%     MB2(1,:,:)=MB(1,:,:).*(1-fac1*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:))));
-%     MB2(2,:,:)=MB(2,:,:).*(1-fac2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:))));
-    
-    figure, hold on
-    for i = 2:size(spectra,3)
-        scatter(...
-            MB2(1,:,i),...
-            MB2(2,:,i),...
-            'filled')
-    end
-    axis equal
-    xlim([0 1]);ylim([-0.5 0.5]);
-    xticks(-1:0.2:1)
-    yticks(-1:0.2:1)
-    xlabel('MBx1');ylabel('MBx2')
-    grid on
-    
-    % for i = 1:359
-    %     camorbit(1,0,'data',[0 0 1]);
-    %     drawnow
-    %     frame = getframe(1);
-    %     im{i} = frame2im(frame);
-    %     [A,map] = rgb2ind(im{i},256);
-    %     if i == 1
-    %         imwrite(A,map,filename2,'gif','LoopCount',Inf,'DelayTime',0.005);
-    %     else
-    %         imwrite(A,map,filename2,'gif','WriteMode','append','DelayTime',0.005);
-    %     end
-    % end
-    
-end
-
-%% Iterations
-
-plot_it=    1;
-
-if ~exist('offset','var') && plot_it; figure, hold on; end
-
-MBx=MB;
-MBx1std=[0;0]; %Initialise variables so that they can be added to
-MBx2std=[0;0];
-
-for S1= -10:0.05:10%-1:0.01:1.5
-    MBx(1,:,:)=MB(1,:,:)+S1*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
-    MBx1std=[MBx1std,[S1;mean(std(MBx(1,:,2:end)))]];
-end
-MBx1std=MBx1std(:,2:end);
-
-for S2= -10:0.05:10%0:0.04:2.5
-    MBx(2,:,:)=MB(2,:,:)+S2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
-    MBx2std=[MBx2std,[S2;mean(std(MBx(2,:,2:end)))]];
-end
-MBx2std=MBx2std(:,2:end);
-
-[~,melpeakloc]=max(T_melanopsin);
-melwavelength=SToWls(S_melanopsin);
-melpeak=melwavelength(melpeakloc);
-
-if plot_it
-    %figure, hold on
-    plot(MBx1std(1,:),MBx1std(2,:),'b')
-    plot(MBx2std(1,:),MBx2std(2,:),'r')
-    xlabel('weight of factor')
-    ylabel('standard deviation')    
-    title(sprintf('Mel peak-%d nm',melpeak))
-    legend({'MBx1','MBx2'})
-end
-
-[MB1_minSD, MB1_minSD_loc] = min(MBx1std(2,:));
-[MB2_minSD, MB2_minSD_loc] = min(MBx2std(2,:));
-MB1_zeroSD = MBx1std(2,MBx1std(1,:)==0);
-MB2_zeroSD = MBx2std(2,MBx2std(1,:)==0);
-
-
-% %% Iterations
-% if ~exist('offset','var'); figure, hold on; end
-%
-%
-% for i=1:3
-%     plot(SToWls(S_cones_ss10),T_cones_ss10(i,:),'k')
-% end
-%
-% plot(SToWls(S_melanopsin),T_melanopsin,'b')
-%
-%
-% xlabel('wavelength (nm)')
-% ylabel('Spectral Sensitivity')
-%
-% [~,melpeakloc]=max(T_melanopsin);
-% melwavelength=SToWls(S_melanopsin);
-% melpeak=melwavelength(melpeakloc);
-% title(sprintf('Mel peak-%d nm',melpeak))
-
-%% What is the inter-object distance?
-
-S_vals=[MBx1std(1,MB1_minSD_loc),MBx2std(1,MB2_minSD_loc)];
-
-MBx(1,:,:)=MB(1,:,:)+S_vals(1)*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
-MBx(2,:,:)=MB(2,:,:)+S_vals(2)*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
-
-% for i=2:12
-%     scatter(squeeze(MBx(1,:,i)),squeeze(MBx(2,:,i)));
-%     xlim([-10 10])
-%     ylim([-10 10])
-%     hold on
-%     axis equal
-% end
-% hold off
-
-MBx_m=squeeze(mean(MBx(:,:,2:end),2));
-% scatter(MBx_m(1,2:end),MBx_m(2,2:end),'k','filled');
-% axis equal
-% xlim([0 1])
-% ylim([-1 2])
-
-spread=[std(MBx_m(1,:)),std(MBx_m(2,:))];
-%disp(melpeak)

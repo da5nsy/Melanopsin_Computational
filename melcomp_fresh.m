@@ -16,28 +16,28 @@ function melcomp_fresh(Z_ax)
 
 %% Pre-flight checks
 % Setting things here controls what data is used and in what way
+% If we're inside a function, it is assumed that all are set, otherwise it
+%   looks for them to be set manually
 
-try 
-    nargin; 
+try
+    nargin;
 catch
-    clear, clc, close all 
+    clear, clc, close all
+    
+    PF_SPD = 1;
+    % 1 = CIE D series
+    % 2 = Hernández-Andrés+
+    
+    PF_refs = 2;
+    % 1 = Vhrel+ (all)
+    % 2 = Vhrel+ (natural only)
+    % 3 = Foster+
+    
+    PF_obs = 1;
+    % 1 = PTB Smith-Pokorny
 end
-%clears everything, unless we're inside a function
 
-PF_SPD = 2;
-% 1 = CIE D series
-% 2 = Hernández-Andrés+
-
-PF_refs = 1;
-% 1 = Vhrel+
-PF_refs_on = 1; %Only Natural (else, all)
-% 2 = Ennis+
-% 3 = Foster+ 
-
-PF_obs = 1;
-% 1 = PTB Smith-Pokorny
-
-%% Compute Daylight SPD
+%% Load Daylight SPD
 plt_SPD = 0;
 
 if PF_SPD == 1
@@ -68,11 +68,11 @@ else
 end
 
 % Load Reflectances
-if PF_refs == 1
+if (PF_refs == 1) || (PF_refs == 2)
     load sur_vrhel
     refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
     T_refs = sur_vrhel';
-    if PF_refs_on
+    if PF_refs == 2
         T_refs = sur_vrhel(:,refs)';
         T_refs = T_refs([2,1,3,6,5,4,8,9,11,10,7],:); %change order for clearer plotting visualisation
     end
@@ -104,7 +104,7 @@ else
 end
 
 
-% Observer
+% Load Observer
 if PF_obs == 1
     % Smith-Pokorny, for use with MacLeod Boynton diagram
     load T_cones_sp
@@ -122,18 +122,20 @@ S_mel = S_melanopsin - [10, 0, 0]; clear S_melanopsin T_melanopsin
 % For messing with hypothetical spectral sensitivity of melanopsin
 %S_mel(1)=S_melanopsin(1)+30;
 
-%% Pull them all together
+% Pull all observer elements together
 
 S_sh = [max([S_SPD(1),S_refs(1),S_obs(1)]),max([S_SPD(2),S_refs(2),S_obs(2)]),min([S_SPD(3),S_refs(3),S_obs(3)])]; %S_shared: work out what the lowest common denominator for the range/interval of the data is
 
 %reduce all data down to the common range/interval
 T_SPD  = SplineSpd(S_SPD,T_SPD,S_sh,1); % extend == 1: Cubic spline, extends with last value in that direction
-T_SPD = T_SPD(:,1:30:end); %temporary(?) downsampling for use with Foster+ refs
 if or((PF_refs == 1),(PF_refs == 2))
     T_refs = SplineSrf(S_refs,T_refs',S_sh,1);
 elseif PF_refs == 3 %It would theoretically be fine to run the Foster data through the above, I'm certain nothing would change, but it takes an incredibly long time (to do nothing, since the Foster data is probably always going to be the lowest resolution thing that is being handled, thus S_Sh should == S_refs)
     T_refs = T_refs';
     T_refs = T_refs(:,1:10000:end); %temporary(?) downsampling for speed in testing
+    if PF_SPD == 2
+        T_SPD = T_SPD(:,1:30:end);      %temporary(?) downsampling of SPD data for use with Foster+ refs
+    end
 end
 T_obs  = SplineCmf(S_obs,T_obs,S_sh,1)';
 T_rods = SplineCmf(S_rods,T_rods,S_sh)';
@@ -144,11 +146,11 @@ T_mel  = SplineCmf(S_mel,T_mel,S_sh)';
 T_LMSRI=[T_obs,T_rods,T_mel];
 S_LMSRI=S_sh;
 
-%% Combine
+%% Compute colorimetry
 
 plt_fig     = 1; % 0 = off, 1 = on
 plt_locus   = 0; % plot spectral locus in the MB diagram, 0 = off, 1 = on
-real_cols   = 0; % 0 = colormap, 1 = colours calculated from SPD and refs
+plt_real_cols   = 0; % 0 = colormap, 1 = colours calculated from SPD and refs
 
 for i=1:size(T_SPD,2)
     T_rad(:,:,i)  = T_refs.*T_SPD(:,i);
@@ -160,23 +162,29 @@ for i=1:size(T_SPD,2)
     %   function - which relate to the Smith-Pokorny fundamentals
 end
 
-% Compute colorimetry (just for display)
-load T_xyz1931.mat
-T_xyz1931=SplineCmf(S_xyz1931,T_xyz1931,S_refs)';
-for i=[11, 1:size(T_SPD,2)] %starts with 11 (6551K, arbitrary), so that a fixed white is already calculated in time for the first 'plt_RGB' line
-    pltc_whiteXYZ(:,i) = T_xyz1931' * T_SPD(:,i);
-    pltc_XYZ(:,:,i)    = T_xyz1931' * T_rad(:,:,i);
-    pltc_Lab(:,:,i)    = XYZToLab(squeeze(pltc_XYZ(:,:,i)),pltc_whiteXYZ(:,i));    
-    pltc_RGB(:,:,i)    = XYZToSRGBPrimary(LabToXYZ(pltc_Lab(:,:,i),pltc_whiteXYZ(:,11))); %Using fixed, arbitrary (mid-range), white.
-    %pltc_RGB(:,:,i)    = pltc_RGB(:,:,i)/max(max(pltc_RGB(:,:,i)));
+if plt_real_cols
+    % Compute colorimetry (just for display)
+    load T_xyz1931.mat
+    T_xyz1931=SplineCmf(S_xyz1931,T_xyz1931,S_refs)';
+    for i=[11, 1:size(T_SPD,2)] %starts with 11 (6551K, arbitrary), so that a fixed white is already calculated in time for the first 'plt_RGB' line
+        pltc_whiteXYZ(:,i) = T_xyz1931' * T_SPD(:,i);
+        pltc_XYZ(:,:,i)    = T_xyz1931' * T_rad(:,:,i);
+        pltc_Lab(:,:,i)    = XYZToLab(squeeze(pltc_XYZ(:,:,i)),pltc_whiteXYZ(:,i));
+        pltc_RGB(:,:,i)    = XYZToSRGBPrimary(LabToXYZ(pltc_Lab(:,:,i),pltc_whiteXYZ(:,11))); %Using fixed, arbitrary (mid-range), white.
+        %pltc_RGB(:,:,i)    = pltc_RGB(:,:,i)/max(max(pltc_RGB(:,:,i)));
+    end
+    pltc_RGB = pltc_RGB/max(pltc_RGB(:));
 end
-pltc_RGB = pltc_RGB/max(pltc_RGB(:));
 pltc_alt = repmat(jet(size(T_refs,2))',1,1,size(T_SPD,2)); %despite the effort gone through above to calculate the actual colours, this seems more useful for differentiating different reflectances from eachother
-rng(7); 
+rng(7);
 pltc_alt=pltc_alt(:,randperm(size(T_refs,2)),:); %this particular random permutation seems to generate colours in an order which means that when plotted (Hernández-Andrés+, Vrhel+) the different refs are most easily distinguishable.
 
-if ~exist('Z_ax','var') %if Z_ax isn't already defined, i.e. if we are not inside a function
-    Z_ax = 9; %variable to visually test different hypothesese, 9 is default
+
+try % if we are inside a function, continue
+    nargin; 
+catch %else
+    Z_ax = 9; 
+    disp('default: Z-axis is ''i''')
 end
 
 plt_lbls{1}  = 'L'; %writing out this way so that there's a quick reference as to which value of Z_ax does what

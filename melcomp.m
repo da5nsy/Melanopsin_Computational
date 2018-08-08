@@ -147,7 +147,7 @@ S_LMSRI=S_sh;
 %% Compute colorimetry
 
 plt_fig       = 1; % 0 = off, 1 = on
-plt_locus     = 0; % plot spectral locus in the MB diagram, 0 = off, 1 = on
+plt_locus     = 1; % plot spectral locus in the MB diagram, 0 = off, 1 = on
 plt_real_cols = 0; % 0 = colormap, 1 = colours calculated from SPD and refs
 plt_lines     = 0; %plot lines on the graph connecting points (good for when using low numbers of reflectances for seeing shapes through the data) 
 
@@ -199,13 +199,7 @@ plt_lbls{11} = '(0.6373*L)+(0.3924*M)';
 plt_lbls{12} = 'r + i';
 
 if plt_fig
-    figure, hold on, grid on
-    %axis equal
-    xlim([0 1]), ylim([0 1])
-    xlabel('l'),ylabel('s'), 
-    %title(plt_lbls{Z_ax})
-    %view(3) %view(188,46)
-    
+   
     if ismember(Z_ax,1:5)
         t_Z = LMSRI(Z_ax,:,:); %temp Z
     elseif ismember(Z_ax,6:9)
@@ -218,13 +212,15 @@ if plt_fig
         t_Z = lsri(3,:,:)+lsri(4,:,:);
     end
     
-    if plt_lines
-        plot3(lsri(1,:),lsri(2,:),t_Z(1,:),'Color',[0,0,0,0.2]) %transulent lines
-    end
     if plt_real_cols == 1
         scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_RGB(:,:)','v','filled') %with colours of objects
+        hold on
     else
         scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_alt(:,:)','v','filled') %with arbitrary colours
+        hold on
+    end
+    if plt_lines
+        plot3(lsri(1,:),lsri(2,:),t_Z(1,:),'Color',[0,0,0,0.2]) %transulent lines
     end
     zlabel(plt_lbls{Z_ax})
 
@@ -233,6 +229,13 @@ if plt_fig
         %plot(MB_locus(1,:),MB_locus(2,:))
         fill([MB_locus(1,5:65),MB_locus(1,5)],[MB_locus(2,5:65),MB_locus(2,5)],'k','LineStyle','none','FaceAlpha','0.1')
     end
+    
+    grid on
+    %axis equal
+    xlim([0 1]), ylim([0 1])
+    xlabel('l'),ylabel('s'), 
+    %title(plt_lbls{Z_ax})
+    %view(3) %view(188,46)
 end
 
 if nargin %ends function here

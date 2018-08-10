@@ -95,20 +95,21 @@ xlabel('x'); ylabel('y/y');
 
 %% Fig: chromaticities
 
+figure('Position',[plot_where plot_size])
 melcomp(1,1,1,1) %Z-ax is arbitrary here
 view(0,90)
 xlim([0.5 1])
-set(gcf,'Position',[plot_where plot_size]);
 
 %print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\chromaticities','-depsc')
 
 
 %% Fig: ZL
 
+figure('Position',[plot_where plot_size])
 melcomp(1,1,1,1) %final number sets Z-axis selection, 1 = 'L'
-view(75,20)
+xlim([0.5 1])
+view(340,40)
 set(gcf,'color','w');
-set(gcf,'Position',[plot_where plot_size]);
 
 %print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\ZL','-depsc')
 
@@ -118,22 +119,26 @@ figure('Position',[plot_where plot_size.*[1,2.3]]) %bigger plot than standard
 for i=1:5
     subplot(5,2,i*2-1)
     melcomp(1,1,1,i) %final number sets Z-axis selection, 1 = 'L'
-    view(90,0)
-    ylim([0 0.8])
+    view(0,0)    
+    xlim([0.6 0.8])
     if i ~= 5
-        ylabel([])
+        xlabel([])
+        xticklabels([])
     end
 end
 for i=1:5
     subplot(5,2,i*2)
     melcomp(1,1,1,i) %final number sets Z-axis selection, 1 = 'L'
-    view(0,0)    
-    xlim([0.6 0.8])
+    view(90,0)
+    ylim([0 0.8])
     if i ~= 5
-        xlabel([])
+        ylabel([])
+        yticklabels([])
     end
+    zticklabels([])
     zlabel([])
 end
+
 set(gcf,'color','w');
 
 %print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\res_LMSRI','-depsc')
@@ -141,25 +146,41 @@ set(gcf,'color','w');
 %% Fig: res_lsri
 
 figure('Position',[plot_where plot_size.*[1,2.3]]) %bigger plot than standard
+
 for i=6:9
     subplot(4,2,(i-5)*2-1)
-    melcomp(1,1,1,i) %final number sets Z-axis selection, 1 = 'L'
-    view(90,0)
-    ylim([0 0.8])
-    if i ~= 9
-        ylabel([])
-    end
-end
-for i=6:9
-    subplot(4,2,(i-5)*2)
     melcomp(1,1,1,i) %final number sets Z-axis selection, 1 = 'L'
     view(0,0)    
     xlim([0.6 0.8])
     if i ~= 9
         xlabel([])
+        xticklabels([])
     end
+end
+for i=6:9
+    subplot(4,2,(i-5)*2)
+    melcomp(1,1,1,i) %final number sets Z-axis selection, 1 = 'L'
+    view(90,0)
+    ylim([0 0.8])
+    if i ~= 9
+        ylabel([])
+        yticklabels([])
+    end
+    zticklabels([])
     zlabel([])
 end
+
 set(gcf,'color','w');
 
 %print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\res_lsri','-depsc')
+
+%% Tight subplot demo
+
+% clear, clc
+% 
+% [ha, pos] = tight_subplot(3,2);
+% for ii = 1:6;
+%     axes(ha(ii));
+%     plot(randn(10,ii));
+% end
+% set(ha(1:4),'XTickLabel',''); set(ha,'YTickLabel','')

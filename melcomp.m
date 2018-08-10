@@ -179,9 +179,10 @@ rng(7);
 pltc_alt=pltc_alt(:,randperm(size(T_refs,2)),:); %this particular random permutation seems to generate colours in an order which means that when plotted (Hernández-Andrés+, Vrhel+) the different refs are most easily distinguishable.
 
 
-if nargin == 4    
-else
-    Z_ax = 9; 
+try
+    nargin == 4;
+catch
+    Z_ax = 9;
     disp('default: Z-axis is ''i''')
 end
 
@@ -238,8 +239,10 @@ if plt_fig
     %view(3) %view(188,46)
 end
 
-if nargin %ends function here
+try
+    nargin %ends function here
     return
+catch
 end
 
 %% Correction through rotation

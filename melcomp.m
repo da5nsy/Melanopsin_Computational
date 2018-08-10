@@ -274,21 +274,43 @@ end
 
 %% Correction through subtractive shift
 
-plt_CTS = 1;
+plt_CTSS= 1;
 
-lsri_s = lsri; %shifted
+lsri_ss = lsri; %shifted
 
-lsri_s(2,:) = lsri(2,:)-(lsri(4,:)-0.27);
+lsri_ss(2,:) = lsri(2,:)-(lsri(4,:)-0.27);
 
-if plt_CTS
+if plt_CTSS
     figure, hold on, axis equal, grid on
     scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
-    scatter3(lsri_s(1,:),lsri_s(2,:),lsri_s(4,:),[],pltc_alt(:,:)','^','filled')
+    scatter3(lsri_ss(1,:),lsri_ss(2,:),lsri_ss(4,:),[],pltc_alt(:,:)','^','filled')
     
     legend({'Original','Shifted'},'Location','best')
     xlabel('l'),ylabel('s2'),zlabel('i2');
     
     view(90,0)
 end
+
+%% Correction through multiplicative shift
+
+% WORK IN PROGRESS %
+
+plt_CTMS = 1;
+
+lsri_ms = lsri; %shifted
+
+lsri_ms(2,:) = lsri(2,:).*(0.05./(lsri(4,:)/max(lsri(4,:))));
+
+if plt_CTMS
+    figure, hold on, axis equal, grid on
+    scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
+    scatter3(lsri_ms(1,:),lsri_ms(2,:),lsri_ms(4,:),[],pltc_alt(:,:)','^','filled')
+    
+    legend({'Original','Shifted'},'Location','best')
+    xlabel('l'),ylabel('s2'),zlabel('i2');
+    
+    view(90,0)
+end
+
 
 end

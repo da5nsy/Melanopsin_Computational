@@ -1,4 +1,4 @@
-function [MB1_minSD,MB2_minSD,melpeak,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melcomp(offset)
+function [MB1_minSD,MB2_minSD,melpeak,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melcomp_old(offset)
 
 %% Research questions:
 %

@@ -254,18 +254,28 @@ end
 plt_CTR = 1;
 
 %rotation matrix
-ang=0.8036; %angle in radians, just eyeballed, and in one dimension
+ang1  = 0.8036; %angle in radians, just eyeballed, and in one dimension
+ang2 = -0.12;
+
 rm=...
-    [1,0,0,0;...
-    0,cos(ang),0,sin(ang);...
+    [cos(ang2),0,0,sin(ang2);...
+    0,cos(ang1),0,sin(ang1);...
     0,0,1,0;...
-    0,-sin(ang),0,cos(ang)]; 
+    -sin(ang2),-sin(ang1),0,cos(ang1)+cos(ang2)]; 
+
+% %Only calibrate s
+% rm=...
+%     [1,0,0,0;...
+%     0,cos(ang1),0,sin(ang1);...
+%     0,0,1,0;...
+%     0,-sin(ang1),0,cos(ang1)]; 
 
 %apply rotation
 lsri_r=lsri(:,:)'*rm;
 
 if plt_CTR
-    figure, hold on, axis equal, grid on
+    figure, hold on, %axis equal, 
+    grid on
     % %xlim([0 1]), ylim([-1 1]), zlim([0,2])
     scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
     scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,4),[],pltc_alt(:,:)','^','filled')

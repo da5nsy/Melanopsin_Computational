@@ -115,7 +115,7 @@ set(gcf,'color','w');
 
 %% Fig: res_LMSRI
 
-figure('Position',[plot_where plot_size.*[1,2.3]]) %bigger plot than standard
+figure('Position',[plot_where plot_size.*[1,2.5]]) %bigger plot than standard
 for i=1:5
     subplot(5,2,i*2-1)
     melcomp(1,1,1,i) %final number sets Z-axis selection, 1 = 'L'
@@ -145,7 +145,7 @@ set(gcf,'color','w');
 
 %% Fig: res_lsri
 
-figure('Position',[plot_where plot_size.*[1,2.3]]) %bigger plot than standard
+figure('Position',[plot_where plot_size.*[1,2]]) %bigger plot than standard
 
 for i=6:9
     subplot(4,2,(i-5)*2-1)

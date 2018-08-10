@@ -180,7 +180,11 @@ pltc_alt=pltc_alt(:,randperm(size(T_refs,2)),:); %this particular random permuta
 
 
 try
-    nargin == 4;
+    nargin;
+    if nargin ~= 4
+        Z_ax = 9;
+        disp('default: Z-axis is ''i''')
+    end    
 catch
     Z_ax = 9;
     disp('default: Z-axis is ''i''')

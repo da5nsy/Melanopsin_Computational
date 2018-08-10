@@ -24,7 +24,7 @@ try
 catch
     clear, clc, close all
     
-    PF_SPD = 2;
+    PF_SPD = 1;
     % 1 = CIE D series
     % 2 = Hernández-Andrés+
     
@@ -244,14 +244,14 @@ if plt_fig
 end
 
 try
-    nargin %ends function here
+    nargin; %ends function here
     return
 catch
 end
 
 %% Correction through rotation
 
-plt_CTR = 1;
+plt_CTR = 0;
 
 %rotation matrix
 ang1  = 0.7; %angle in radians, just eyeballed, and in one dimension

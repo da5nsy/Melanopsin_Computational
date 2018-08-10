@@ -24,7 +24,7 @@ try
 catch
     clear, clc, close all
     
-    PF_SPD = 1;
+    PF_SPD = 2;
     % 1 = CIE D series
     % 2 = Hernández-Andrés+
     
@@ -254,8 +254,8 @@ end
 plt_CTR = 1;
 
 %rotation matrix
-ang1  = 0.8036; %angle in radians, just eyeballed, and in one dimension
-ang2 = -0.12;
+ang1  = 0.7; %angle in radians, just eyeballed, and in one dimension
+ang2 = -0.1;
 
 rm=...
     [cos(ang2),0,0,sin(ang2);...
@@ -283,7 +283,8 @@ if plt_CTR
     legend({'Original','Rotated'},'Location','best')
     xlabel('l'),ylabel('s2'),zlabel('i2'); %l stays the same
     
-    view(90,0)
+    view(0,90)
+    %view(90,0)
 end
 
 %% Correction through subtractive shift

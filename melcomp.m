@@ -272,13 +272,13 @@ if plt_CTR
     view(90,0)
 end
 
-%% Correction through shift
+%% Correction through subtractive shift
 
 plt_CTS = 1;
 
 lsri_s = lsri; %shifted
 
-lsri_s(2,:) = lsri(2,:)-(lsri_s(4,:)-0.27);
+lsri_s(2,:) = lsri(2,:)-(lsri(4,:)-0.27);
 
 if plt_CTS
     figure, hold on, axis equal, grid on

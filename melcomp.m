@@ -251,10 +251,10 @@ end
 
 %% Correction through rotation
 
-plt_CTR = 0;
+plt_CTR = 1;
 
 %rotation matrix
-ang1  = 0.7; %angle in radians, just eyeballed, and in one dimension
+ang1  = 0.7; %angle in radians, just eyeballed, and in one dimension (for Granada data)
 ang2 = -0.1;
 
 rm=...
@@ -314,7 +314,8 @@ plt_CTMS = 1;
 
 lsri_ms = lsri; %shifted
 
-lsri_ms(2,:) = lsri(2,:).*(0.05./(lsri(4,:)/max(lsri(4,:))));
+%lsri_ms(2,:) = lsri(2,:).*(1./(lsri(4,:)/max(lsri(4,:))));
+lsri_ms(2,:) = lsri(2,:).*((max(lsri(4,:))-lsri(4,:)));
 
 if plt_CTMS
     figure, hold on, axis equal, grid on

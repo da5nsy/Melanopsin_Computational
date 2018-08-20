@@ -1,5 +1,7 @@
 % figures for paper
 
+clc, clear, close all
+
 plot_where = [20,60];
 plot_size  = [900,400];
 
@@ -35,7 +37,7 @@ plot_size  = [900,400];
 
 Mel_Phot_Corr
 
-set(gcf,'Position',[plot_where plot_size]);
+set(gcf,'Position',[plot_where plot_size],'color','w');
 
 %print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\Mel_Phot','-depsc')
 
@@ -96,7 +98,7 @@ xlabel('x'); ylabel('y/y');
 %% Fig: chromaticities
 
 figure('Position',[plot_where plot_size])
-melcomp(1,1,1,1) %Z-ax is arbitrary here
+melcomp(1,1,1,1,'3D') %Z-ax is arbitrary here
 view(0,90)
 xlim([0.5 1])
 
@@ -105,8 +107,10 @@ xlim([0.5 1])
 
 %% Fig: ZL
 
+% Not currently used
+
 figure('Position',[plot_where plot_size])
-melcomp(1,1,1,1) %final number sets Z-axis selection, 1 = 'L'
+melcomp(1,1,1,1,'3D') %final number sets Z-axis selection, 1 = 'L'
 xlim([0.5 1])
 view(340,40)
 set(gcf,'color','w');
@@ -118,7 +122,7 @@ set(gcf,'color','w');
 figure('Position',[plot_where plot_size.*[1,2.5]]) %bigger plot than standard
 for i=1:5
     subplot(5,2,i*2-1)
-    melcomp(1,1,1,i) %final number sets Z-axis selection, 1 = 'L'
+    melcomp(1,1,1,i,'3D') %final number sets Z-axis selection, 1 = 'L'
     view(0,0)    
     xlim([0.6 0.8])
     if i ~= 5
@@ -128,7 +132,7 @@ for i=1:5
 end
 for i=1:5
     subplot(5,2,i*2)
-    melcomp(1,1,1,i) %final number sets Z-axis selection, 1 = 'L'
+    melcomp(1,1,1,i,'3D') %final number sets Z-axis selection, 1 = 'L'
     view(90,0)
     ylim([0 0.8])
     if i ~= 5
@@ -149,7 +153,7 @@ figure('Position',[plot_where plot_size.*[1,2]]) %bigger plot than standard
 
 for i=6:9
     subplot(4,2,(i-5)*2-1)
-    melcomp(1,1,1,i) %final number sets Z-axis selection, 1 = 'L'
+    melcomp(1,1,1,i,'3D') %final number sets Z-axis selection, 1 = 'L'
     view(0,0)    
     xlim([0.6 0.8])
     if i ~= 9
@@ -159,7 +163,7 @@ for i=6:9
 end
 for i=6:9
     subplot(4,2,(i-5)*2)
-    melcomp(1,1,1,i) %final number sets Z-axis selection, 1 = 'L'
+    melcomp(1,1,1,i,'3D') %final number sets Z-axis selection, 1 = 'L'
     view(90,0)
     ylim([0 0.8])
     if i ~= 9
@@ -173,6 +177,35 @@ end
 set(gcf,'color','w');
 
 %print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\res_lsri','-depsc')
+
+%% Fig: rot_corr
+
+figure('Position',[plot_where plot_size.*[1,2]])
+subplot(2,2,[1,2])
+melcomp(1,1,1,9,'CTR')
+text(0.02,0.98,'A','Units', 'Normalized', 'VerticalAlignment', 'Top')
+
+subplot(2,2,3)
+melcomp(1,1,1,9,'CTR')
+view(0,0)
+legend('off')
+text(0.02,0.98,'B','Units', 'Normalized', 'VerticalAlignment', 'Top')
+
+subplot(2,2,4)
+melcomp(1,1,1,9,'CTR')
+view(90,0)
+legend('off')
+text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top')
+
+%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\rot_corr','-depsc')
+
+
+%% Fig: why_corr
+
+melcomp_why
+
+set(gcf,'Position',[plot_where plot_size]);
+%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\why_corr','-depsc')
 
 %% Tight subplot demo
 

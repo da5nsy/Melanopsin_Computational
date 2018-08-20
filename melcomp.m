@@ -1,4 +1,4 @@
-function melcomp(PF_SPD,PF_refs,PF_obs,Z_ax)
+function melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt)
 
 % A fresh attempt
 
@@ -146,8 +146,6 @@ S_LMSRI=S_sh;
 
 %% Compute colorimetry
 
-plt_fig       = 1; % 0 = off, 1 = on
-plt_locus     = 1; % plot spectral locus in the MB diagram, 0 = off, 1 = on
 plt_real_cols = 0; % 0 = colormap, 1 = colours calculated from SPD and refs
 plt_lines     = 0; %plot lines on the graph connecting points (good for when using low numbers of reflectances for seeing shapes through the data) 
 
@@ -178,14 +176,25 @@ pltc_alt = repmat(jet(size(T_refs,2))',1,1,size(T_SPD,2)); %despite the effort g
 rng(7);
 pltc_alt=pltc_alt(:,randperm(size(T_refs,2)),:); %this particular random permutation seems to generate colours in an order which means that when plotted (Hernández-Andrés+, Vrhel+) the different refs are most easily distinguishable.
 
+%% Plot third dimension
+
+plt_fig = 0; % hard-code, 0 = off, 1 = on
+try strcmp(plt,'3D'); % allow overwrite from function call
+    if strcmp(plt,'3D')
+        plt_fig = 1;
+    end
+catch
+end
+plt_locus = 1; % plot spectral locus in the MB diagram, 0 = off, 1 = on
 
 try
-    nargin;
-    if nargin ~= 4
-        Z_ax = 9;
+    nargin; %are we inside a function?
+    if nargin < 4 %has this been specified in the call?
+        Z_ax = 9; % if not, provide default
         disp('default: Z-axis is ''i''')
     end    
 catch
+    % we're not inside a function, hard-code your choice below
     Z_ax = 9;
     disp('default: Z-axis is ''i''')
 end
@@ -243,18 +252,18 @@ if plt_fig
     %view(3) %view(188,46)
 end
 
-try
-    nargin; %ends function here
-    return
+%% Correction through rotation
+
+plt_CTR = 0;
+try strcmp(plt,'CTR');
+    if strcmp(plt,'CTR')
+        plt_CTR = 1;
+    end
 catch
 end
 
-%% Correction through rotation
-
-plt_CTR = 1;
-
 %rotation matrix
-ang1  = 0.7; %angle in radians, just eyeballed, and in one dimension (for Granada data)
+ang1  = 0.7; %angle in radians, just eyeballed (for Granada data)
 ang2 = -0.1;
 
 rm=...
@@ -263,7 +272,7 @@ rm=...
     0,0,1,0;...
     -sin(ang2),-sin(ang1),0,cos(ang1)+cos(ang2)]; 
 
-% %Only calibrate s
+% %Single dimension, only calibrate s
 % rm=...
 %     [1,0,0,0;...
 %     0,cos(ang1),0,sin(ang1);...
@@ -274,14 +283,14 @@ rm=...
 lsri_r=lsri(:,:)'*rm;
 
 if plt_CTR
-    figure, hold on, %axis equal, 
+    scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
+    hold on
     grid on
     % %xlim([0 1]), ylim([-1 1]), zlim([0,2])
-    scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
     scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,4),[],pltc_alt(:,:)','^','filled')
     
     legend({'Original','Rotated'},'Location','best')
-    xlabel('l'),ylabel('s2'),zlabel('i2'); %l stays the same
+    xlabel('l'),ylabel('s'),zlabel('i');
     
     view(0,90)
     %view(90,0)
@@ -289,7 +298,7 @@ end
 
 %% Correction through subtractive shift
 
-plt_CTSS= 1;
+plt_CTSS= 0;
 
 lsri_ss = lsri; %shifted
 
@@ -310,7 +319,7 @@ end
 
 % WORK IN PROGRESS %
 
-plt_CTMS = 1;
+plt_CTMS = 0;
 
 lsri_ms = lsri; %shifted
 

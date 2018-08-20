@@ -1,3 +1,4 @@
+function melcomp_why()
 clc, clear, close all
 
 load sur_vrhel
@@ -32,8 +33,8 @@ load T_cones_sp
 SPD_L = (0.6373*T_cones_sp(1,:)*T_SPD)+(0.3924*T_cones_sp(2,:)*T_SPD);
 T_SPD_n = T_SPD./SPD_L;
 
-figure, hold on;
-plot(SToWls(S_SPD),T_SPD_n)
+% figure, hold on;
+% plot(SToWls(S_SPD),T_SPD_n)
 
 
 %% Testing STD of refs
@@ -58,6 +59,7 @@ plot(1./SToWls(S_refs),std(T_refs_nat),'ko','DisplayName','STD')
 % plot(1./SToWls(S_refs),T_refs_all)
 % plot(1./SToWls(S_refs),std(T_refs_all),'ko','DisplayName','STD')
 
+%% Testing STD of illums
 % Natural, wavelength
 figure, hold on
 plot(SToWls(S_SPD),T_SPD_n)
@@ -75,8 +77,8 @@ load T_melanopsin.mat
 %T_refs_i = SplineSrf(S_refs,T_refs_nat',S_cones_ss2)';
 T_refs_i = SplineSrf(S_refs,T_refs_all',S_cones_ss2)';
 
-%c = corr(T_refs_i);
-c = corr(T_SPD_n');
+c = corr(T_refs_i);
+%c = corr(T_SPD_n');
 c(isnan(c))=1;
 
 figure, hold on
@@ -102,3 +104,4 @@ set(gca,'XTickLabel',390:50:790)
 set(gca,'YTickLabel',390:50:790)
 
 
+end

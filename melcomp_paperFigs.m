@@ -56,7 +56,7 @@ plot([0,0.6],[y1(61),y1(61)],'r')
 
 plot(x,y1,'k')
 
-xlabel('Input'),ylabel('Determined Output')
+xlabel('Input'),ylabel('Output')
 xticks(0:0.2:1); yticks(0:0.2:1);
 
 
@@ -68,7 +68,7 @@ plot([0,0.6],[0.42,0.42],'r:')
 plot([0,0.6],[0.93,0.93],'r:')
 
 plot(y2,x,'k')
-xlabel('Input'),ylabel('Undetermined Output')
+xlabel('Input'),ylabel('Output')
 xticks(0:0.2:1); yticks(0:0.2:1);
 
 %print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\Monotonicity_concept','-depsc')

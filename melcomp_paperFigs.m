@@ -178,34 +178,41 @@ set(gcf,'color','w');
 
 %print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\res_lsri','-depsc')
 
-%% Fig: rot_corr
+%% Fig: CTR
 
-figure('Position',[plot_where plot_size.*[1,2]])
-subplot(2,2,[1,2])
+figure('Position',[plot_where plot_size.*[1,3]])
+subplot(3,2,[1,4])
 melcomp(1,1,1,9,'CTR')
 text(0.02,0.98,'A','Units', 'Normalized', 'VerticalAlignment', 'Top')
 
-subplot(2,2,3)
+subplot(3,2,5)
 melcomp(1,1,1,9,'CTR')
 view(0,0)
 legend('off')
 text(0.02,0.98,'B','Units', 'Normalized', 'VerticalAlignment', 'Top')
 
-subplot(2,2,4)
+subplot(3,2,6)
 melcomp(1,1,1,9,'CTR')
 view(90,0)
 legend('off')
 text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top')
 
-%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\rot_corr','-depsc')
+print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\CTR','-depsc')
 
 
-%% Fig: why_corr
+%% Fig: why_correl
 
-melcomp_why
+melcomp_why('correl')
 
 set(gcf,'Position',[plot_where plot_size]);
-%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\why_corr','-depsc')
+%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\why_correl','-depsc')
+
+%% Fig: why_PCA
+
+melcomp_why('PCA')
+
+set(gcf,'Position',[plot_where plot_size]);
+%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\why_PCA','-depsc')
 
 %% Tight subplot demo
 

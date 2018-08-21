@@ -1,5 +1,9 @@
-function melcomp_why()
-clc, clear, close all
+function melcomp_why(plt)
+try
+    nargin;
+catch
+    clear, clc, close all
+end
 
 load sur_vrhel
 refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141]; %natural ones
@@ -39,69 +43,116 @@ T_SPD_n = T_SPD./SPD_L;
 
 %% Testing STD of refs
 
-% Natural, wavelength
-figure, hold on
-plot(SToWls(S_refs),T_refs_nat)
-plot(SToWls(S_refs),std(T_refs_nat),'ko','DisplayName','STD')
-
-% Natural, frequency
-figure, hold on
-plot(1./SToWls(S_refs),T_refs_nat)
-plot(1./SToWls(S_refs),std(T_refs_nat),'ko','DisplayName','STD')
-
-% % All, wavelength
+% % Natural, wavelength
 % figure, hold on
-% plot(SToWls(S_refs),T_refs_all)
-% plot(SToWls(S_refs),std(T_refs_all),'ko','DisplayName','STD')
-% 
-% % All, frequency
+% plot(SToWls(S_refs),T_refs_nat)
+% plot(SToWls(S_refs),std(T_refs_nat),'ko','DisplayName','STD')
+%
+% % Natural, frequency
 % figure, hold on
-% plot(1./SToWls(S_refs),T_refs_all)
-% plot(1./SToWls(S_refs),std(T_refs_all),'ko','DisplayName','STD')
+% plot(1./SToWls(S_refs),T_refs_nat)
+% plot(1./SToWls(S_refs),std(T_refs_nat),'ko','DisplayName','STD')
+%
+% % % All, wavelength
+% % figure, hold on
+% % plot(SToWls(S_refs),T_refs_all)
+% % plot(SToWls(S_refs),std(T_refs_all),'ko','DisplayName','STD')
+% %
+% % % All, frequency
+% % figure, hold on
+% % plot(1./SToWls(S_refs),T_refs_all)
+% % plot(1./SToWls(S_refs),std(T_refs_all),'ko','DisplayName','STD')
 
-%% Testing STD of illums
-% Natural, wavelength
-figure, hold on
-plot(SToWls(S_SPD),T_SPD_n)
-plot(SToWls(S_SPD),std(T_SPD_n'),'ko','DisplayName','STD')
+% %% Testing STD of illums
+% % Natural, wavelength
+% figure, hold on
+% plot(SToWls(S_SPD),T_SPD_n)
+% plot(SToWls(S_SPD),std(T_SPD_n'),'ko','DisplayName','STD')
+%
+% % Natural, frequency
+% figure, hold on
+% plot(1./SToWls(S_SPD),T_SPD_n)
+% plot(1./SToWls(S_SPD),std(T_SPD_n'),'ko','DisplayName','STD')
 
-% Natural, frequency
-figure, hold on
-plot(1./SToWls(S_SPD),T_SPD_n)
-plot(1./SToWls(S_SPD),std(T_SPD_n'),'ko','DisplayName','STD')
+%% Plot correlation
 
-%%
-load T_cones_ss2.mat
-load T_melanopsin.mat
-
-%T_refs_i = SplineSrf(S_refs,T_refs_nat',S_cones_ss2)';
-T_refs_i = SplineSrf(S_refs,T_refs_all',S_cones_ss2)';
-
-c = corr(T_refs_i);
-%c = corr(T_SPD_n');
-c(isnan(c))=1;
-
-figure, hold on
-imagesc(c)
-axis image
-
-%%
-% plot locations of peak sensitvities
-[~, maxloc]        = max(T_cones_ss2,[],2);
-[~, maxloc(end+1)] = max(T_melanopsin,[],2);
-for i=1:4
-    plot([maxloc(i),maxloc(i)],[min(ylim),max(ylim)],'k')
+plt_correl = 0;
+try strcmp(plt,'correl');
+    if strcmp(plt,'correl')
+        plt_correl = 1;
+    end
+catch
 end
-colorbar
 
-fill([0, max(xlim), 0, 0],[0, max(ylim), max(ylim), 0],[1,1,1],'LineStyle','none')
+load T_cones_ss2.mat T_cones_ss2 S_cones_ss2
+load T_melanopsin.mat T_melanopsin S_melanopsin
+load T_rods.mat T_rods S_rods
+T_rods = SplineCmf(S_rods,T_rods,S_cones_ss2); S_rods = S_cones_ss2;
 
-%xlim([1 341]);ylim([1 341]);
+[~, maxloc]        = max(T_cones_ss2,[],2);
+[~, maxloc(end+1)] = max(T_rods,[],2);
+[~, maxloc(end+1)] = max(T_melanopsin,[],2);
+S_cones_ss2_f = SToWls(S_cones_ss2);
+maxl = S_cones_ss2_f(maxloc); %maxl for max lambda
 
-% be careful with the below, if fairly bluntly overwrites the scales and so
-% it is possible that a bug could creep in here
-set(gca,'XTickLabel',390:50:790)
-set(gca,'YTickLabel',390:50:790)
+c = corr(T_refs_nat);
 
+if plt_correl
+    figure, hold on
+    imagesc(c)
+    axis image
+    colorbar
+    
+    %fill([0, max(xlim), 0, 0],[0, max(ylim), max(ylim), 0],[1,1,1],'LineStyle','none')
+    
+    S_refs_f = SToWls(S_refs); %f for full
+    set(gca,'XTickLabel',S_refs_f(xticks+1))
+    set(gca,'YTickLabel',S_refs_f(xticks+1))
+    
+    txt='lmsri';
+    for i=0:4
+        scatter((maxl-S_cones_ss2(1))/2,(circshift(maxl,i)-S_cones_ss2(1))/2,'k^')
+    end
+    for i=1:5
+        text((maxl(i)-S_cones_ss2(1))/2,(maxl(3)-S_cones_ss2(1))/2-5,txt(i))
+        text((maxl(3)-S_cones_ss2(1))/2-10,(maxl(i)-S_cones_ss2(1))/2,txt(i))
+    end
+    
+    xlabel('Wavelength (nm)')
+    ylabel('Wavelength (nm)')
+end
+
+
+%% Daylight PCA
+
+plt_PCA = 0;
+try strcmp(plt,'PCA');
+    if strcmp(plt,'PCA')
+        plt_PCA = 1;
+    end
+catch
+end
+
+if plt_PCA
+    coeff = pca(T_SPD');
+    
+    figure, hold on
+    linetype={'k-','k--','k:'};
+    for i=1:2
+        plot(SToWls(S_SPD),coeff(:,i),linetype{i},'LineWidth',1)
+    end
+    for i=1:5
+        plot([maxl(i),maxl(i)],[min(ylim),max(ylim)],'Color',[0.5,0.7,1])
+    end
+    for i=1:2 %replot just to get on top
+        plot(SToWls(S_SPD),coeff(:,i),linetype{i},'LineWidth',1)
+    end
+    xlim([min(SToWls(S_SPD)),max(SToWls(S_SPD))])
+    %plot([min(xlim),max(xlim)],[0,0],'b--') %Plot zero line
+    
+    xlabel('Wavelength (nm)')
+    ylabel('Coefficient')
+    legend({'Daylight PC1','Daylight PC2','Peak sensitivities'},'Location','best')
+end
 
 end

@@ -1,4 +1,4 @@
-function melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt)
+function melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
 
 % A fresh attempt
 
@@ -118,7 +118,13 @@ T_mel = SplineCmf(S_melanopsin,T_melanopsin, S_melanopsin - [10, 0, 0],1); %Incr
 S_mel = S_melanopsin - [10, 0, 0]; clear S_melanopsin T_melanopsin
 
 % For messing with hypothetical spectral sensitivity of melanopsin
-%S_mel(1)=S_melanopsin(1)+30;
+try 
+    nargin;
+    if nargin > 5
+    S_mel(1)=S_melanopsin(1)+offset;
+    end
+catch
+end
 
 % Pull all observer elements together
 
@@ -178,10 +184,10 @@ pltc_alt=pltc_alt(:,randperm(size(T_refs,2)),:); %this particular random permuta
 
 %% Plot third dimension
 
-plt_fig = 0; % hard-code, 0 = off, 1 = on
+plt_3D = 0; % hard-code, 0 = off, 1 = on
 try strcmp(plt,'3D'); % allow overwrite from function call
     if strcmp(plt,'3D')
-        plt_fig = 1;
+        plt_3D = 1;
     end
 catch
 end
@@ -212,7 +218,7 @@ plt_lbls{10} = 'L+M';
 plt_lbls{11} = '(0.6373*L)+(0.3924*M)';
 plt_lbls{12} = 'r + i';
 
-if plt_fig
+if plt_3D
    
     if ismember(Z_ax,1:5)
         t_Z = LMSRI(Z_ax,:,:); %temp Z

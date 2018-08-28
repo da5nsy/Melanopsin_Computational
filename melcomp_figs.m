@@ -8,7 +8,7 @@ try %if within a function, do nothing
         error
     end
 catch %else, use default values
-    clear, clc, close all %useful when testing, aka using as a script
+    clear, clc, close all
     
     plot_where = [20,60];
     plot_size  = [900,400];
@@ -19,25 +19,27 @@ catch %else, use default values
     %ff = '-depsc'; %file format
     ff = '-dpdf';
     
-    disp('using default values')
+    p = 0; % 0 = figures display but don't save. 1 = figures display and save.
+    
+    disp('using default values') %!!!!!!!!!!!!!! this is not displaying currently !!!!!!!!!!!!!!!!
 end
 
 % melcomp.m reference notes:
 % PF_SPD = 1;
 % % 1 = CIE D series
 % % 2 = Hernández-Andrés+
-% 
+%
 % PF_refs = 1;
 % % 1 = Vhrel+ (natural only)
 % % 2 = Vhrel+ (all)
 % % 3 = Foster+
-% 
+%
 % PF_obs = 1;
 % % 1 = PTB Smith-Pokorny
 
 %
 
-% plt_lbls{1}  = 'L'; 
+% plt_lbls{1}  = 'L';
 % plt_lbls{2}  = 'M';
 % plt_lbls{3}  = 'S';
 % plt_lbls{4}  = 'R';
@@ -56,7 +58,9 @@ Mel_Phot_Corr
 
 set(gcf,'Position',[plot_where plot_size],'color','w');
 
-print([base,'\','Mel_Phot'],ff)
+if p
+    print([base,'\','Mel_Phot'],ff)
+end
 
 %% Fig: Monotonicity_concept
 
@@ -88,7 +92,9 @@ plot(y2,x,'k')
 xlabel('Input'),ylabel('Output')
 xticks(0:0.2:1); yticks(0:0.2:1);
 
-print([base,'\','Monotonicity_concept'],ff)
+if p
+    print([base,'\','Monotonicity_concept'],ff)
+end
 
 %% Fig: True3D
 
@@ -110,7 +116,9 @@ xlim([0 1]); ylim([0 1]);
 xticks(0:0.2:1); yticks(0:0.2:1);
 xlabel('x'); ylabel('y/y');
 
-print([base,'\','True3D'],ff)
+if p
+    print([base,'\','True3D'],ff)
+end
 
 %% Fig: chromaticities
 
@@ -119,8 +127,9 @@ melcomp(1,1,1,1,'3D') %Z-ax is arbitrary here
 view(0,90)
 xlim([0.5 1])
 
-print([base,'\','chromaticities'],ff)
-
+if p
+    print([base,'\','chromaticities'],ff)
+end
 
 %% Fig: ZL
 
@@ -132,7 +141,9 @@ xlim([0.5 1])
 view(340,40)
 set(gcf,'color','w');
 
-print([base,'\','ZL'],ff)
+if p
+    print([base,'\','ZL'],ff)
+end
 
 %% Fig: res_LMSRI
 
@@ -140,7 +151,7 @@ figure('Position',[plot_where plot_size.*[1,2.5]]) %bigger plot than standard
 for i=1:5
     subplot(5,2,i*2-1)
     melcomp(1,1,1,i,'3D') %final number sets Z-axis selection, 1 = 'L'
-    view(0,0)    
+    view(0,0)
     xlim([0.6 0.8])
     if i ~= 5
         xlabel([])
@@ -162,7 +173,9 @@ end
 
 set(gcf,'color','w');
 
-print([base,'\','res_LMSRI'],ff)
+if p
+    print([base,'\','res_LMSRI'],ff)
+end
 
 %% Fig: res_lsri
 
@@ -171,7 +184,7 @@ figure('Position',[plot_where plot_size.*[1,2]]) %bigger plot than standard
 for i=6:9
     subplot(4,2,(i-5)*2-1)
     melcomp(1,1,1,i,'3D') %final number sets Z-axis selection, 1 = 'L'
-    view(0,0)    
+    view(0,0)
     xlim([0.6 0.8])
     if i ~= 9
         xlabel([])
@@ -193,7 +206,9 @@ end
 
 set(gcf,'color','w');
 
-print([base,'\','res_lsri'],ff)
+if p
+    print([base,'\','res_lsri'],ff)
+end
 
 %% Fig: CTR
 
@@ -214,27 +229,34 @@ view(90,0)
 legend('off')
 text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top')
 
-print([base,'\','CTR'],ff)
-
+if p
+    print([base,'\','CTR'],ff)
+end
 
 %% Fig: why_correl
 
 melcomp_why('correl')
 
 set(gcf,'Position',[plot_where plot_size]);
-print([base,'\','why_correl'],ff)
+
+if p
+    print([base,'\','why_correl'],ff)
+end
 
 %% Fig: why_PCA
 
 melcomp_why('PCA')
 
 set(gcf,'Position',[plot_where plot_size]);
-print([base,'\','why_PCA'],ff)
+
+if p
+    print([base,'\','why_PCA'],ff)
+end
 
 %% Tight subplot demo
 
 % clear, clc
-% 
+%
 % [ha, pos] = tight_subplot(3,2);
 % for ii = 1:6;
 %     axes(ha(ii));

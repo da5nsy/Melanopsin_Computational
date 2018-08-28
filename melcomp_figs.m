@@ -1,9 +1,26 @@
+function melcomp_figs(plot_where,plot_size,base,ff)
+
 % figures for paper
 
-clc, clear, close all
-
-plot_where = [20,60];
-plot_size  = [900,400];
+try %if within a function, do nothing
+    nargin;
+    if nargin ~= 3
+        error
+    end
+catch %else, use default values
+    clear, clc, close all %useful when testing, aka using as a script
+    
+    plot_where = [20,60];
+    plot_size  = [900,400];
+    
+    %base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\figs';
+    base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\VNS18 Poster';
+    
+    %ff = '-depsc'; %file format
+    ff = '-dpdf';
+    
+    disp('using default values')
+end
 
 % melcomp.m reference notes:
 % PF_SPD = 1;
@@ -39,7 +56,7 @@ Mel_Phot_Corr
 
 set(gcf,'Position',[plot_where plot_size],'color','w');
 
-%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\Mel_Phot','-depsc')
+print([base,'\','Mel_Phot'],ff)
 
 %% Fig: Monotonicity_concept
 
@@ -71,7 +88,7 @@ plot(y2,x,'k')
 xlabel('Input'),ylabel('Output')
 xticks(0:0.2:1); yticks(0:0.2:1);
 
-%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\Monotonicity_concept','-depsc')
+print([base,'\','Monotonicity_concept'],ff)
 
 %% Fig: True3D
 
@@ -93,7 +110,7 @@ xlim([0 1]); ylim([0 1]);
 xticks(0:0.2:1); yticks(0:0.2:1);
 xlabel('x'); ylabel('y/y');
 
-%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\True3D','-depsc')
+print([base,'\','True3D'],ff)
 
 %% Fig: chromaticities
 
@@ -102,7 +119,7 @@ melcomp(1,1,1,1,'3D') %Z-ax is arbitrary here
 view(0,90)
 xlim([0.5 1])
 
-%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\chromaticities','-depsc')
+print([base,'\','chromaticities'],ff)
 
 
 %% Fig: ZL
@@ -115,7 +132,7 @@ xlim([0.5 1])
 view(340,40)
 set(gcf,'color','w');
 
-%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\ZL','-depsc')
+print([base,'\','ZL'],ff)
 
 %% Fig: res_LMSRI
 
@@ -145,7 +162,7 @@ end
 
 set(gcf,'color','w');
 
-%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\res_LMSRI','-depsc')
+print([base,'\','res_LMSRI'],ff)
 
 %% Fig: res_lsri
 
@@ -176,7 +193,7 @@ end
 
 set(gcf,'color','w');
 
-%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\res_lsri','-depsc')
+print([base,'\','res_lsri'],ff)
 
 %% Fig: CTR
 
@@ -197,7 +214,7 @@ view(90,0)
 legend('off')
 text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top')
 
-print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\CTR','-depsc')
+print([base,'\','CTR'],ff)
 
 
 %% Fig: why_correl
@@ -205,14 +222,14 @@ print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writ
 melcomp_why('correl')
 
 set(gcf,'Position',[plot_where plot_size]);
-%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\why_correl','-depsc')
+print([base,'\','why_correl'],ff)
 
 %% Fig: why_PCA
 
 melcomp_why('PCA')
 
 set(gcf,'Position',[plot_where plot_size]);
-%print('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\why_PCA','-depsc')
+print([base,'\','why_PCA'],ff)
 
 %% Tight subplot demo
 

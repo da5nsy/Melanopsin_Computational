@@ -253,6 +253,50 @@ if p
     print([base,'\','why_PCA'],ff)
 end
 
+%% Fig: inputs
+
+%copied out of melcomp.m
+
+figure('Position',[plot_where plot_size.*[1,3]])
+
+subplot(3,1,1), hold on
+D_CCT=1./linspace(1/3600,1/25000,20); %non-linear range, aiming to better reproduce observed variation
+load B_cieday
+T_SPD = GenerateCIEDay(D_CCT,[B_cieday]); %these appear to be linearly upsampled from 10nm intervals (see 'cieday investigation.m' https://github.com/da5nsy/General-Purpose-Functions/blob/3ee587429e9c4f3dd52d64acd95acf82d7e05f47/cieday%20investigation.m)
+T_SPD = (T_SPD./repmat(max(T_SPD),81,1)); %normalise
+S_SPD = S_cieday;
+plot(SToWls(S_SPD),T_SPD)
+xlim([350 800]); ylim([0 1]);
+ylabel({'D-series illuminants'; 'Normalised Power'});
+
+subplot(3,1,2), hold on
+load T_cones_sp
+load T_rods
+load T_melanopsin
+plot(SToWls(S_cones_sp),T_cones_sp)
+plot(SToWls(S_rods),T_rods)
+plot(SToWls(S_melanopsin),T_melanopsin)
+xlim([350 800]); ylim([0 1]);
+ylabel({'Spectral Sensitivity'; 'Normalised Spectral Sensitivity'});
+
+subplot(3,1,3), hold on
+load sur_vrhel
+refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
+T_refs = sur_vrhel';
+T_refs = sur_vrhel(:,refs)';
+S_refs = S_vrhel;
+clear sur_vrhel refs S_vrhel
+plot(SToWls(S_refs),T_refs)
+xlim([350 800]); ylim([0 1]);
+ylabel({'Spectral Reflectances'; 'Normalised Spectral Reflectance'});
+
+xlabel('Wavelength (nm)')
+
+if p
+    print([base,'\','inputs'],ff)
+end
+
+
 %% Tight subplot demo
 
 % clear, clc

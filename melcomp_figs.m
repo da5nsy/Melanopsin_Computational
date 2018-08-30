@@ -13,13 +13,13 @@ catch %else, use default values
     plot_where = [20,60];
     plot_size  = [900,400];
     
-    %base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\figs';
-    base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\VNS18 Poster';
+    base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\figs';
+    %base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\VNS18 Poster';
     
-    %ff = '-depsc'; %file format
-    ff = '-dpdf';
+    ff = '-depsc'; %file format
+    %ff = '-dpdf';
     
-    p = 0; % 0 = figures display but don't save. 1 = figures display and save.
+    p = 1; % 0 = figures display but don't save. 1 = figures display and save.
     
     disp('using default values') %!!!!!!!!!!!!!! this is not displaying currently !!!!!!!!!!!!!!!!
 end
@@ -267,17 +267,21 @@ T_SPD = (T_SPD./repmat(max(T_SPD),81,1)); %normalise
 S_SPD = S_cieday;
 plot(SToWls(S_SPD),T_SPD)
 xlim([350 800]); ylim([0 1]);
-ylabel({'D-series illuminants'; 'Normalised Power'});
+ylabel({'20 D-series illuminants'; 'Normalised SPD'});
 
 subplot(3,1,2), hold on
 load T_cones_sp
 load T_rods
 load T_melanopsin
-plot(SToWls(S_cones_sp),T_cones_sp)
-plot(SToWls(S_rods),T_rods)
+plot(SToWls(S_cones_sp),T_cones_sp(3,:))
 plot(SToWls(S_melanopsin),T_melanopsin)
+plot(SToWls(S_rods),T_rods)
+plot(SToWls(S_cones_sp),T_cones_sp(2,:))
+plot(SToWls(S_cones_sp),T_cones_sp(1,:))
+
 xlim([350 800]); ylim([0 1]);
-ylabel({'Spectral Sensitivity'; 'Normalised Spectral Sensitivity'});
+ylabel({'5 opsins'; 'Normalised Spectral Sensitivity'});
+legend('s-cone','melanopsin','rhodopsin','m-cone','l-cone');
 
 subplot(3,1,3), hold on
 load sur_vrhel
@@ -288,7 +292,7 @@ S_refs = S_vrhel;
 clear sur_vrhel refs S_vrhel
 plot(SToWls(S_refs),T_refs)
 xlim([350 800]); ylim([0 1]);
-ylabel({'Spectral Reflectances'; 'Normalised Spectral Reflectance'});
+ylabel({'11 natural surfaces'; 'Normalised Spectral Reflectance'});
 
 xlabel('Wavelength (nm)')
 

@@ -109,7 +109,7 @@ if plt_correl
     set(gca,'XTickLabel',S_refs_f(xticks+1))
     set(gca,'YTickLabel',S_refs_f(xticks+1))
     
-    txt='lmsri';
+    txt='LMSRI';
     for i=0:4
         scatter((maxl-S_cones_ss2(1))/2,(circshift(maxl,i)-S_cones_ss2(1))/2,'k^')
     end

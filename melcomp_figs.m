@@ -302,13 +302,23 @@ end
 
 %% Fig: optimality
 
-range = [-100,100];
+clear, clc, close all
 
-figure, hold on
+range = [-20,20];
+
+
 for i=range(1):range(2)
+    figure('units','normalized','outerposition',[0 0 1 1]), hold on
+    subplot(1,2,1)
     melcomp(1,1,1,9,'3D',i)
-    view(-173,38)
+    view(0,0)
     zlim([0 1])
+    
+    subplot(1,2,2)
+    melcomp(1,1,1,9,'3D',i)
+    view(90,0)
+    zlim([0 1])
+    
     drawnow
     if i~=range(2)
         clf

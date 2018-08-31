@@ -300,6 +300,21 @@ if p
     print([base,'\','inputs'],ff)
 end
 
+%% Fig: optimality
+
+range = [-100,100];
+
+figure, hold on
+for i=range(1):range(2)
+    melcomp(1,1,1,9,'3D',i)
+    view(-173,38)
+    zlim([0 1])
+    drawnow
+    if i~=range(2)
+        clf
+    end
+end
+
 
 %% Tight subplot demo
 

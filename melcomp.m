@@ -121,7 +121,7 @@ S_mel = S_melanopsin - [10, 0, 0]; clear S_melanopsin T_melanopsin
 try 
     nargin;
     if nargin > 5
-    S_mel(1)=S_melanopsin(1)+offset;
+    S_mel(1)=S_mel(1)+offset;
     end
 catch
 end

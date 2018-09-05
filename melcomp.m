@@ -1,6 +1,4 @@
-function melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
-
-% A fresh attempt
+function pc = melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
 
 % TO DO
 % - check that lm work out the same when I calculate them without the PTB
@@ -343,5 +341,10 @@ if plt_CTMS
     view(90,0)
 end
 
+%% PCA of signals
+
+lsi = lsri([1,2,4],:);
+
+[pc.coeff, pc.score, pc.latent, pc.tsquared, pc.explained, pc.mu] = pca(lsi');
 
 end

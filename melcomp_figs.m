@@ -1,4 +1,4 @@
-function melcomp_figs(plot_where,plot_size,base,ff)
+function melcomp_figs(plot_where,plot_size,base,ff,p)
 
 % figures for paper
 
@@ -19,7 +19,7 @@ catch %else, use default values
     ff = '-depsc'; %file format
     %ff = '-dpdf';
     
-    p = 1; % 0 = figures display but don't save. 1 = figures display and save.
+    p = 0; % 0 = figures display but don't save. 1 = figures display and save.
     
     disp('using default values') %!!!!!!!!!!!!!! this is not displaying currently !!!!!!!!!!!!!!!!
 end
@@ -123,7 +123,7 @@ end
 %% Fig: chromaticities
 
 figure('Position',[plot_where plot_size])
-melcomp(1,1,1,1,'3D') %Z-ax is arbitrary here
+melcomp(1,1,1,1,'3D'); %Z-ax is arbitrary here
 view(0,90)
 xlim([0.5 1])
 
@@ -136,7 +136,7 @@ end
 % Not currently used
 
 figure('Position',[plot_where plot_size])
-melcomp(1,1,1,1,'3D') %final number sets Z-axis selection, 1 = 'L'
+melcomp(1,1,1,9,'3D'); %final number sets Z-axis selection, 1 = 'L'
 xlim([0.5 1])
 view(340,40)
 set(gcf,'color','w');
@@ -150,7 +150,7 @@ end
 figure('Position',[plot_where plot_size.*[1,2.5]]) %bigger plot than standard
 for i=1:5
     subplot(5,2,i*2-1)
-    melcomp(1,1,1,i,'3D') %final number sets Z-axis selection, 1 = 'L'
+    melcomp(1,1,1,i,'3D'); %final number sets Z-axis selection, 1 = 'L'
     view(0,0)
     xlim([0.6 0.8])
     if i ~= 5
@@ -160,7 +160,7 @@ for i=1:5
 end
 for i=1:5
     subplot(5,2,i*2)
-    melcomp(1,1,1,i,'3D') %final number sets Z-axis selection, 1 = 'L'
+    melcomp(1,1,1,i,'3D'); %final number sets Z-axis selection, 1 = 'L'
     view(90,0)
     ylim([0 0.8])
     if i ~= 5
@@ -183,7 +183,7 @@ figure('Position',[plot_where plot_size.*[1,2]]) %bigger plot than standard
 
 for i=6:9
     subplot(4,2,(i-5)*2-1)
-    melcomp(1,1,1,i,'3D') %final number sets Z-axis selection, 1 = 'L'
+    melcomp(1,1,1,i,'3D'); %final number sets Z-axis selection, 1 = 'L'
     view(0,0)
     xlim([0.6 0.8])
     if i ~= 9
@@ -193,7 +193,7 @@ for i=6:9
 end
 for i=6:9
     subplot(4,2,(i-5)*2)
-    melcomp(1,1,1,i,'3D') %final number sets Z-axis selection, 1 = 'L'
+    melcomp(1,1,1,i,'3D'); %final number sets Z-axis selection, 1 = 'L'
     view(90,0)
     ylim([0 0.8])
     if i ~= 9
@@ -214,17 +214,17 @@ end
 
 figure('Position',[plot_where plot_size.*[1,3]])
 subplot(3,2,[1,4])
-melcomp(1,1,1,9,'CTR')
+melcomp(1,1,1,9,'CTR');
 text(0.02,0.98,'A','Units', 'Normalized', 'VerticalAlignment', 'Top')
 
 subplot(3,2,5)
-melcomp(1,1,1,9,'CTR')
+melcomp(1,1,1,9,'CTR');
 view(0,0)
 legend('off')
 text(0.02,0.98,'B','Units', 'Normalized', 'VerticalAlignment', 'Top')
 
 subplot(3,2,6)
-melcomp(1,1,1,9,'CTR')
+melcomp(1,1,1,9,'CTR');
 view(90,0)
 legend('off')
 text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top')
@@ -302,28 +302,55 @@ end
 
 %% Fig: optimality
 
-clear, clc, close all
+clear pc ex
 
-range = [-20,20];
+load T_melanopsin T_melanopsin S_melanopsin; T_mel = T_melanopsin; S_mel = SToWls(S_melanopsin);
 
+[~,mloc] = max(T_mel); %max location
+Ip = S_mel(mloc); %Mel peak
 
-for i=range(1):range(2)
-    figure('units','normalized','outerposition',[0 0 1 1]), hold on
-    subplot(1,2,1)
-    melcomp(1,1,1,9,'3D',i)
-    view(0,0)
-    zlim([0 1])
-    
-    subplot(1,2,2)
-    melcomp(1,1,1,9,'3D',i)
-    view(90,0)
-    zlim([0 1])
-    
-    drawnow
-    if i~=range(2)
-        clf
-    end
+range = [-260,5,400];
+
+for i=range(1):range(2):range(3)
+    pc(i-range(1)+1) = melcomp(1,1,1,9,NaN,i);    
+    ex(i-range(1)+1,:)=pc(i-range(1)+1).explained;
+    disp(i)
 end
+
+figure('Position',[plot_where plot_size]), hold on
+%plot(Ip+range(1):range(2):Ip+range(3),ex(1:range(2):end,1)/max(ex(:,1)),'r','LineWidth',3)
+%plot(Ip+range(1):range(2):Ip+range(3),ex(1:range(2):end,2)/max(ex(:,2)),'g','LineWidth',3)
+plot(Ip+range(1):range(2):Ip+range(3),ex(1:range(2):end,3)/max(ex(:,3)),'b','LineWidth',3)
+plot([Ip,Ip],[min(ylim),max(ylim)],'k--')
+
+[~,m3] = max(ex(:,3)); %max third principal component
+plot([m3+Ip+range(1)-1,m3+Ip+range(1)-1],[min(ylim),max(ylim)])
+
+load T_cones_sp.mat
+plot(SToWls(S_cones_sp),T_cones_sp) 
+load T_rods
+plot(SToWls(S_rods),T_rods)
+plot(SToWls(S_mel),T_mel) 
+
+
+
+% for i=range(1):range(2)
+%     figure('units','normalized','outerposition',[0 0 1 1]), hold on
+%     subplot(1,2,1)
+%     melcomp(1,1,1,9,'3D',i);
+%     view(0,0)
+%     zlim([0 1])
+%     
+%     subplot(1,2,2)
+%     melcomp(1,1,1,9,'3D',i);
+%     view(90,0)
+%     zlim([0 1])
+%     
+%     drawnow
+%     if i~=range(2)
+%         clf
+%     end
+% end
 
 
 %% Tight subplot demo

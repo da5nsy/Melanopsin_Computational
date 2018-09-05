@@ -302,12 +302,12 @@ end
 
 %% Fig: optimality
 ss      = 1; %spectral sensitvities
-prog    = 0; %progess read-out
-range   = [-200,10,400]; % [start,interval,end]
+prog    = 1; %progess read-out
+t_range = [-200,10,400]; % target range, [start,interval,end]
 
 figure('units','normalized','outerposition',[0 0 1 1]), hold on
 %figure('Position',[plot_where plot_size]), hold on
-melcomp_optimality(ss,prog,range)
+melcomp_optimality(ss,prog,t_range)
 
 %% Tight subplot demo
 

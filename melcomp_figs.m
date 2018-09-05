@@ -301,57 +301,13 @@ if p
 end
 
 %% Fig: optimality
+ss      = 1; %spectral sensitvities
+prog    = 0; %progess read-out
+range   = [-200,10,400]; % [start,interval,end]
 
-clear pc ex
-
-load T_melanopsin T_melanopsin S_melanopsin; T_mel = T_melanopsin; S_mel = SToWls(S_melanopsin);
-
-[~,mloc] = max(T_mel); %max location
-Ip = S_mel(mloc); %Mel peak
-
-range = [-260,5,400];
-
-for i=range(1):range(2):range(3)
-    pc(i-range(1)+1) = melcomp(1,1,1,9,NaN,i);    
-    ex(i-range(1)+1,:)=pc(i-range(1)+1).explained;
-    disp(i)
-end
-
-figure('Position',[plot_where plot_size]), hold on
-%plot(Ip+range(1):range(2):Ip+range(3),ex(1:range(2):end,1)/max(ex(:,1)),'r','LineWidth',3)
-%plot(Ip+range(1):range(2):Ip+range(3),ex(1:range(2):end,2)/max(ex(:,2)),'g','LineWidth',3)
-plot(Ip+range(1):range(2):Ip+range(3),ex(1:range(2):end,3)/max(ex(:,3)),'b','LineWidth',3)
-plot([Ip,Ip],[min(ylim),max(ylim)],'k--')
-
-[~,m3] = max(ex(:,3)); %max third principal component
-plot([m3+Ip+range(1)-1,m3+Ip+range(1)-1],[min(ylim),max(ylim)])
-
-load T_cones_sp.mat
-plot(SToWls(S_cones_sp),T_cones_sp) 
-load T_rods
-plot(SToWls(S_rods),T_rods)
-plot(SToWls(S_mel),T_mel) 
-
-
-
-% for i=range(1):range(2)
-%     figure('units','normalized','outerposition',[0 0 1 1]), hold on
-%     subplot(1,2,1)
-%     melcomp(1,1,1,9,'3D',i);
-%     view(0,0)
-%     zlim([0 1])
-%     
-%     subplot(1,2,2)
-%     melcomp(1,1,1,9,'3D',i);
-%     view(90,0)
-%     zlim([0 1])
-%     
-%     drawnow
-%     if i~=range(2)
-%         clf
-%     end
-% end
-
+figure('units','normalized','outerposition',[0 0 1 1]), hold on
+%figure('Position',[plot_where plot_size]), hold on
+melcomp_optimality(ss,prog,range)
 
 %% Tight subplot demo
 

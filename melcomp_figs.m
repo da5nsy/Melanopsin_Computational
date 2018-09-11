@@ -303,7 +303,7 @@ end
 %% Fig: optimality
 ss      = 1; %spectral sensitvities
 prog    = 1; %progess read-out
-t_range = [-200,10,400]; % target range, [start,interval,end]
+t_range = [-200,2,400]; % target range, [start,interval,end]
 
 figure('units','normalized','outerposition',[0 0 1 1]), hold on
 %figure('Position',[plot_where plot_size]), hold on

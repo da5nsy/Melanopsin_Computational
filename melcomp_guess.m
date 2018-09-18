@@ -1,14 +1,21 @@
-clear, clc, close all
+function melcomp_guess(offset)
 
-% [pc, LMSRI] = melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
-[pc, LMSRI] = melcomp(1,3,1,9,NaN,0);
+% Function for trying to guess the illuminant from the S:I ratio
+
+try
+    nargin;
+catch
+    clear, clc, close all
+    offset = 0;
+end
+
+[~, LMSRI] = melcomp(1,1,1,9,NaN,offset); % [pc, LMSRI] = melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
 
 %% Testing S:I ratio.
 
 cols = jet(size(LMSRI,3));
 
-figure, hold on
-for i=1:size(LMSRI,3)
+for i=1:3:size(LMSRI,3)
     scatter(log2(LMSRI(3,:,i)),log2(LMSRI(5,:,i)),'MarkerEdgeColor',cols(i,:))
     %scatter(log2(LMSRI(3,:,i)),log2(LMSRI(5,:,i)),'filled')
     hold on
@@ -19,6 +26,8 @@ for i=1:size(LMSRI,3)
     plot(log2(LMSRI(3,:,i)),yfit,'Color',cols(i,:))
 end
 legend('Location','best')
+ylim([-3 3])
+axis equal
 
 % figure, hold on
 % for i=1:5:size(LMSRI,3)
@@ -27,7 +36,7 @@ legend('Location','best')
 %     title('s,i')
 % end
 
-
+return
 %% Does averaging over spatially juxtaposed points provide improvement?
 
 figure, hold on
@@ -59,4 +68,6 @@ for j=1:50
         title('log(S),log(I)')
     end
     pause(0.2)
+end
+
 end

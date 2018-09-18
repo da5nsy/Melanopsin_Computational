@@ -33,7 +33,7 @@ plot_obs=       0;
 plot_refs=      0;
 
 % Load Daylight Data
-load('C:\Users\cege-user\Dropbox\UCL\Reference Data\Granada Data\Granada_daylight_2600_161.mat');
+load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_daylight_2600_161.mat');
 granada=final; clear final
 % 300 - 1100nm, 5nm interval, unlabeled
 % 2600 samples
@@ -183,7 +183,7 @@ dLW=.1;
 % This is unsurprsing as the first principal component daylight is very
 % broad.
 
-plot_corr=   0;
+plot_corr=   1;
 if plot_corr
     plotOrder={'L','M','S','Mel'};
     figure('units','normalized','outerposition',[0 0 1 1])

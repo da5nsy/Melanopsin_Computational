@@ -257,7 +257,7 @@ end
 
 %copied out of melcomp.m
 
-figure('Position',[plot_where plot_size.*[1,3]])
+figure('Position',[plot_where plot_size.*[1,2]])
 
 subplot(3,1,1), hold on
 D_CCT=1./linspace(1/3600,1/25000,20); %non-linear range, aiming to better reproduce observed variation

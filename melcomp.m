@@ -1,4 +1,4 @@
-function pc = melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
+function [pc, LMSRI] = melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
 
 % TO DO
 % - check that lm work out the same when I calculate them without the PTB
@@ -27,7 +27,7 @@ catch
     % 1 = CIE D series
     % 2 = Hernández-Andrés+
     
-    PF_refs = 1;
+    PF_refs = 2;
     % 1 = Vhrel+ (natural only)
     % 2 = Vhrel+ (all)
     % 3 = Foster+

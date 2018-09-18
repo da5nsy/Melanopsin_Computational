@@ -9,8 +9,8 @@ catch
     
     %default values
     ss=1;
-    prog=0;
-    t_range = [-200,10,400];
+    prog=1;
+    t_range = [-200,5,400];
     disp('Using default values');
 end
 
@@ -29,13 +29,18 @@ for i=t_range_ex
         disp(i)
     end
 end
+ex_c = ex(1:t_range(2):end,3); %ex_condensed
+[~,locs] = findpeaks(ex_c);
+X_ax = Ip+t_range(1):t_range(2):Ip+t_range(3);
+AoI = X_ax(locs); %Areas of interest
 
+%Plot principal components
 plt_firstAndSecondPC = 0;
+plot(Ip+t_range_ex,ex_c,'b','LineWidth',3,'DisplayName','3rd PC weight')
 if plt_firstAndSecondPC
-    plot(Ip+t_range(1):t_range(2):Ip+t_range(3),ex(1:t_range(2):end,1),'r','LineWidth',3,'DisplayName','1st PC weight')
-    plot(Ip+t_range(1):t_range(2):Ip+t_range(3),ex(1:t_range(2):end,2),'g','LineWidth',3,'DisplayName','2nd PC weight')
+    plot(Ip+t_range_ex,ex(1:t_range(2):end,1),'r','LineWidth',3,'DisplayName','1st PC weight')
+    plot(Ip+t_range_ex,ex(1:t_range(2):end,2),'g','LineWidth',3,'DisplayName','2nd PC weight')
 end
-plot(Ip+t_range(1):t_range(2):Ip+t_range(3),ex(1:t_range(2):end,3),'b','LineWidth',3,'DisplayName','3rd PC weight')
 
 plt_melPeakLine = 0;
 if plt_melPeakLine
@@ -61,8 +66,6 @@ end
 
 plt_peakLines = 0;
 if plt_peakLines
-    X_ax = Ip+t_range(1):t_range(2):Ip+t_range(3);
-    AoI = X_ax(locs); %Areas of interest
     legend('AutoUpdate','off')
     for i = 1:length(locs)
         plot([AoI(i),AoI(i)],[min(ylim),pks(i)],'k')
@@ -73,14 +76,11 @@ end
 legend('Location','best')
 axis tight
 
-%%
+%% See what the data looks like in 3 dimensions at the peaks pulled out by the previous calcs
 
-viz = 1;
+plt_viz = 0;
 
-
-if viz
-    ex_c = ex(1:t_range(2):end,3); %ex_condensed
-    [~,locs] = findpeaks(ex_c);
+if plt_viz
     for i = 1:length(locs)
         figure,
         melcomp(1,1,1,9,'3D',t_range_ex(locs(i)));

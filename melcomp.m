@@ -27,7 +27,7 @@ catch
     % 1 = CIE D series
     % 2 = Hernández-Andrés+
     
-    PF_refs = 2;
+    PF_refs = 3;
     % 1 = Vhrel+ (natural only)
     % 2 = Vhrel+ (all)
     % 3 = Foster+
@@ -79,23 +79,24 @@ if or((PF_refs == 1),(PF_refs == 2))
     clear sur_vrhel refs S_vrhel 
 elseif PF_refs == 3
     base = 'C:\Users\cege-user\Documents\Large data\Foster Images\';
-    for i=1:4 %2002 images
-        ims(i)=load([base, '2002\scene',num2str(i),'.mat']); %imageS
-    end
+%     for i=1:4 %2002 images
+%         ims(i)=load([base, '2002\scene',num2str(i),'.mat']); %imageS
+%     end
 %     %2004 images
-%     ims(5)=load([base,'2004\scene1\ref_crown3bb_reg1.mat']);
-%     ims(6)=load([base,'2004\scene2\ref_ruivaes1bb_reg1.mat']);
+     ims(5)=load([base,'2004\scene1\ref_crown3bb_reg1.mat']);
+     ims(6)=load([base,'2004\scene2\ref_ruivaes1bb_reg1.mat']);
 %     ims(7)=load([base,'2004\scene3\ref_mosteiro4bb_reg1.mat']);
 %     ims(8)=load([base,'2004\scene4\ref_cyflower1bb_reg1.mat']);
 %     ims(9)=load([base,'2004\scene5\ref_cbrufefields1bb_reg1.mat']);
     
-    [r, c, w] = size(ims(1).reflectances);
-    T_refs = reshape(ims(1).reflectances, r*c, w);
-    for i=2:4%length(ims)
-        [r, c, w] = size(ims(i).reflectances);
-        T_refs = [T_refs; reshape(ims(i).reflectances, r*c, w)];
-    end
-    S_refs=[410,10,31];
+    [r, c, w] = size(ims(5).reflectances);
+    T_refs = reshape(ims(5).reflectances, r*c, w);
+%     for i=6%length(ims)
+%         [r, c, w] = size(ims(i).reflectances);
+%         T_refs = [T_refs; reshape(ims(i).reflectances, r*c, w)];
+%     end
+    %S_refs=[410,10,31]; %for 2002 data
+    S_refs=[400,10,33];%for 2004 data (except #9)
 else
     error('refs selection failed')
 end
@@ -104,15 +105,15 @@ end
 % Load Observer
 if PF_obs == 1
     % Smith-Pokorny, for use with MacLeod Boynton diagram
-    load T_cones_sp
+    load T_cones_sp T_cones_sp S_cones_sp
     T_obs = T_cones_sp;
     S_obs = S_cones_sp;
     clear T_cones_sp S_cones_sp
 else
     error('obs selection failed')
 end
-load T_rods
-load T_melanopsin
+load T_rods T_rods S_rods
+load T_melanopsin T_melanopsin S_melanopsin
 T_mel = SplineCmf(S_melanopsin,T_melanopsin, S_melanopsin - [10, 0, 0],1); %Increasing the range of this function in case it ends up limiting the range of S_sh, and shorten variable names
 S_mel = S_melanopsin - [10, 0, 0]; clear S_melanopsin T_melanopsin
 
@@ -127,18 +128,17 @@ end
 
 % Pull all observer elements together
 
-S_sh = [max([S_SPD(1),S_refs(1),S_obs(1)]),max([S_SPD(2),S_refs(2),S_obs(2)]),min([S_SPD(3),S_refs(3),S_obs(3)])]; %S_shared: work out what the lowest common denominator for the range/interval of the data is
-
 %reduce all data down to the common range/interval
+S_sh = [max([S_SPD(1),S_refs(1),S_obs(1)]),max([S_SPD(2),S_refs(2),S_obs(2)]),min([S_SPD(3),S_refs(3),S_obs(3)])]; %S_shared: work out what the lowest common denominator for the range/interval of the data is
 T_SPD  = SplineSpd(S_SPD,T_SPD,S_sh,1); % extend == 1: Cubic spline, extends with last value in that direction
 if or((PF_refs == 1),(PF_refs == 2))
     T_refs = SplineSrf(S_refs,T_refs',S_sh,1);
 elseif PF_refs == 3 %It would theoretically be fine to run the Foster data through the above, I'm certain nothing would change, but it takes an incredibly long time (to do nothing, since the Foster data is probably always going to be the lowest resolution thing that is being handled, thus S_Sh should == S_refs)
     T_refs = T_refs';
-    T_refs = T_refs(:,1:10000:end); %temporary(?) downsampling for speed in testing
-    if PF_SPD == 2
-        T_SPD = T_SPD(:,1:30:end);  %temporary(?) downsampling of SPD data for use with Foster+ refs
-    end
+%     T_refs = T_refs(:,1:10000:end); %temporary(?) downsampling for speed in testing
+%     if PF_SPD == 2
+%         T_SPD = T_SPD(:,1:30:end);  %temporary(?) downsampling of SPD data for use with Foster+ refs
+%     end
 end
 T_obs  = SplineCmf(S_obs,T_obs,S_sh,1)';
 T_rods = SplineCmf(S_rods,T_rods,S_sh)';

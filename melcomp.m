@@ -78,7 +78,7 @@ if or((PF_refs == 1),(PF_refs == 2))
     S_refs = S_vrhel;
     clear sur_vrhel refs S_vrhel 
 elseif PF_refs == 3
-    base = 'C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Foster Images\';
+    base = 'C:\Users\cege-user\Documents\Large data\Foster Images\';
     for i=1:4 %2002 images
         ims(i)=load([base, '2002\scene',num2str(i),'.mat']); %imageS
     end

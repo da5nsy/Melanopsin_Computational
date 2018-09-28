@@ -9,25 +9,29 @@ catch
     offset = 0;
 end
 
-[~, LMSRI] = melcomp(1,1,1,9,NaN,offset); % [pc, LMSRI] = melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
+tic
+[~, LMSRI] = melcomp(1,3,1,9,NaN,offset); % [pc, LMSRI] = melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
+toc
 
 %% Testing S:I ratio.
 
 cols = jet(size(LMSRI,3));
 
 for i=1:3:size(LMSRI,3)
-    scatter(log2(LMSRI(3,:,i)),log2(LMSRI(5,:,i)),'MarkerEdgeColor',cols(i,:))
-    %scatter(log2(LMSRI(3,:,i)),log2(LMSRI(5,:,i)),'filled')
+    scatter(log10(LMSRI(3,1:8000:end,i)),log10(LMSRI(5,1:8000:end,i)),'MarkerEdgeColor',cols(i,:))
+    %scatter(log10(LMSRI(3,:,i)),log10(LMSRI(5,:,i)),'filled')
     hold on
-    title('log(S),log(I)')
     
-    fit = polyfit(log2(LMSRI(3,:,i)),log2(LMSRI(5,:,i)),1);
-    yfit = polyval(fit,log2(LMSRI(3,:,i)));
-    plot(log2(LMSRI(3,:,i)),yfit,'Color',cols(i,:))
+    fit(i,:) = polyfit(log10(LMSRI(3,:,i)),log10(LMSRI(5,:,i)),1);
+    yfit = polyval(fit(i,:),log10(LMSRI(3,:,i)));
+    legend('AutoUpdate','Off')
+    plot(log10(LMSRI(3,:,i)),yfit,'Color',cols(i,:))
+    legend('AutoUpdate','On')
 end
 legend('Location','best')
-ylim([-3 3])
 axis equal
+xlabel('log(S)')
+ylabel('log(I)')
 
 % figure, hold on
 % for i=1:5:size(LMSRI,3)
@@ -36,7 +40,40 @@ axis equal
 %     title('s,i')
 % end
 
+figure, hold on
+plot(fit(1:3:end,1),'o')
+plot(fit(1:3:end,2),'o')
+
 return
+
+%%
+
+cols = jet(size(LMSRI,3));
+
+for i=round(size(LMSRI,3)/2)
+    scatter(log10(LMSRI(3,:,i)),log10(LMSRI(5,:,i)),'.','MarkerEdgeColor',cols(i,:))
+    %scatter(log10(LMSRI(3,:,i)),log10(LMSRI(5,:,i)),'filled')
+    hold on
+    
+    fit = polyfit(log10(LMSRI(3,:,i)),log10(LMSRI(5,:,i)),1);
+    yfit = polyval(fit,log10(LMSRI(3,:,i)));
+    legend('AutoUpdate','Off')
+    plot(log10(LMSRI(3,:,i)),yfit,'Color',cols(i,:))
+    legend('AutoUpdate','On')
+end
+legend('Location','best')
+axis equal
+xlabel('log(S)')
+ylabel('log(I)')
+
+% figure, hold on
+% for i=1:5:size(LMSRI,3)
+%     scatter(lsri(2,:,i),lsri(4,:,i),'filled')
+%     hold on
+%     title('s,i')
+% end
+
+
 %% Does averaging over spatially juxtaposed points provide improvement?
 
 figure, hold on

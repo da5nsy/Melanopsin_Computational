@@ -79,22 +79,23 @@ if or((PF_refs == 1),(PF_refs == 2))
     clear sur_vrhel refs S_vrhel 
 elseif PF_refs == 3
     base = 'C:\Users\cege-user\Documents\Large data\Foster Images\';
-%     for i=1:4 %2002 images
-%         ims(i)=load([base, '2002\scene',num2str(i),'.mat']); %imageS
-%     end
-%     %2004 images
-     ims(5)=load([base,'2004\scene1\ref_crown3bb_reg1.mat']);
-     ims(6)=load([base,'2004\scene2\ref_ruivaes1bb_reg1.mat']);
-%     ims(7)=load([base,'2004\scene3\ref_mosteiro4bb_reg1.mat']);
-%     ims(8)=load([base,'2004\scene4\ref_cyflower1bb_reg1.mat']);
-%     ims(9)=load([base,'2004\scene5\ref_cbrufefields1bb_reg1.mat']);
+    %     for i=1:4 %2002 images
+    %         ims(i)=load([base, '2002\scene',num2str(i),'.mat']); %imageS
+    %     end
+    %     %2004 images
+    ims(5)=load([base,'2004\scene1\ref_crown3bb_reg1.mat']);
+    ims(6)=load([base,'2004\scene2\ref_ruivaes1bb_reg1.mat']);
+    %     ims(7)=load([base,'2004\scene3\ref_mosteiro4bb_reg1.mat']);
+    %     ims(8)=load([base,'2004\scene4\ref_cyflower1bb_reg1.mat']);
+    %     ims(9)=load([base,'2004\scene5\ref_cbrufefields1bb_reg1.mat']);
     
-    [r, c, w] = size(ims(5).reflectances);
-    T_refs = reshape(ims(5).reflectances, r*c, w);
-%     for i=6%length(ims)
-%         [r, c, w] = size(ims(i).reflectances);
-%         T_refs = [T_refs; reshape(ims(i).reflectances, r*c, w)];
-%     end
+    ims(6).reflectances = ims(6).reflectances(:,1:end-100,:);
+    [r, c, w] = size(ims(6).reflectances);
+    T_refs = reshape(ims(6).reflectances, r*c, w);
+    %     for i=6%length(ims) %add this loop to append multiple images
+    %         [r, c, w] = size(ims(i).reflectances);
+    %         T_refs = [T_refs; reshape(ims(i).reflectances, r*c, w)];
+    %     end
     %S_refs=[410,10,31]; %for 2002 data
     S_refs=[400,10,33];%for 2004 data (except #9)
 else

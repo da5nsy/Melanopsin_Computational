@@ -106,7 +106,7 @@ if plt_correl
     %fill([0, max(xlim), 0, 0],[0, max(ylim), max(ylim), 0],[1,1,1],'LineStyle','none')
     
     S_refs_f = SToWls(S_refs); %f for full
-    set(gca,'XTickLabel',S_refs_f(xticks+1))
+    set(gca,'XTickLabel',S_refs_f(xticks+1)) % I think the +1 is not needed here, look into this !!!!!!!!!!!!!!!
     set(gca,'YTickLabel',S_refs_f(xticks+1))
     
     txt='LMSRI';

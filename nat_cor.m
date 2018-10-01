@@ -2,7 +2,7 @@
 
 %% Load data
 
-clear, clc, close all
+%clear, clc, close all
 
 base = 'C:\Users\cege-user\Documents\Large data\Foster Images\';
 for i=1:4 %2002 images
@@ -47,7 +47,7 @@ sur_macbeth = sur_macbeth(2:71,:);
 S_macbeth = [385,5,70];
 
 %%
-close all
+%close all
 
 %visualization of corrs
 figure; hold on

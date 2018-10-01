@@ -6,8 +6,13 @@
 % (There might be an additional constraint that you'd want enough power to
 % avoid SNR issues)
 
+% TO DO LIST
+% ----------
+
 % Add back in D65 from previous version. You'd want to sample the area of
 % the spectrum where there was the most power, also.
+
+% Try for Foster images
 
 load sur_vrhel.mat
 

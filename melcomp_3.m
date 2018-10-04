@@ -61,14 +61,49 @@ end
 [pc.COEFF, pc.SCORE, pc.LATENT, pc.TSQUARED, pc.EXPLAINED] = pca(T_SPD'); %correct/weight at edges of spectrum?
 
 %% Calc correlation between 
+nPC = 15; %Number of principal components
 
-cs = cat(1,LMSRI,lsri,lsri(2,:,:)./lsri(4,:,:),lsri(2,:,:)./lsri(3,:,:)); %colour signals
+cs = cat(1,LMSRI,...
+    lsri,...
+    LMSRI(1,:,:)+LMSRI(2,:,:),...
+    (0.6373*LMSRI(1,:,:))+(0.3924*LMSRI(2,:,:)),...
+    LMSRI(4,:,:)+ LMSRI(5,:,:),...
+    LMSRI(1,:,:)./LMSRI(2,:,:),...
+    LMSRI(1,:,:)./LMSRI(3,:,:),...
+    LMSRI(1,:,:)./LMSRI(4,:,:),...
+    LMSRI(1,:,:)./LMSRI(5,:,:),...
+    LMSRI(3,:,:)./LMSRI(4,:,:),...
+    LMSRI(3,:,:)./LMSRI(5,:,:),...
+    (LMSRI(3,:,:)+LMSRI(5,:,:))./(LMSRI(1,:,:)+LMSRI(2,:,:))...
+    ); 
 
-for j=1:6
+plt_lbls{1}  = 'L'; %writing out this way so that there's a quick reference as to which value of Z_ax does what
+plt_lbls{2}  = 'M';
+plt_lbls{3}  = 'S';
+plt_lbls{4}  = 'R';
+plt_lbls{5}  = 'I';
+plt_lbls{6}  = 'l';
+plt_lbls{7}  = 's';
+plt_lbls{8}  = 'r';
+plt_lbls{9}  = 'i';
+plt_lbls{10} = 'L+M';
+plt_lbls{11} = '(0.6373*L)+(0.3924*M)';
+plt_lbls{12} = 'r + i';
+plt_lbls{13} = 'L/M';
+plt_lbls{14} = 'L/S';
+plt_lbls{15} = 'L/R';
+plt_lbls{16} = 'L/I';
+plt_lbls{17} = 'S/R';
+plt_lbls{18} = 'S/I';
+plt_lbls{19} = '(S+I)/(L+M)';
+
+c = zeros(size(cs,1),nPC);
+for j=1:nPC
     for i=1:size(cs,1)
         c(i,j) = corr(squeeze(mean(cs(i,:,:),2)),pc.SCORE(:,j));
     end
 end
+c=abs(c);
 
 c_norm = c;
 for i=1:j %leftover, be careful
@@ -76,9 +111,28 @@ for i=1:j %leftover, be careful
     c_norm(:,i) = c_norm(:,i)/max(c_norm(:,i));
 end
 
-corr(squeeze(mean(lsri(2,:,:),2))./squeeze(mean(lsri(4,:,:),2)),pc.SCORE(:,2)); %s/i
-surf(c_norm)
+figure, hold on
+subplot(2,1,1)
+imagesc(c)
+colorbar
+title('correlation between signal and PC weight')
+xlabel('PC')
 
+set(gca, 'XTick', 1:nPC); 
+set(gca, 'YTick', 1:size(cs,1)); 
+set(gca, 'YTickLabel', plt_lbls); 
+colormap('gray'); 
+
+subplot(2,1,2)
+imagesc(c_norm)
+colorbar
+title('as above, normalised')
+xlabel('PC')
+
+set(gca, 'XTick', 1:nPC); 
+set(gca, 'YTick', 1:size(cs,1)); 
+set(gca, 'YTickLabel', plt_lbls); 
+colormap('gray'); 
 
 
 

@@ -1,8 +1,10 @@
 % Practical version of the abstract formulae in 
 
-% Maloney, L. T. Computational Approaches to Color Constancy. (Stanford, 1984).
+% Maloney, L. T., Computational Approaches to Color Constancy. (Stanford, 1984).
+%
 % and 
-% SURFACE COLOUR PERCEPTION AND ENVIRONMENTAL CONSTRAINTS, laurence t. maloney
+%
+% Maloney, L. T., SURFACE COLOUR PERCEPTION AND ENVIRONMENTAL CONSTRAINTS
 % in Mausfeld, R. & Heyer, D. Colour Perception: Mind and the Physical World. 
 % (Oxford University Press, USA, 2004).
 
@@ -13,7 +15,7 @@ clear, clc, close all
 % 2. Basis weights
 % 3. Full spectra
 
-plt_lin = 0;
+plt_lin = 0; %want to plot?
 
 load B_vrhel %basis functions of reflectance measurements
 B_vrhel = B_vrhel(:,1:3); %Let's pretend it only has 3 basis functions
@@ -82,6 +84,7 @@ p_alt3 = sum(B_cieday*e'.*B_vrhel*s.*R'); %with linear functions and weights
 
 % Second part
 
+g=zeros(3,3,3); %preallocate
 for i=1:3
     for j=1:3
         for k=1:3
@@ -90,13 +93,44 @@ for i=1:3
     end
 end
 
+%trace version
 p_alt4 = [trace(s*e*g(:,:,1)),trace(s*e*g(:,:,2)),trace(s*e*g(:,:,3))];
 
-% I have no idea why the above works but it does.
+% forloop version
+p_alt5=[0;0;0];
+for i=1:3
+    for j=1:3
+        for k=1:3
+        p_alt5(k) = p_alt5(k) + s(j)*e(i)*g(i,j,k);
+        end
+    end
+end
 
+%would be nice to do this neatly in a single matrix multiplication
 
+p_alt6(1) = e*g(:,:,1)*s;
+p_alt6(2) = e*g(:,:,2)*s;
+p_alt6(3) = e*g(:,:,3)*s;
+%that's neat enough :)
 
+%although:
+eg = [e*g(:,:,1);e*g(:,:,2);e*g(:,:,3)]; %depends on light and stable matrix g
+p_alt7 = eg*s;
+%This seems equivalent to eq 9.7 (first ref) where the light and the
+%independent matrix are bundled together, and it sure is neat.
 
+%% Inverse
+
+% Here I want to try to get the values for s (from which I can easily
+% construct S) from p, e and g alone.
+
+eg_inv = inv(eg); 
+s_recovered = eg_inv*p;
+
+s
+s_recovered
+%s-s_recovered
+% Essentially the same. Presumably just precision errors
 
 
 

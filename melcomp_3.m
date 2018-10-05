@@ -20,6 +20,9 @@ end
 addI.el = addI.NUM(:,4); %elevation
 addI.az = addI.NUM(:,5); %azimuth
 
+%T_SPD = T_SPD(:,addI.el>15);
+%addI.el = addI.el(addI.el>15);
+
 
 %% SRFs (Spectral Reflectance Functions)
 
@@ -71,7 +74,21 @@ end
 
 [pc.COEFF, pc.SCORE, pc.LATENT, pc.TSQUARED, pc.EXPLAINED] = pca(T_SPD'); %correct/weight at edges of spectrum?
 
-%% Calc correlation between 
+%% Calculate lines of fit between S and I values
+
+clear fit
+for i=1:size(LMSRI,3)
+    fit(i,:) = polyfit(log10(LMSRI(3,:,i)),log10(LMSRI(5,:,i)),1);
+end
+% fit = repmat(fit,1,170);
+% fit = reshape(fit,2,170,2600);
+
+f_m = permute(repmat(fit(:,1),1,1,170),[2,3,1]);
+f_c = permute(repmat(fit(:,2),1,1,170),[2,3,1]);
+
+
+%% Calc correlation between
+
 nPC = 5; %Number of principal components
 
 cs = cat(1,LMSRI,...
@@ -85,7 +102,9 @@ cs = cat(1,LMSRI,...
     LMSRI(1,:,:)./LMSRI(5,:,:),...
     LMSRI(3,:,:)./LMSRI(4,:,:),...
     LMSRI(3,:,:)./LMSRI(5,:,:),...
-    (LMSRI(3,:,:)+LMSRI(5,:,:))./(LMSRI(1,:,:)+LMSRI(2,:,:))...
+    (LMSRI(3,:,:)+LMSRI(5,:,:))./(LMSRI(1,:,:)+LMSRI(2,:,:)),...
+    f_m,...
+    f_c...
     ); 
 
 plt_lbls{1}  = 'L'; %writing out this way so that there's a quick reference as to which value of Z_ax does what
@@ -107,6 +126,8 @@ plt_lbls{16} = 'L/I';
 plt_lbls{17} = 'S/R';
 plt_lbls{18} = 'S/I';
 plt_lbls{19} = '(S+I)/(L+M)';
+plt_lbls{20} = 'S/I fit m';
+plt_lbls{21} = 'S/I fit c';
 
 c = zeros(size(cs,1),nPC);
 for j=1:nPC
@@ -153,6 +174,9 @@ for i=1:size(cs,1)
     for j=1:nPC
         subplot(size(cs,1),nPC,j+((i-1)*nPC))
         scatter(squeeze(mean(cs(i,:,:),2)),pc.SCORE(:,j),'r.')
+        if j == 1
+            ylabel(plt_lbls{i},'rotation',0)
+        end
         set(gca,'YTickLabel',[])
         set(gca,'XTickLabel',[])
         set(gca,'Color',repmat(c_norm(i,j),3,1))
@@ -166,7 +190,7 @@ ds = 1; %downsample
 
 % S/I against PC 2
 figure, 
-scatter3(squeeze(mean(cs(18,:,1:ds:end),2)),pc.SCORE(1:ds:end,2),addI.el(1:ds:end,1),'r.')
+scatter3(squeeze(mean(cs(18,:,:),2)),pc.SCORE(:,2),addI.el,'r.')
 set(gca,'Color',repmat(c_norm(i,j),3,1))
 axis tight
 xlabel(plt_lbls{18})
@@ -174,17 +198,25 @@ ylabel('PC 2 weight')
 
 % l against PC3
 figure, 
-scatter3(squeeze(mean(cs(6,:,1:ds:end),2)),pc.SCORE(1:ds:end,3),addI.el(1:ds:end,1),'r.')
+scatter3(squeeze(mean(cs(6,:,:),2)),pc.SCORE(:,3),addI.el,'r.')
 set(gca,'Color',repmat(c_norm(i,j),3,1))
 axis tight
 xlabel(plt_lbls{6})
 ylabel('PC 3 weight')
 
+% c against PC2 (logs)
 figure, 
-%plot(pc.SCORE(1:ds:end,1))
-scatter(addI.el(1:ds:end,1),pc.SCORE(1:ds:end,2))
-xlabel('Elevation')
-ylabel('PC2')
+scatter3(squeeze(mean(cs(21,:,:),2)),log10(pc.SCORE(:,2)),log10(addI.el),'r.')
+set(gca,'Color',repmat(c_norm(i,j),3,1))
+axis tight
+xlabel(plt_lbls{21})
+ylabel('PC 2 weight')
+
+% figure, 
+% %plot(pc.SCORE(1:ds:end,1))
+% scatter(addI.el(1:ds:end,1),pc.SCORE(1:ds:end,2))
+% xlabel('Elevation')
+% ylabel('PC2')
 
 %%
 figure,

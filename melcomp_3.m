@@ -10,6 +10,17 @@ load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_da
 T_SPD=final; clear final
 S_SPD=[300,5,161];
 
+% Additional SPD info (source: personal correspondance with J. Hernández-Andrés)
+[addI.NUM,addI.TXT,addI.RAW] = xlsread('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\add_info.xlsx');
+for i=1:length(T_SPD) %a lot of stupid code just to get the date and time out
+    addI.t(i) = datetime(...
+        [char(addI.RAW(2,2)),' ',char(days(cell2mat(addI.RAW(2,3))),'hh:mm')],...
+        'InputFormat','dd/MM/uuuu HH:mm');
+end
+addI.el = addI.NUM(:,4); %elevation
+addI.az = addI.NUM(:,5); %azimuth
+
+
 %% SRFs (Spectral Reflectance Functions)
 
 load sur_vrhel
@@ -61,7 +72,7 @@ end
 [pc.COEFF, pc.SCORE, pc.LATENT, pc.TSQUARED, pc.EXPLAINED] = pca(T_SPD'); %correct/weight at edges of spectrum?
 
 %% Calc correlation between 
-nPC = 15; %Number of principal components
+nPC = 5; %Number of principal components
 
 cs = cat(1,LMSRI,...
     lsri,...
@@ -111,6 +122,7 @@ for i=1:j %leftover, be careful
     c_norm(:,i) = c_norm(:,i)/max(c_norm(:,i));
 end
 
+%%
 figure, hold on
 subplot(2,1,1)
 imagesc(c)
@@ -134,6 +146,48 @@ set(gca, 'YTick', 1:size(cs,1));
 set(gca, 'YTickLabel', plt_lbls); 
 colormap('gray'); 
 
+%% plot scatters with backrounds the colours of the strength of correlation
 
+figure,
+for i=1:size(cs,1)
+    for j=1:nPC
+        subplot(size(cs,1),nPC,j+((i-1)*nPC))
+        scatter(squeeze(mean(cs(i,:,:),2)),pc.SCORE(:,j),'r.')
+        set(gca,'YTickLabel',[])
+        set(gca,'XTickLabel',[])
+        set(gca,'Color',repmat(c_norm(i,j),3,1))
+        axis tight
+    end
+end
+
+%% plot individual scatters of interest
+
+ds = 1; %downsample
+
+% S/I against PC 2
+figure, 
+scatter3(squeeze(mean(cs(18,:,1:ds:end),2)),pc.SCORE(1:ds:end,2),addI.el(1:ds:end,1),'r.')
+set(gca,'Color',repmat(c_norm(i,j),3,1))
+axis tight
+xlabel(plt_lbls{18})
+ylabel('PC 2 weight')
+
+% l against PC3
+figure, 
+scatter3(squeeze(mean(cs(6,:,1:ds:end),2)),pc.SCORE(1:ds:end,3),addI.el(1:ds:end,1),'r.')
+set(gca,'Color',repmat(c_norm(i,j),3,1))
+axis tight
+xlabel(plt_lbls{6})
+ylabel('PC 3 weight')
+
+figure, 
+%plot(pc.SCORE(1:ds:end,1))
+scatter(addI.el(1:ds:end,1),pc.SCORE(1:ds:end,2))
+xlabel('Elevation')
+ylabel('PC2')
+
+%%
+figure,
+plot(SToWls(S_SPD),pc.COEFF(:,1:3)./max(pc.COEFF(:,1:3)))
 
 

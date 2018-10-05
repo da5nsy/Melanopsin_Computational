@@ -25,7 +25,7 @@ load B_cieday.mat
 figure, hold on
 
 plot(SToWls(S_cieday),B_cieday(:,1:3)./max(B_cieday(:,1:3)),'r:','LineWidth',3)
-plot(S_SPD_e(17:97),COEFF(:,1:5))
+plot(S_SPD_e(17:97),COEFF(:,1:3)./max(COEFF(:,1:3)))
 legend
 
 

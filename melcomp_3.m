@@ -10,18 +10,21 @@ load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_da
 T_SPD=final; clear final
 S_SPD=[300,5,161];
 
-% Additional SPD info (source: personal correspondance with J. Hernández-Andrés)
-[addI.NUM,addI.TXT,addI.RAW] = xlsread('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\add_info.xlsx');
-for i=1:length(T_SPD) %a lot of stupid code just to get the date and time out
-    addI.t(i) = datetime(...
-        [char(addI.RAW(2,2)),' ',char(days(cell2mat(addI.RAW(2,3))),'hh:mm')],...
-        'InputFormat','dd/MM/uuuu HH:mm');
+try load SPD.mat addI %bit slow so I saved it out
+catch
+    % Additional SPD info (source: personal correspondance with J. Hernández-Andrés)
+    [addI.NUM,addI.TXT,addI.RAW] = xlsread('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\add_info.xlsx');
+    for i=1:length(T_SPD) %a lot of stupid code just to get the date and time out
+        addI.t(i) = datetime(...
+            [char(addI.RAW(2,2)),' ',char(days(cell2mat(addI.RAW(2,3))),'hh:mm')],...
+            'InputFormat','dd/MM/uuuu HH:mm');
+    end
+    addI.el = addI.NUM(:,4); %elevation
+    addI.az = addI.NUM(:,5); %azimuth
 end
-addI.el = addI.NUM(:,4); %elevation
-addI.az = addI.NUM(:,5); %azimuth
 
-%T_SPD = T_SPD(:,addI.el>15);
-%addI.el = addI.el(addI.el>15);
+T_SPD = T_SPD(:,addI.el>30);
+addI.el = addI.el(addI.el>30);
 
 
 %% SRFs (Spectral Reflectance Functions)
@@ -48,6 +51,7 @@ S_mel = S_melanopsin - [10, 0, 0]; clear S_melanopsin T_melanopsin
 
 %reduce all data down to the common range/interval
 S_sh = [max([S_SPD(1),S_SRF(1),S_SSF(1)]),max([S_SPD(2),S_SRF(2),S_SSF(2)]),min([S_SPD(3),S_SRF(3),S_SSF(3)])]; %S_shared: work out what the lowest common denominator for the range/interval of the data is
+%S_sh = [400,5,61]; % brute force way to do something like the variableweights thing
 
 T_SPD = SplineSpd(S_SPD,T_SPD,S_sh,1); % extend == 1: Cubic spline, extends with last value in that direction
 T_SRF = SplineSrf(S_SRF,T_SRF',S_sh,1); 
@@ -59,6 +63,9 @@ T_mel  = SplineCmf(S_mel,T_mel,S_sh)'; %extend? !!!!!!!!!!
 % combine sensitivity vectors
 T_LMSRI=[T_SSF,T_rods,T_mel];
 S_LMSRI=S_sh;
+
+% compute pca variable weight
+pc.variableweights = T_SSF(:,1)+T_SSF(:,3)+T_mel(:,1); %somewhat arbitrary choice
 
 %% Calculate colour signals
 
@@ -72,7 +79,7 @@ end
 
 %% PCA of illums
 
-[pc.COEFF, pc.SCORE, pc.LATENT, pc.TSQUARED, pc.EXPLAINED] = pca(T_SPD'); %correct/weight at edges of spectrum?
+[pc.COEFF, pc.SCORE, pc.LATENT, pc.TSQUARED, pc.EXPLAINED] = pca(T_SPD','VariableWeights',pc.variableweights);
 
 %% Calculate lines of fit between S and I values
 

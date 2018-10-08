@@ -145,6 +145,27 @@ colormap gray
 % set(gca,'YTickLabel',S_refs_f(xticks))
 xlabel('Nickerson')
     
-    
+%% What about daylight SPDs?
+
+load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_daylight_2600_161.mat');
+% http://colorimaginglab.ugr.es/pages/Data#__doku_granada_daylight_spectral_database
+% From: J. Hernández-Andrés, J. Romero& R.L. Lee, Jr., "Colorimetric and
+%       spectroradiometric characteristics of narrow-field-of-view
+%       clear skylight in Granada, Spain" (2001)
+T_SPD=final; clear final
+S_SPD=[300,5,161];
+
+T_SPD(T_SPD < 0) = 0; 
+
+T_SPD_c = corr(T_SPD');
+T_SPD_c_log = corr(log10(T_SPD'));
+
+figure,
+imagesc(T_SPD_c)
+colorbar
+
+figure,
+imagesc(T_SPD_c_log)
+colorbar
     
 

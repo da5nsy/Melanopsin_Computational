@@ -272,36 +272,3 @@ axis equal
 % plot(SToWls(S_SPD),pc.COEFF(:,1:3)./max(pc.COEFF(:,1:3)))
 % legend({'PC1','PC2','PC3'},'Location','Best')
 % axis tight
-
-%%
-for j=50:2:80
-    
-    msi = squeeze(mean(cs(18,:,:),2))-0.5867; %mean S/I
-    s = squeeze(mean(cs(2,:,:),2));
-    pc2 = pc.SCORE(:,2);
-    Z = (pc.SCORE(:,1)-min(pc.SCORE(:,1))).^(1/4);
-    
-    r=zeros(2,2600);
-    
-    for i=1:2600
-        theta = (8 - Z(i))*j;
-        R = [cosd(theta) -sind(theta); ...
-            sind(theta) cosd(theta)];
-        r(:,i) = R*[msi(i) pc2(i)]';
-    end
-    
-    figure,
-    subplot(1,2,1)
-    scatter3(msi,pc2,Z,'k.')
-    view(2)
-    axis equal
-    
-    subplot(1,2,2)
-    scatter3(r(1,:),r(2,:),Z,'k.')
-    view(2)
-    axis equal
-    
-    title(j)
-    
-    pause(1)
-end

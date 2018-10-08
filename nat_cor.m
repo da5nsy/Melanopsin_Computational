@@ -2,7 +2,7 @@
 
 %% Load data
 
-%clear, clc, close all
+clear, clc, close all
 
 base = 'C:\Users\cege-user\Documents\Large data\Foster Images\';
 for i=1:4 %2002 images
@@ -58,7 +58,7 @@ for i=1:length(ims)
     subplot(3,3,i)
     imagesc(ims(i).c)
     axis image
-    %colorbar
+    colorbar
     colormap gray
     
     S_refs_f = SToWls(ims(i).S);
@@ -67,34 +67,34 @@ for i=1:length(ims)
     
 end
 
-% %visualization of images
-% figure; hold on
-% for i=1:length(ims)
-%     subplot(3,3,i)
-%     imshow(cat(3,ims(i).r(:,:,25),ims(i).r(:,:,17),ims(i).r(:,:,7)).^0.2) %added the final term as a bodge to make everything visible rather than for a strict scientific reason
-% end
+%visualization of images
+figure; hold on
+for i=1:length(ims)
+    subplot(3,3,i)
+    imshow(cat(3,ims(i).r(:,:,25),ims(i).r(:,:,17),ims(i).r(:,:,7)).^0.2) %added the final term as a bodge to make everything visible rather than for a strict scientific reason
+end
 
-% figure, 
-% %median vs mean? Arguments for either, results similar but not same
-% av = mean(cat(3,...
-%     ims(1).c,...
-%     ims(2).c,...
-%     ims(3).c,...
-%     ims(4).c,...
-%     ims(5).c(2:end-1,2:end-1),...
-%     ims(6).c(2:end-1,2:end-1),...
-%     ims(7).c(2:end-1,2:end-1),...
-%     ims(8).c(2:end-1,2:end-1),...
-%     ims(9).c(2:end,2:end)),...
-%     3);
-% imagesc(av)
-% axis image
-% %colorbar
-% colormap gray
-% 
-% S_refs_f = SToWls(ims(1).S);
-% set(gca,'XTickLabel',S_refs_f(xticks))
-% set(gca,'YTickLabel',S_refs_f(xticks))
+figure, 
+%median vs mean? Arguments for either, results similar but not same
+av = median(cat(3,...
+    ims(1).c,...
+    ims(2).c,...
+    ims(3).c,...
+    ims(4).c,...
+    ims(5).c(2:end-1,2:end-1),...
+    ims(6).c(2:end-1,2:end-1),...
+    ims(7).c(2:end-1,2:end-1),...
+    ims(8).c(2:end-1,2:end-1),...
+    ims(9).c(2:end,2:end)),...
+    3);
+imagesc(av)
+axis image
+colorbar
+colormap gray
+
+S_refs_f = SToWls(ims(1).S);
+set(gca,'XTickLabel',S_refs_f(xticks))
+set(gca,'YTickLabel',S_refs_f(xticks))
 
 %% Plot all other datasets
 
@@ -107,9 +107,9 @@ sur_vrhel_c = corr(sur_vrhel');
 imagesc(sur_vrhel_c)
 axis image
 colormap gray
-% S_refs_f = SToWls(S_vrhel);
-% set(gca,'XTickLabel',S_refs_f(xticks))
-% set(gca,'YTickLabel',S_refs_f(xticks))
+S_refs_f = SToWls(S_vrhel);
+set(gca,'XTickLabel',S_refs_f(xticks))
+set(gca,'YTickLabel',S_refs_f(xticks))
 xlabel('Vrhel')
 
 subplot(2,2,2)
@@ -118,9 +118,9 @@ sur_vrhel_n_c = corr(sur_vrhel_n');
 imagesc(sur_vrhel_n_c)
 axis image
 colormap gray
-% S_refs_f = SToWls(S_vrhel);
-% set(gca,'XTickLabel',S_refs_f(xticks))
-% set(gca,'YTickLabel',S_refs_f(xticks))
+S_refs_f = SToWls(S_vrhel);
+set(gca,'XTickLabel',S_refs_f(xticks))
+set(gca,'YTickLabel',S_refs_f(xticks))
 xlabel('Vrhel (Nat only)')
 
 % There's a note in the PTB contents.m file that says that these are
@@ -130,9 +130,9 @@ sur_macbeth_c = corr(sur_macbeth');
 imagesc(sur_macbeth_c)
 axis image
 colormap gray
-% S_refs_f = SToWls(S_macbeth);
-% set(gca,'XTickLabel',S_refs_f(xticks))
-% set(gca,'YTickLabel',S_refs_f(xticks))
+S_refs_f = SToWls(S_macbeth);
+set(gca,'XTickLabel',S_refs_f(xticks))
+set(gca,'YTickLabel',S_refs_f(xticks))
 xlabel('Macbeth')
 
 subplot(2,2,4)
@@ -140,10 +140,20 @@ sur_nickerson_c = corr(sur_nickerson');
 imagesc(sur_nickerson_c)
 axis image
 colormap gray
-% S_refs_f = SToWls(S_nickerson);
-% set(gca,'XTickLabel',S_refs_f(xticks))
-% set(gca,'YTickLabel',S_refs_f(xticks))
+S_refs_f = SToWls(S_nickerson);
+set(gca,'XTickLabel',S_refs_f(xticks))
+set(gca,'YTickLabel',S_refs_f(xticks))
 xlabel('Nickerson')
+
+%%
+load T_cones_sp
+load T_melanopsin
+load T_rods
+figure, hold on
+subplot(2,2,1)
+plot(SToWls(S_cones_sp),T_cones_sp)
+plot(SToWls(S_melanopsin),T_melanopsin)
+plot(SToWls(S_rods),T_rods)
     
 %% What about daylight SPDs?
 

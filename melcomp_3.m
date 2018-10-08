@@ -116,7 +116,7 @@ f_c = permute(repmat(fit(:,2),1,1,170),[2,3,1]);
 
 %% Calc correlation between
 
-nPC = 5; %Number of principal components
+nPC = 3; %Number of principal components
 
 cs = cat(1,LMSRI,...
     lsri,...
@@ -171,11 +171,11 @@ for i=1:j %leftover, be careful
 end
 
 %%
-plt_viz = 0;
+plt_viz = 1;
 
 if plt_viz
     figure, hold on
-    subplot(2,1,1)
+    subplot(1,2,1)
     imagesc(c)
     colorbar
     title('correlation between signal and PC weight')
@@ -186,7 +186,7 @@ if plt_viz
     set(gca, 'YTickLabel', plt_lbls);
     colormap('gray');
     
-    subplot(2,1,2)
+    subplot(1,2,2)
     imagesc(c_norm)
     colorbar
     title('as above, normalised')
@@ -230,9 +230,18 @@ set(gca,'Color',repmat(c_norm(18,2),3,1))
 axis tight
 xlabel(plt_lbls{18})
 ylabel('PC 2 weight')
+zlabel('I')
 
-yfit = polyval(mean(fit),melog10(LMSRI(3,:,i)));
-plot(log10(LMSRI(3,:,i)),yfit,'Color',cols(i,:))
+figure, hold on
+scatter3(squeeze(mean(cs(18,:,:),2)),pc.SCORE(:,2),pc.SCORE(:,1),'b.')
+set(gca,'Color',repmat(c_norm(18,2),3,1))
+axis tight
+xlabel(plt_lbls{18})
+ylabel('PC 2 weight')
+zlabel('PC 1 weight')
+
+% yfit = polyval(mean(fit),log10(LMSRI(3,:,i)));
+% plot(log10(LMSRI(3,:,i)),yfit,'Color',cols(i,:))
 
 % % l against PC3
 % figure,
@@ -258,7 +267,8 @@ plot(log10(LMSRI(3,:,i)),yfit,'Color',cols(i,:))
 
 %%
 
-% figure,
-% plot(SToWls(S_SPD),pc.COEFF(:,1:3)./max(pc.COEFF(:,1:3)))
-
+figure,
+plot(SToWls(S_SPD),pc.COEFF(:,1:3)./max(pc.COEFF(:,1:3)))
+legend({'PC1','PC2','PC3'},'Location','Best')
+axis tight
 

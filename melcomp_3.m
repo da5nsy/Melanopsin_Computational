@@ -223,22 +223,23 @@ end
 
 ds = 1; %downsample
 
-% S/I against PC 2
-figure, hold on
-scatter3(squeeze(mean(cs(18,:,:),2)),pc.SCORE(:,2),squeeze(mean(LMSRI(5,:,:))),'r.')
-set(gca,'Color',repmat(c_norm(18,2),3,1))
-axis tight
-xlabel(plt_lbls{18})
-ylabel('PC 2 weight')
-zlabel('I')
+% % S/I against PC 2
+% figure, hold on
+% scatter3(squeeze(mean(cs(18,:,:),2)),pc.SCORE(:,2),squeeze(mean(LMSRI(5,:,:))),'r.')
+% set(gca,'Color',repmat(c_norm(18,2),3,1))
+% axis tight
+% xlabel(plt_lbls{18})
+% ylabel('PC 2 weight')
+% zlabel('I')
 
 figure, hold on
-scatter3(squeeze(mean(cs(18,:,:),2)),pc.SCORE(:,2),pc.SCORE(:,1),'b.')
+scatter3(squeeze(mean(cs(18,:,:),2)),pc.SCORE(:,2),(pc.SCORE(:,1)-min(pc.SCORE(:,1))).^(1/4),'b.')
 set(gca,'Color',repmat(c_norm(18,2),3,1))
 axis tight
 xlabel(plt_lbls{18})
 ylabel('PC 2 weight')
 zlabel('PC 1 weight')
+axis equal
 
 % yfit = polyval(mean(fit),log10(LMSRI(3,:,i)));
 % plot(log10(LMSRI(3,:,i)),yfit,'Color',cols(i,:))
@@ -267,8 +268,8 @@ zlabel('PC 1 weight')
 
 %%
 
-figure,
-plot(SToWls(S_SPD),pc.COEFF(:,1:3)./max(pc.COEFF(:,1:3)))
-legend({'PC1','PC2','PC3'},'Location','Best')
-axis tight
+% figure,
+% plot(SToWls(S_SPD),pc.COEFF(:,1:3)./max(pc.COEFF(:,1:3)))
+% legend({'PC1','PC2','PC3'},'Location','Best')
+% axis tight
 

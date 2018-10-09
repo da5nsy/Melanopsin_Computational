@@ -31,7 +31,7 @@ plot(SToWls(S_SPD),T_SPD)
 %%
 
 cla
-[pc.coeff, pc.score, pc.latent, pc.tsquared, pc.explained] = pca(T_SPD');
+[pc.coeff, pc.score, pc.latent, pc.tsquared, pc.explained, pc.mu] = pca(T_SPD');
 
 ylim([-1 1]); yticks([-1,0,1]);
 %legend({'PC1','PC2','PC3'},'Location','Southwest')
@@ -48,12 +48,17 @@ plot(SToWls(S_SPD),pc.coeff(:,3)./max(pc.coeff(:,3)))
 
 %%
 cla
+hold on
 ylim([0 2]); yticks([0,1,2]);
 
-% clear recon
-% recon(:,1) = T_SPD(:,103);
-% recon(:,2) = pc.score(103,:)*pc.coeff';
-% recon(:,3) = pc.score(103,1:3)*pc.coeff(:,1:3)';
-% 
-% figure, plot(recon)
-% legend({'Original Data','Reconstructed with all scores and cos','Reconstructed with 1:3'})
+recon(:,1) = pc.score(103,:)   * pc.coeff'        + pc.mu; % Reconstructed with all PCs
+recon(:,2) = pc.score(103,1:3) * pc.coeff(:,1:3)' + pc.mu; % Reconstructed with 3 PCs
+
+plot(SToWls(S_SPD), T_SPD(:,103), 'b') % Original data
+plot(SToWls(S_SPD), recon(:,2), 'r--') % 3 PC
+% legend({'Original Data','Reconstructed with 1:3'})
+
+% figure, plot((pc.score*pc.coeff' + repmat(pc.mu,2600,1))') %all the data reconstructed
+
+
+

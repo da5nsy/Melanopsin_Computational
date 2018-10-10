@@ -63,7 +63,16 @@ for i=1:n
     pause(0.2)
 end
 
-% figure,
-% scatter(sc(:,1,round(n/2)),sc(:,2,round(n/2)));
+%%
+
+figure, hold on
+plot(5:39,fit_t(5:39,1))
+plot(5:39,fit_t(5:39,2))
+
+a = polyfit(5:39,fit_t(5:39,1)',6);
+y_p = polyval(a,5:39);
+plot(5:39,y_p);
+
+
 
 

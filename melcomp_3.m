@@ -272,3 +272,84 @@ axis equal
 % plot(SToWls(S_SPD),pc.COEFF(:,1:3)./max(pc.COEFF(:,1:3)))
 % legend({'PC1','PC2','PC3'},'Location','Best')
 % axis tight
+
+%%
+
+SoI = squeeze(mean(cs(18,:,:),2)); %signal of interest
+SoIL = log2(SoI); %Log SoI
+pc1 = pc.SCORE(:,1);
+pc2 = pc.SCORE(:,2);
+pc1n = (pc1-min(pc1)).^(1/4); %pc1 normalised
+
+% figure, hold on
+% scatter3(SoI,pc2,pc1,'r.')
+% axis tight
+% xlabel('SoI')
+% ylabel('PC2')
+% zlabel('PC1')
+%
+% figure, hold on
+% scatter3(SoI,pc2,pc1n,'b.')
+% axis tight
+% xlabel('SoI')
+% ylabel('PC2')
+% zlabel('PC1n')
+% axis equal
+
+figure, hold on
+scatter3(SoIL,pc2,pc1n,'b.')
+axis tight
+xlabel('SoIL')
+ylabel('PC2')
+zlabel('PC1n')
+axis equal
+
+%% Segment
+
+NoD = 30; %nnumber of divisions
+m1 = max(pc1n);
+cols = flag(NoD); %cols = jet(n);
+
+sc_t = [SoIL pc2]; %scatter temp
+sc = NaN([size(sc_t) NoD]);
+
+figure, hold on
+axis equal
+
+for i=1:NoD
+    sc(and(pc1n<(i*(m1/NoD)),pc1n>((i-1)*(m1/NoD))),:,i) = sc_t(and(pc1n<(i*(m1/NoD)),pc1n>((i-1)*(m1/NoD))),:);
+    fit_t(i,:) = polyfit(sc(~isnan(sc(:,1,i)),1,i),sc(~isnan(sc(:,2,i)),2,i),1); %fitty, lol. Seriously though, temp.
+    
+    x = linspace(min(sc(:,1,i)),max(sc(:,1,i)),20);
+    y = (fit_t(i,1) * x) + fit_t(i,2);
+    
+    if any(fit_t(i,:))
+        scatter(sc(:,1,i),sc(:,2,i),[],cols(i,:));
+        plot(x,y,'Color',cols(i,:));
+    end
+    drawnow
+    %pause(0.2)
+end
+
+%% Assess curve of fit values
+clear x y
+
+figure, hold on
+
+x = 4:30;
+y_1 = fit_t(4:30,1);
+y_2 = fit_t(4:30,2);
+plot(x,y_1,x,y_2)
+
+p_1 = polyfit(log(x),log(y_1'),4);
+p_2 = real(polyfit(log(x),log(y_2'),4)); %goes imaginary due to negative numbers (I think?)
+y_1p = polyval(p_1, log(x));
+y_2p = polyval(p_2, log(x));
+
+plot(x,exp(y_1p),x,exp(y_2p))
+
+legend
+
+%plot(x,exp(p(2))*x.^p(1));
+
+% f = fit(x,y,'power2') %need curve fitting toolbox for this

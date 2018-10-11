@@ -54,19 +54,13 @@ fill([min(xlim),max(xlim),max(xlim),min(xlim),min(xlim)],[-1,-1,0,0,-1],...
 %plot(SToWls(S_SPD),pc.coeff(:,1:3)./max(pc.coeff(:,1:3)))
 
 plot(SToWls(S_SPD),pc_p.coeff(:,1))
-if p
-    print([base,'\','3'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 %%
 plot(SToWls(S_SPD),pc_p.coeff(:,2))
-if p
-    print([base,'\','4'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 %%
 plot(SToWls(S_SPD),pc_p.coeff(:,3))
-if p
-    print([base,'\','5'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %%
 cla
@@ -79,9 +73,7 @@ recon_p(:,2) = pc_p.score(103,1:3) * pc_p.coeff(:,1:3)' + pc_p.mu; % Reconstruct
 %plot(SToWls(S_SPD), T_SPD(:,103), 'b') % Original data
 plot(SToWls(S_SPD), recon_p(:,2), 'r') % 3 PC
 % legend({'Original Data','Reconstructed with 1:3'})
-if p
-    print([base,'\','6'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 % figure, plot((pc_p.score*pc_p.coeff' + repmat(pc_p.mu,length(pc_p.score),1))') %all the data reconstructed
 
@@ -99,15 +91,11 @@ ylim([0 1]); yticks([0,1]);
 xlabel('Wavelength'); ylabel('Reflectance');
 
 plot(SToWls(S_SRF),T_SRF(:,109)) %pear
-if p
-    print([base,'\','7'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %% all the SRFs
 plot(SToWls(S_SRF),T_SRF)
-if p
-    print([base,'\','8'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %%
 
@@ -122,19 +110,13 @@ fill([min(xlim),max(xlim),max(xlim),min(xlim),min(xlim)],[-1,-1,0,0,-1],...
 %plot(SToWls(S_SRF),pc.coeff(:,1:3)./max(pc.coeff(:,1:3)))
 
 plot(SToWls(S_SRF),pc_r.coeff(:,1))
-if p
-    print([base,'\','9'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 %%
 plot(SToWls(S_SRF),pc_r.coeff(:,2))
-if p
-    print([base,'\','10'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 %%
 plot(SToWls(S_SRF),pc_r.coeff(:,3))
-if p
-    print([base,'\','11'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %%
 cla
@@ -147,9 +129,7 @@ recon_r(:,2) = pc_r.score(109,1:3) * pc_r.coeff(:,1:3)' + pc_r.mu; % Reconstruct
 %plot(SToWls(S_SRF), T_SRF(:,109), 'b') % Original data
 plot(SToWls(S_SRF), recon_r(:,2), 'r') % 3 PC
 % legend({'Original Data','Reconstructed with 1:3'})
-if p
-    print([base,'\','12'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 % figure, plot((pc_r.score*pc_r.coeff' + repmat(pc_r.mu,length(pc_r.score),1))') %all the data reconstructed
 
@@ -170,9 +150,7 @@ plot(SToWls(S_melanopsin),T_melanopsin)
 
 ylabel('Sensitivity')
 
-if p
-    print([base,'\','13'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %% Show colorimetric effect of principal components
 
@@ -236,17 +214,13 @@ end
 
 scatter3(n.xy(:,1,1),n.xy(:,1,2),n.XYZ(:,1,2),'k*')
 zlabel('Y')
-if p
-    print([base,'\','14'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
 scatter3(n.xy(:,2,1),n.xy(:,2,2),n.XYZ(:,2,2),'b*')
-if p
-    print([base,'\','15'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
 scatter3(n.xy(:,3,1),n.xy(:,3,2),n.XYZ(:,3,2),'r*')
-if p
-    print([base,'\','16'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %%
 figure(1)
@@ -258,22 +232,16 @@ fill([min(xlim),max(xlim),max(xlim),min(xlim),min(xlim)],[-1,-1,0,0,-1],...
     'k','LineStyle','none','FaceAlpha','0.03');
 
 plot(SToWls(S_SPD),pc_p.coeff(:,2),'Color',cols(2,:))
-if p
-    print([base,'\','17'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 for i = -2:0.5:2
     plot(SToWls(S_SPD),pc_p.coeff(:,2)*i,'Color',cols(2,:)*((i+2)/4))
 end
-if p
-    print([base,'\','18'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 cla
 plot(SToWls(S_SPD),pc_p.coeff(:,2)*-1,'Color',cols(2,:)*((-1+2)/4))
-if p
-    print([base,'\','19'],ff)
-end
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %%
 

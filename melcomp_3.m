@@ -30,7 +30,7 @@ end
 %% SRFs (Spectral Reflectance Functions)
 
 load sur_vrhel
-T_SRF = sur_vrhel';
+T_SRF = sur_vrhel(:,[1:44,65,69,81:154])';
 S_SRF = S_vrhel;
 clear sur_vrhel S_vrhel
 
@@ -78,8 +78,6 @@ elseif vw == 2 %S+L+I
     pc.variableweights = T_SSF(:,1)+T_SSF(:,3)+T_mel(:,1); 
 end
 
-
-
 %% Calculate colour signals
 
 for i=1:size(T_SPD,2)
@@ -88,16 +86,6 @@ for i=1:size(T_SPD,2)
     lsri(1:2,:,i) = LMSToMacBoyn(LMSRI(1:3,:,i)); %change this to be more direct !!!!!!!!!!!!!!
     lsri(3,:,i)   = LMSRI(4,:,i)./(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)); %change this to be more direct !!!!!!!!!!!!!!
     lsri(4,:,i)   = LMSRI(5,:,i)./(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)); %change this to be more direct !!!!!!!!!!!!!!
-end
-
-%% Modify colour signals
-mod_I = 0;
-
-if mod_I
-    figure, hist(LMSRI(5,:),50)
-    %LMSRI(5,LMSRI(1,:)<0.1) = 0.0000000000000001;
-    LMSRI(5,:) = log(LMSRI(5,:))-min(log(LMSRI(5,:)));
-    figure, hist(LMSRI(5,:),50)
 end
 
 %% PCA of illums
@@ -111,8 +99,8 @@ for i=1:size(LMSRI,3)
     fit(i,:) = polyfit(log10(LMSRI(3,:,i)),log10(LMSRI(5,:,i)),1);
 end %need to visualise this to make sure it's working as planned !!!!!!!!!!
 
-f_m = permute(repmat(fit(:,1),1,1,170),[2,3,1]);
-f_c = permute(repmat(fit(:,2),1,1,170),[2,3,1]);
+f_m = permute(repmat(fit(:,1),1,1,size(LMSRI,2)),[2,3,1]);
+f_c = permute(repmat(fit(:,2),1,1,size(LMSRI,2)),[2,3,1]);
 
 %% Calc correlation between
 
@@ -132,7 +120,7 @@ cs = cat(1,LMSRI,...
     (LMSRI(3,:,:)+LMSRI(5,:,:))./(LMSRI(1,:,:)+LMSRI(2,:,:)),...
     f_m,...
     f_c...
-    );
+    ); %colour signals
 
 plt_lbls{1}  = 'L'; %writing out this way so that there's a quick reference as to which value of Z_ax does what
 plt_lbls{2}  = 'M';
@@ -275,7 +263,7 @@ axis equal
 
 %%
 
-SoI = squeeze(mean(cs(18,:,:),2)); %signal of interest
+SoI = squeeze(mean(cs(18,:,:),2)); %signal of interest, OR S-over-I (take your pick!)
 SoIL = log2(SoI); %Log SoI
 pc1 = pc.SCORE(:,1);
 pc2 = pc.SCORE(:,2);

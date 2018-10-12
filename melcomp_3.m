@@ -1,4 +1,10 @@
-clc, clear, close all
+function [cs,pc,plt_lbls] = melcomp_3
+
+try
+    nargin;
+catch
+    clear, clc, close all
+end
 
 %% SPDs (Spectral Power Distributions)
 
@@ -159,7 +165,7 @@ for i=1:j %leftover, be careful
 end
 
 %%
-plt_viz = 1;
+plt_viz = 0;
 
 if plt_viz
     figure, hold on
@@ -209,25 +215,27 @@ end
 
 %% plot individual scatters of interest
 
-ds = 1; %downsample
+% ds = 1; %downsample
 
-% S/I against PC 2
-figure, hold on
-scatter3(squeeze(mean(cs(18,:,:),2)),pc.SCORE(:,2),squeeze(mean(LMSRI(5,:,:))),'r.')
-set(gca,'Color',repmat(c_norm(18,2),3,1))
-axis tight
-xlabel(plt_lbls{18})
-ylabel('PC 2 weight')
-zlabel('I')
+% % S/I against PC 2
+% scatter(squeeze(mean(cs(1,:,:),2)),pc.SCORE(:,1),'k.')
+% xlabel(plt_lbls{1})
+% ylabel('PC 1')
+% 
+% scatter3(squeeze(mean(cs(18,:,:),2)),pc.SCORE(:,2),pc.SCORE(:,1),'k.')
+% %set(gca,'Color',repmat(c_norm(18,2),3,1))
+% xlabel(plt_lbls{18})
+% ylabel('PC 2')
+% zlabel('PC 1')
 
-figure, hold on
-scatter3(squeeze(mean(cs(18,:,:),2)),pc.SCORE(:,2),(pc.SCORE(:,1)-min(pc.SCORE(:,1))).^(1/4),'b.')
-set(gca,'Color',repmat(c_norm(18,2),3,1))
-axis tight
-xlabel(plt_lbls{18})
-ylabel('PC 2 weight')
-zlabel('PC 1 weight')
-axis equal
+% figure, hold on
+% scatter3(squeeze(mean(cs(18,:,:),2)),pc.SCORE(:,2),(pc.SCORE(:,1)-min(pc.SCORE(:,1))).^(1/4),'b.')
+% set(gca,'Color',repmat(c_norm(18,2),3,1))
+% axis tight
+% xlabel(plt_lbls{18})
+% ylabel('PC 2 weight')
+% zlabel('PC 1 weight')
+% axis equal
 
 % yfit = polyval(mean(fit),log10(LMSRI(3,:,i)));
 % plot(log10(LMSRI(3,:,i)),yfit,'Color',cols(i,:))
@@ -262,6 +270,7 @@ axis equal
 % axis tight
 
 %%
+plt_soil = 0;
 
 SoI = squeeze(mean(cs(18,:,:),2)); %signal of interest, OR S-over-I (take your pick!)
 SoIL = log2(SoI); %Log SoI
@@ -284,15 +293,18 @@ pc1n = (pc1-min(pc1)).^(1/4); %pc1 normalised
 % zlabel('PC1n')
 % axis equal
 
-figure, hold on
-scatter3(SoIL,pc2,pc1n,'b.')
-axis tight
-xlabel('SoIL')
-ylabel('PC2')
-zlabel('PC1n')
-axis equal
-
+if plt_soil
+    figure, hold on
+    scatter3(SoIL,pc2,pc1n,'b.')
+    axis tight
+    xlabel('SoIL')
+    ylabel('PC2')
+    zlabel('PC1n')
+    axis equal
+end
 %% Segment
+
+plt_seg = 0;
 
 NoD = 30; %nnumber of divisions
 m1 = max(pc1n);
@@ -301,43 +313,50 @@ cols = flag(NoD); %cols = jet(n);
 sc_t = [SoIL pc2]; %scatter temp
 sc = NaN([size(sc_t) NoD]);
 
-figure, hold on
-axis equal
-
-for i=1:NoD
-    sc(and(pc1n<(i*(m1/NoD)),pc1n>((i-1)*(m1/NoD))),:,i) = sc_t(and(pc1n<(i*(m1/NoD)),pc1n>((i-1)*(m1/NoD))),:);
-    fit_t(i,:) = polyfit(sc(~isnan(sc(:,1,i)),1,i),sc(~isnan(sc(:,2,i)),2,i),1); %fitty, lol. Seriously though, temp.
+if plt_seg
+    figure, hold on
+    axis equal
     
-    x = linspace(min(sc(:,1,i)),max(sc(:,1,i)),20);
-    y = (fit_t(i,1) * x) + fit_t(i,2);
-    
-    if any(fit_t(i,:))
-        scatter(sc(:,1,i),sc(:,2,i),[],cols(i,:));
-        plot(x,y,'Color',cols(i,:));
+    for i=1:NoD
+        sc(and(pc1n<(i*(m1/NoD)),pc1n>((i-1)*(m1/NoD))),:,i) = sc_t(and(pc1n<(i*(m1/NoD)),pc1n>((i-1)*(m1/NoD))),:);
+        fit_t(i,:) = polyfit(sc(~isnan(sc(:,1,i)),1,i),sc(~isnan(sc(:,2,i)),2,i),1); %fitty, lol. Seriously though, temp.
+        
+        x_seg = linspace(min(sc(:,1,i)),max(sc(:,1,i)),20);
+        y = (fit_t(i,1) * x_seg) + fit_t(i,2);
+        
+        if any(fit_t(i,:))
+            scatter(sc(:,1,i),sc(:,2,i),[],cols(i,:));
+            plot(x_seg,y,'Color',cols(i,:));
+        end
+        drawnow
+        %pause(0.2)
     end
-    drawnow
-    %pause(0.2)
 end
 
 %% Assess curve of fit values
-clear x y
+plt_ass = 0;
 
-figure, hold on
-
-x = 4:30;
-y_1 = fit_t(4:30,1);
-y_2 = fit_t(4:30,2);
-plot(x,y_1,x,y_2)
-
-p_1 = polyfit(log(x),log(y_1'),4);
-p_2 = real(polyfit(log(x),log(y_2'),4)); %goes imaginary due to negative numbers (I think?)
-y_1p = polyval(p_1, log(x));
-y_2p = polyval(p_2, log(x));
-
-plot(x,exp(y_1p),x,exp(y_2p))
-
-legend
+if plt_ass
+    figure, hold on
+    
+    x_ass = 4:30;
+    y_1 = fit_t(4:30,1);
+    y_2 = fit_t(4:30,2);
+    plot(x_ass,y_1,x_ass,y_2)
+    
+    p_1 = polyfit(log(x_ass),log(y_1'),4);
+    p_2 = real(polyfit(log(x_ass),log(y_2'),4)); %goes imaginary due to negative numbers (I think?)
+    y_1p = polyval(p_1, log(x_ass));
+    y_2p = polyval(p_2, log(x_ass));
+    
+    plot(x_ass,exp(y_1p),x_ass,exp(y_2p))
+    
+    legend
+end
 
 %plot(x,exp(p(2))*x.^p(1));
 
 % f = fit(x,y,'power2') %need curve fitting toolbox for this
+
+
+end

@@ -7,7 +7,7 @@ clc, clear, close all
 base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Project Overview Presentation';
 
 ff = '-dtiff'; %file format
-p  = 1; %print? (aka save?), set to 1 to begin saving
+p  = 0; %print? (aka save?), set to 1 to begin saving
 
 plot_where = [20,60];
 plot_size  = [800,375];
@@ -334,3 +334,100 @@ if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 % ylim('auto')
 % xticks('auto')
 % yticks('auto')
+
+%%
+[cs,pc_melcomp,plt_lbls] = melcomp_3;
+
+% L against PC1
+figure(1)
+cla
+scatter(squeeze(mean(cs(1,:,:),2)),pc_melcomp.SCORE(:,1),'k.')
+xlabel(plt_lbls{1})
+ylabel('PC 1')
+xlim('auto')
+xticks('auto')
+ylim('auto')
+yticks('auto')
+
+f_SI = polyfit(squeeze(mean(cs(1,:,:),2)),pc_melcomp.SCORE(:,1),1);
+x = linspace(min(squeeze(mean(cs(1,:,:),2))),max(squeeze(mean(cs(1,:,:),2))));
+y = x*f_SI(1)+f_SI(2);
+plot(x,y)
+
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
+% S/I against PC2
+cla
+scatter(squeeze(mean(cs(18,:,:),2)),pc_melcomp.SCORE(:,2),'k.')
+xlabel(plt_lbls{18})
+ylabel('PC 2')
+xlim('auto')
+xticks('auto')
+ylim('auto')
+yticks('auto')
+
+f_SI = polyfit(squeeze(mean(cs(18,:,:),2)),pc_melcomp.SCORE(:,2),1);
+x = linspace(min(squeeze(mean(cs(18,:,:),2))),max(squeeze(mean(cs(18,:,:),2))));
+y = x*f_SI(1)+f_SI(2);
+plot(x,y)
+
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
+%% 3D plot - basic (same as previous but without line and with a third dimension)
+cla
+scatter3(squeeze(mean(cs(18,:,:),2)),pc_melcomp.SCORE(:,2),pc_melcomp.SCORE(:,1),'k.')
+%set(gca,'Color',repmat(c_norm(18,2),3,1))
+xlabel(plt_lbls{18})
+ylabel('PC 2')
+zlabel('PC 1')
+
+%% 3D plot - log(S/I) against sqrt(normalised(PC1))
+
+SoI = squeeze(mean(cs(18,:,:),2)); %signal of interest, OR S-over-I (take your pick!)
+SoIL = log2(SoI); %Log SoI
+pc1 = pc_melcomp.SCORE(:,1);
+pc2 = pc_melcomp.SCORE(:,2);
+pc1n = (pc1-min(pc1)).^(1/4); %pc1 normalised
+
+cla
+scatter3(SoIL,pc2,pc1n,'b.')
+xlabel('log2(S/I)')
+ylabel('PC2')
+zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
+
+%%
+
+plt_seg = 1;
+
+NoD = 30; %nnumber of divisions
+m1 = max(pc1n);
+cols = lines(NoD); %cols = jet(n);
+
+sc_t = [SoIL pc2]; %scatter temp
+sc = NaN([size(sc_t) NoD]);
+
+if plt_seg
+    figure('Position',[plot_where 800 800]), hold on
+    set(gca, 'FontSize', 16)
+    set(gcf,'defaultLineLineWidth',2)
+    axis equal
+    xlabel('log2(S/I)')
+    ylabel('PC2')
+    cla
+    
+    for i=1:NoD
+        sc(and(pc1n<(i*(m1/NoD)),pc1n>((i-1)*(m1/NoD))),:,i) = sc_t(and(pc1n<(i*(m1/NoD)),pc1n>((i-1)*(m1/NoD))),:);
+        fit_t(i,:) = polyfit(sc(~isnan(sc(:,1,i)),1,i),sc(~isnan(sc(:,2,i)),2,i),1); %fitty, lol. Seriously though, temp.
+        
+        x_seg = linspace(min(sc(:,1,i)),max(sc(:,1,i)),20);
+        y = (fit_t(i,1) * x_seg) + fit_t(i,2);
+        
+        if any(fit_t(i,:))
+            scatter3(sc(:,1,i),sc(:,2,i),pc1n,[],cols(i,:));
+            plot3(x_seg,y,pc1n,'Color',cols(i,:)); !!!!!!!!!!!!!!!!!!!!!!!!!!!
+        end
+        drawnow
+        %pause(0.2)
+    end
+end
+

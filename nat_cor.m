@@ -113,7 +113,8 @@ set(gca,'YTickLabel',S_refs_f(xticks))
 xlabel('Vrhel')
 
 subplot(2,2,2)
-sur_vrhel_n = sur_vrhel(:,[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141]);
+%sur_vrhel_n = sur_vrhel(:,[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141]);
+sur_vrhel_n = sur_vrhel(:,[1:44,65,69,81:154]);
 sur_vrhel_n_c = corr(sur_vrhel_n');
 imagesc(sur_vrhel_n_c)
 axis image
@@ -146,14 +147,14 @@ set(gca,'YTickLabel',S_refs_f(xticks))
 xlabel('Nickerson')
 
 %%
-load T_cones_sp
-load T_melanopsin
-load T_rods
-figure, hold on
-subplot(2,2,1)
-plot(SToWls(S_cones_sp),T_cones_sp)
-plot(SToWls(S_melanopsin),T_melanopsin)
-plot(SToWls(S_rods),T_rods)
+% load T_cones_sp
+% load T_melanopsin
+% load T_rods
+% figure, hold on
+% subplot(2,2,1)
+% plot(SToWls(S_cones_sp),T_cones_sp)
+% plot(SToWls(S_melanopsin),T_melanopsin)
+% plot(SToWls(S_rods),T_rods)
     
 %% What about daylight SPDs?
 
@@ -178,4 +179,6 @@ figure,
 imagesc(T_SPD_c_log)
 colorbar
     
+% looks dodgy AF to me. Something wacky going on around 130
+% wonder if the sweep would even out if plotted in frequency intervals?
 

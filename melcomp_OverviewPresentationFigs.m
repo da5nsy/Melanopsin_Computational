@@ -135,23 +135,6 @@ if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 % disp(pc_r.score(109,1:3)) %values for demo ref
 
-%% Plot spectral sensitivities
-
-figure(1)
-cla
-
-load T_cones_sp T_cones_sp S_cones_sp
-load T_rods T_rods S_rods
-load T_melanopsin T_melanopsin S_melanopsin
-
-plot(SToWls(S_cones_sp),T_cones_sp)
-plot(SToWls(S_rods),T_rods)
-plot(SToWls(S_melanopsin),T_melanopsin)
-
-ylabel('Sensitivity')
-
-if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
-
 %% Show colorimetric effect of principal components
 
 %load CMF
@@ -216,32 +199,138 @@ scatter3(n.xy(:,1,1),n.xy(:,1,2),n.XYZ(:,1,2),'k*')
 zlabel('Y')
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
-scatter3(n.xy(:,2,1),n.xy(:,2,2),n.XYZ(:,2,2),'b*')
+scatter3(n.xy(:,2,1),n.xy(:,2,2),n.XYZ(:,2,2),'b*') %could be nice to use 'real' colours here(?)
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 scatter3(n.xy(:,3,1),n.xy(:,3,2),n.XYZ(:,3,2),'r*')
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
-%%
+%% Plot spectral sensitivities
+
+figure(1)
+cla
+
+ylim([0 1]); yticks([0,1]);
+
+load T_cones_sp T_cones_sp S_cones_sp
+load T_rods T_rods S_rods
+load T_melanopsin T_melanopsin S_melanopsin
+
+plot(SToWls(S_cones_sp),T_cones_sp)
+plot(SToWls(S_rods),T_rods)
+plot(SToWls(S_melanopsin),T_melanopsin)
+
+ylabel('Sensitivity')
+
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
+% Find peak sensitivities (sure there's a way to do this in less lines)
+[~,ms.m_idx(1:3)] = max(T_cones_sp'); %ms = max sensitivities
+[~,ms.m_idx(4)]   = max(T_rods'); 
+[~,ms.m_idx(5)]   = max(T_melanopsin'); 
+
+ms.fS_sp  = SToWls(S_cones_sp); %full S
+ms.fS_r   = SToWls(S_rods);
+ms.fS_mel = SToWls(S_melanopsin);
+
+ms.m(1:3) = ms.fS_sp(ms.m_idx(1:3)); %max
+ms.m(4)   = ms.fS_r(ms.m_idx(4));
+ms.m(5)   = ms.fS_mel(ms.m_idx(5));
+
+%% Show the effect of changing the weight of PC2
 figure(1)
 cols = lines(3);
+xlim([380 780]); xticks(380:100:780);
+ylim([-0.3 0.3]); yticks([-0.3,0,0.3]);
+ylabel('Power');
 
 cla
-ylim([-0.3 0.3]); yticks([-0.3,0,0.3]);
 fill([min(xlim),max(xlim),max(xlim),min(xlim),min(xlim)],[-1,-1,0,0,-1],...
     'k','LineStyle','none','FaceAlpha','0.03');
 
 plot(SToWls(S_SPD),pc_p.coeff(:,2),'Color',cols(2,:))
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
+plot([ms.m(3),ms.m(3)],[min(ylim),max(ylim)],'Color','k')
+plot([ms.m(5),ms.m(5)],[min(ylim),max(ylim)],'Color','k')
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
+cla
+fill([min(xlim),max(xlim),max(xlim),min(xlim),min(xlim)],[-1,-1,0,0,-1],...
+    'k','LineStyle','none','FaceAlpha','0.03');
+plot(SToWls(S_SPD),pc_p.coeff(:,2)*-1,'Color',cols(2,:)*((-1+2)/4))
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
+plot([ms.m(3),ms.m(3)],[min(ylim),max(ylim)],'Color','k')
+plot([ms.m(5),ms.m(5)],[min(ylim),max(ylim)],'Color','k')
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
+cla
+fill([min(xlim),max(xlim),max(xlim),min(xlim),min(xlim)],[-1,-1,0,0,-1],...
+    'k','LineStyle','none','FaceAlpha','0.03');
 for i = -2:0.5:2
     plot(SToWls(S_SPD),pc_p.coeff(:,2)*i,'Color',cols(2,:)*((i+2)/4))
 end
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
-cla
-plot(SToWls(S_SPD),pc_p.coeff(:,2)*-1,'Color',cols(2,:)*((-1+2)/4))
+%%
+
+load sur_vrhel.mat
+
+figure('Position',[plot_where 800 800]), hold on
+set(gca, 'FontSize', 16)
+set(gcf,'defaultLineLineWidth',2)
+
+%sur_vrhel_n = sur_vrhel(:,[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141]);
+sur_vrhel_n = sur_vrhel(:,[1:44,65,69,81:154]);
+sur_vrhel_n_c = corr(sur_vrhel_n');
+surf(sur_vrhel_n_c*100,'EdgeColor','none')
+axis image
+colormap gray
+S_refs_f = SToWls(S_vrhel);
+xticks(6:50:200)
+yticks(6:50:200)
+set(gca,'XTickLabel',S_refs_f(xticks))
+set(gca,'YTickLabel',S_refs_f(yticks))
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
+plot3([26,26],[min(ylim),max(ylim)],[max(zlim),max(zlim)],'Color','b')
+plot3([50,50],[min(ylim),max(ylim)],[max(zlim),max(zlim)],'Color','k')
+plot3([min(xlim),max(xlim)],[26,26],[max(zlim),max(zlim)],'Color','b')
+plot3([min(xlim),max(xlim)],[50,50],[max(zlim),max(zlim)],'Color','k')
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
+plot3([88,88],[min(ylim),max(ylim)],[max(zlim),max(zlim)],'Color','r')
+plot3([78,78],[min(ylim),max(ylim)],[max(zlim),max(zlim)],'Color','g')
+plot3([58,58],[min(ylim),max(ylim)],[max(zlim),max(zlim)],'Color',[0.5,0.5,0.5])
+plot3([min(xlim),max(xlim)],[88,88],[max(zlim),max(zlim)],'Color','r')
+plot3([min(xlim),max(xlim)],[78,78],[max(zlim),max(zlim)],'Color','g')
+plot3([min(xlim),max(xlim)],[58,58],[max(zlim),max(zlim)],'Color',[0.5,0.5,0.5])
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
+%% Plot normalised spectral reflectances
+figure(1)
+
+cla
+hold on
+xlim([390 730]); xticks(400:100:700);
+ylim([0 10]); yticks([0,10]);
+xlabel('Wavelength'); ylabel('Normalised  Reflectance');
+
+plot([440,440],[min(ylim),max(ylim)],'b:')
+plot([488,488],[min(ylim),max(ylim)],'k:')
+
+plot(SToWls(S_SRF),T_SRF./T_SRF(26,:))
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
 
 %%
 
+% figure(2)
+% cla
+% 
+% scatter(T_SRF(26,:),T_SRF(76,:))
+% xlim('auto')
+% ylim('auto')
+% xticks('auto')
+% yticks('auto')

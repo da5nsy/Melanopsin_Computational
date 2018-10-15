@@ -4,10 +4,10 @@
 
 clc, clear, close all
 
-base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Project Overview Presentation';
+base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Project Overview Presentation\2';
 
 ff = '-dtiff'; %file format
-p  = 0; %print? (aka save?), set to 1 to begin saving
+p  = 1; %print? (aka save?), set to 1 to begin saving
 
 plot_where = [20,60];
 plot_size  = [800,375];
@@ -26,8 +26,12 @@ load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_da
 %       spectroradiometric characteristics of narrow-field-of-view
 %       clear skylight in Granada, Spain" (2001)
 
-T_SPD = final(17:97,:); clear final
-S_SPD = [380,5,81];
+load spd_houser.mat
+T_SPD = spd_houser;
+S_SPD = S_houser;
+
+% T_SPD = final(17:97,:); clear final
+% S_SPD = [380,5,81];
 
 xlim([380 780]); xticks(380:100:780);
 ylim([0 2]); yticks([0,1,2]);
@@ -459,8 +463,12 @@ if plt_ass
     plot(x_ass,exp(y_2p),'b:')
     
     
-    legend('x','c',num2str(p_1),num2str(p_2))
+    legend('m','c',num2str(p_1),num2str(p_2))
 end
+
+%%
+
+return
 
 %%
 
@@ -468,6 +476,8 @@ figure(1)
 
 scatter3(log2(squeeze(mean(cs(13,:,:),2))),pc2,pc1n,'r.')
 scatter3(log2(squeeze(mean(cs(14,:,:),2))),pc2,pc1n,'g.')
+
+xlabel(' ')
 
 legend('log(S/I)','log(L/M)','log(L/S)')
 
@@ -502,3 +512,5 @@ for i=[6:9,13:21]
     zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
     view(2)
 end
+
+%%

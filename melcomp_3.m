@@ -32,10 +32,6 @@ end
 % T_SPD = T_SPD(:,addI.el>30);
 % addI.el = addI.el(addI.el>30);
 
-load spd_houser.mat
-T_SPD = spd_houser;
-S_SPD = S_houser;
-
 
 %% SRFs (Spectral Reflectance Functions)
 

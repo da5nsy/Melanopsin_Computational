@@ -4,10 +4,10 @@
 
 clc, clear, close all
 
-base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Project Overview Presentation\2';
+base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Project Overview Presentation';
 
 ff = '-dtiff'; %file format
-p  = 1; %print? (aka save?), set to 1 to begin saving
+p  = 0; %print? (aka save?), set to 1 to begin saving
 
 plot_where = [20,60];
 plot_size  = [800,375];
@@ -26,12 +26,8 @@ load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_da
 %       spectroradiometric characteristics of narrow-field-of-view
 %       clear skylight in Granada, Spain" (2001)
 
-load spd_houser.mat
-T_SPD = spd_houser;
-S_SPD = S_houser;
-
-% T_SPD = final(17:97,:); clear final
-% S_SPD = [380,5,81];
+T_SPD = final(17:97,:); clear final
+S_SPD = [380,5,81];
 
 xlim([380 780]); xticks(380:100:780);
 ylim([0 2]); yticks([0,1,2]);

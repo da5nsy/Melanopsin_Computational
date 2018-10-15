@@ -387,6 +387,7 @@ SoI = squeeze(mean(cs(18,:,:),2)); %signal of interest, OR S-over-I (take your p
 SoIL = log2(SoI); %Log SoI
 pc1 = pc_melcomp.SCORE(:,1);
 pc2 = pc_melcomp.SCORE(:,2);
+pc3 = pc_melcomp.SCORE(:,3);
 pc1n = (pc1-min(pc1)).^(1/4); %pc1 normalised
 
 cla
@@ -395,7 +396,7 @@ xlabel('log2(S/I)')
 ylabel('PC2')
 zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
 
-%%
+%% Plot showing segmentation by PC1
 
 plt_seg = 1;
 
@@ -410,13 +411,16 @@ if plt_seg
     figure('Position',[plot_where 800 800]), hold on
     set(gca, 'FontSize', 16)
     set(gcf,'defaultLineLineWidth',2)
+    
+    zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
     axis equal
     xlabel('log2(S/I)')
     ylabel('PC2')
     cla
     
     for i=1:NoD
-        sc(and(pc1n<(i*(m1/NoD)),pc1n>((i-1)*(m1/NoD))),:,i) = sc_t(and(pc1n<(i*(m1/NoD)),pc1n>((i-1)*(m1/NoD))),:);
+        block(i,[1 2]) = [(i-1)*(m1/NoD), i*(m1/NoD)];
+        sc(and(pc1n>=(block(i,1)),pc1n<block(i,2)),:,i) = sc_t(and(pc1n>=(block(i,1)),pc1n<block(i,2)),:);
         fit_t(i,:) = polyfit(sc(~isnan(sc(:,1,i)),1,i),sc(~isnan(sc(:,2,i)),2,i),1); %fitty, lol. Seriously though, temp.
         
         x_seg = linspace(min(sc(:,1,i)),max(sc(:,1,i)),20);
@@ -424,10 +428,77 @@ if plt_seg
         
         if any(fit_t(i,:))
             scatter3(sc(:,1,i),sc(:,2,i),pc1n,[],cols(i,:));
-            plot3(x_seg,y,pc1n,'Color',cols(i,:)); !!!!!!!!!!!!!!!!!!!!!!!!!!!
+            plot3(x_seg,y,repmat(mean(block(i,:)),size(x_seg,2),1),'Color',cols(i,:));
         end
         drawnow
         %pause(0.2)
     end
 end
 
+%%
+
+plt_ass = 1;
+
+if plt_ass
+    figure('Position',[plot_where 800 800]), hold on
+    set(gca, 'FontSize', 16)
+    set(gcf,'defaultLineLineWidth',2)
+    
+    x_ass = mean(block(and(fit_t(:,1),fit_t(:,2)),:),2);
+    y_1 = fit_t(and(fit_t(:,1),fit_t(:,2)),1);
+    y_2 = fit_t(and(fit_t(:,1),fit_t(:,2)),2);
+    plot(x_ass,y_1,'r')
+    plot(x_ass,y_2,'b')
+    
+    p_1 = polyfit(log(x_ass),log(y_1),2);
+    p_2 = real(polyfit(log(x_ass),log(y_2),2)); %goes imaginary due to negative numbers (I think?)
+    y_1p = polyval(p_1, log(x_ass));
+    y_2p = polyval(p_2, log(x_ass));
+    
+    plot(x_ass,exp(y_1p),'r:')
+    plot(x_ass,exp(y_2p),'b:')
+    
+    
+    legend('x','c',num2str(p_1),num2str(p_2))
+end
+
+%%
+
+figure(1)
+
+scatter3(log2(squeeze(mean(cs(13,:,:),2))),pc2,pc1n,'r.')
+scatter3(log2(squeeze(mean(cs(14,:,:),2))),pc2,pc1n,'g.')
+
+legend('log(S/I)','log(L/M)','log(L/S)')
+
+%%
+
+close all
+
+for i=[6:9,13:21]
+    figure,
+    scatter3(log2(squeeze(mean(cs(i,:,:),2))),pc2,pc1n)
+    title(plt_lbls{i})
+    axis equal
+    
+    xlabel('target signal')
+    ylabel('PC2')
+    zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
+    view(2)
+end
+
+%%
+
+close all
+
+for i=[6:9,13:21]
+    figure,
+    scatter3(log2(squeeze(mean(cs(i,:,:),2))),pc3,pc1n)
+    title(plt_lbls{i})
+    axis equal
+    
+    xlabel('target signal')
+    ylabel('PC3')
+    zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
+    view(2)
+end

@@ -404,6 +404,27 @@ if plt_viz
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 end
 
+% plot scatters with backrounds the colours of the strength of correlation
+
+plt_sca = 0;
+if plt_sca
+    figure,
+    for i=1:size(cs,1)
+        for j=1:nPC
+            subplot(size(cs,1),nPC,j+((i-1)*nPC))
+            scatter(squeeze(mean(cs(i,:,:),2)),pc_p.score(:,j),'r.')
+            if j == 1
+                ylabel(plt_lbls{i},'rotation',0)
+            end
+            set(gca,'YTickLabel',[])
+            set(gca,'XTickLabel',[])
+            set(gca,'Color',repmat(c_norm(i,j),3,1))
+            axis tight
+        end
+    end
+end
+
+
 %% Why S and I when larger intervals are available?
 
 % Correlation image across reflectance spectra
@@ -411,7 +432,8 @@ figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
 hold on
 set(gca, 'FontSize', 16)
 
-sur_vrhel_c = corr(sur_vrhel');
+sur_vrhel_n = sur_vrhel(:,[1:44,65,69,81:154]);
+sur_vrhel_c = corr(sur_vrhel_n');
 surf(sur_vrhel_c*100,'EdgeColor','none')
 axis image
 colormap gray
@@ -447,128 +469,15 @@ xlabel('Wavelength'); ylabel('Normalised  Reflectance');
 plot([440,440],[min(ylim),max(ylim)],'b:')
 plot([488,488],[min(ylim),max(ylim)],'k:')
 
-plot(SToWls(S_vrhel),sur_vrhel./sur_vrhel(26,:))
+plot(SToWls(S_vrhel),sur_vrhel_n./sur_vrhel_n(26,:))
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
-%% plot scatters with backrounds the colours of the strength of correlation
+%% 
 
-plt_sca = 0;
-
-if plt_sca
-    figure,
-    for i=1:size(cs,1)
-        for j=1:nPC
-            subplot(size(cs,1),nPC,j+((i-1)*nPC))
-            scatter(squeeze(mean(cs(i,:,:),2)),pc_p.score(:,j),'r.')
-            if j == 1
-                ylabel(plt_lbls{i},'rotation',0)
-            end
-            set(gca,'YTickLabel',[])
-            set(gca,'XTickLabel',[])
-            set(gca,'Color',repmat(c_norm(i,j),3,1))
-            axis tight
-        end
-    end
-end
-
-%% - %%
-% Continuation of old script
-
-plt_soil = 1;
-
-SoI = squeeze(mean(cs(18,:,:),2)); %signal of interest, OR S-over-I (take your pick!)
-SoIL = log2(SoI); %Log SoI
-pc1 = pc_p.score(:,1);
-pc2 = pc_p.score(:,2);
-pc1n = (pc1-min(pc1)).^(1/4); %pc1 normalised
-
-% figure, hold on
-% scatter3(SoI,pc2,pc1,'r.')
-% axis tight
-% xlabel('SoI')
-% ylabel('PC2')
-% zlabel('PC1')
-%
-% figure, hold on
-% scatter3(SoI,pc2,pc1n,'b.')
-% axis tight
-% xlabel('SoI')
-% ylabel('PC2')
-% zlabel('PC1n')
-% axis equal
-
-if plt_soil
-    figure, hold on
-    scatter3(SoIL,pc2,pc1n,'b.')
-    axis tight
-    xlabel('SoIL')
-    ylabel('PC2')
-    zlabel('PC1n')
-    axis equal
-end
-%% Segment
-
-plt_seg = 0;
-
-NoD = 30; %nnumber of divisions
-m1 = max(pc1n);
-cols = flag(NoD); %cols = jet(n);
-
-sc_t = [SoIL pc2]; %scatter temp
-sc = NaN([size(sc_t) NoD]);
-
-if plt_seg
-    figure, hold on
-    axis equal
-    
-    for i=1:NoD
-        sc(and(pc1n<(i*(m1/NoD)),pc1n>((i-1)*(m1/NoD))),:,i) = sc_t(and(pc1n<(i*(m1/NoD)),pc1n>((i-1)*(m1/NoD))),:);
-        fit_t(i,:) = polyfit(sc(~isnan(sc(:,1,i)),1,i),sc(~isnan(sc(:,2,i)),2,i),1); %fitty, lol. Seriously though, temp.
-        
-        x_seg = linspace(min(sc(:,1,i)),max(sc(:,1,i)),20);
-        y = (fit_t(i,1) * x_seg) + fit_t(i,2);
-        
-        if any(fit_t(i,:))
-            scatter(sc(:,1,i),sc(:,2,i),[],cols(i,:));
-            plot(x_seg,y,'Color',cols(i,:));
-        end
-        drawnow
-        %pause(0.2)
-    end
-end
-
-%% Assess curve of fit values
-plt_ass = 0;
-
-if plt_ass
-    figure, hold on
-    
-    x_ass = 4:30;
-    y_1 = fit_t(4:30,1);
-    y_2 = fit_t(4:30,2);
-    plot(x_ass,y_1,x_ass,y_2)
-    
-    p_1 = polyfit(log(x_ass),log(y_1'),4);
-    p_2 = real(polyfit(log(x_ass),log(y_2'),4)); %goes imaginary due to negative numbers (I think?)
-    y_1p = polyval(p_1, log(x_ass));
-    y_2p = polyval(p_2, log(x_ass));
-    
-    plot(x_ass,exp(y_1p),x_ass,exp(y_2p))
-    
-    legend
-end
-
-%plot(x,exp(p(2))*x.^p(1));
-
-% f = fit(x,y,'power2') %need curve fitting toolbox for this
-
-%% - %%
-% Port of figs script
-
-% L against PC1
+%L against PC1
 figure(1)
 cla
-scatter(squeeze(mean(cs(1,:,:),2)),pc_p.SCORE(:,1),'k.')
+scatter(squeeze(mean(cs(1,:,:),2)),pc_p.score(:,1),'k.')
 xlabel(plt_lbls{1})
 ylabel('PC 1')
 xlim('auto')
@@ -576,52 +485,49 @@ xticks('auto')
 ylim('auto')
 yticks('auto')
 
-f_SI = polyfit(squeeze(mean(cs(1,:,:),2)),pc_p.SCORE(:,1),1);
+f_L1 = polyfit(squeeze(mean(cs(1,:,:),2)),pc_p.score(:,1),1);
 x = linspace(min(squeeze(mean(cs(1,:,:),2))),max(squeeze(mean(cs(1,:,:),2))));
-y = x*f_SI(1)+f_SI(2);
+y = x*f_L1(1)+f_L1(2);
 plot(x,y)
 
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 % S/I against PC2
 cla
-scatter(squeeze(mean(cs(18,:,:),2)),pc_p.SCORE(:,2),'k.')
+scatter(squeeze(mean(cs(18,:,:),2)),pc_p.score(:,2),'k.')
 xlabel(plt_lbls{18})
 ylabel('PC 2')
-xlim('auto')
-xticks('auto')
-ylim('auto')
-yticks('auto')
 
-f_SI = polyfit(squeeze(mean(cs(18,:,:),2)),pc_p.SCORE(:,2),1);
+f_SI2 = polyfit(squeeze(mean(cs(18,:,:),2)),pc_p.score(:,2),1);
 x = linspace(min(squeeze(mean(cs(18,:,:),2))),max(squeeze(mean(cs(18,:,:),2))));
-y = x*f_SI(1)+f_SI(2);
+y = x*f_SI2(1)+f_SI2(2);
 plot(x,y)
 
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %% 3D plot - basic (same as previous but without line and with a third dimension)
 cla
-scatter3(squeeze(mean(cs(18,:,:),2)),pc_p.SCORE(:,2),pc_p.SCORE(:,1),'k.')
+scatter3(squeeze(mean(cs(18,:,:),2)),pc_p.score(:,2),pc_p.score(:,1),'k.')
 %set(gca,'Color',repmat(c_norm(18,2),3,1))
 xlabel(plt_lbls{18})
 ylabel('PC 2')
 zlabel('PC 1')
 
-%% 3D plot - log(S/I) against sqrt(normalised(PC1))
+% how to visualize in 2D? !!!!!!!!!!!!!!!!!1
+% if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
-SoI = squeeze(mean(cs(18,:,:),2)); %signal of interest, OR S-over-I (take your pick!)
-SoIL = log2(SoI); %Log SoI
-pc1 = pc_p.SCORE(:,1);
-pc2 = pc_p.SCORE(:,2);
-pc3 = pc_p.SCORE(:,3);
-pc1n = (pc1-min(pc1)).^(1/4); %pc1 normalised
+%% 3D plot - log(S/I) against (normalised(PC1)).^(1/4)
+
+pc1n = (pc_p.score(:,1)-min(pc_p.score(:,1))).^(1/4);
 
 cla
-scatter3(SoIL,pc2,pc1n,'b.')
+scatter3(log2(squeeze(mean(cs(18,:,:),2))),pc_p.score(:,2),pc1n,'b.')
 xlabel('log2(S/I)')
 ylabel('PC2')
 zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
+
+% how to visualize in 2D? !!!!!!!!!!!!!!!!!1
+% if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %% Plot showing segmentation by PC1
 
@@ -631,7 +537,7 @@ NoD = 30; %nnumber of divisions
 m1 = max(pc1n);
 cols = lines(NoD); %cols = jet(n);
 
-sc_t = [SoIL pc2]; %scatter temp
+sc_t = [log2(squeeze(mean(cs(18,:,:),2))) pc_p.score(:,2)]; %scatter temp
 sc = NaN([size(sc_t) NoD]);
 
 if plt_seg
@@ -639,28 +545,30 @@ if plt_seg
     set(gca, 'FontSize', 16)
     set(gcf,'defaultLineLineWidth',2)
     
-    zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
-    axis equal
     xlabel('log2(S/I)')
     ylabel('PC2')
+    zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
+    axis tight
     cla
     
     for i=1:NoD
-        block(i,[1 2]) = [(i-1)*(m1/NoD), i*(m1/NoD)];
-        sc(and(pc1n>=(block(i,1)),pc1n<block(i,2)),:,i) = sc_t(and(pc1n>=(block(i,1)),pc1n<block(i,2)),:);
+        block(i,[1 2]) = [(i-1)*(m1/NoD), i*(m1/NoD)]; %compute lower and upper bounds for block
+        sc(and(pc1n>=(block(i,1)),pc1n<block(i,2)),:,i) = sc_t(and(pc1n>=(block(i,1)),pc1n<block(i,2)),:); %sorts values into order based on block membership
         fit_t(i,:) = polyfit(sc(~isnan(sc(:,1,i)),1,i),sc(~isnan(sc(:,2,i)),2,i),1); %fitty, lol. Seriously though, temp.
         
         x_seg = linspace(min(sc(:,1,i)),max(sc(:,1,i)),20);
-        y = (fit_t(i,1) * x_seg) + fit_t(i,2);
+        y_seg = (fit_t(i,1) * x_seg) + fit_t(i,2);
         
         if any(fit_t(i,:))
-            scatter3(sc(:,1,i),sc(:,2,i),pc1n,[],cols(i,:));
-            plot3(x_seg,y,repmat(mean(block(i,:)),size(x_seg,2),1),'Color',cols(i,:));
+            scatter3(sc(:,1,i),sc(:,2,i),pc1n,[],cols(i,:),'.');
+            plot3(x_seg,y_seg,repmat(mean(block(i,:)),size(x_seg,2),1),'Color',cols(i,:));
         end
         drawnow
         %pause(0.2)
     end
 end
+
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %%
 
@@ -686,55 +594,7 @@ if plt_ass
     plot(x_ass,exp(y_2p),'b:')
     
     
-    legend('m','c',num2str(p_1),num2str(p_2))
+    legend('m','c',num2str(p_1),num2str(p_2),'Location','Northwest')
 end
 
-%%
-
-return
-
-%%
-
-figure(1)
-
-scatter3(log2(squeeze(mean(cs(13,:,:),2))),pc2,pc1n,'r.')
-scatter3(log2(squeeze(mean(cs(14,:,:),2))),pc2,pc1n,'g.')
-
-xlabel(' ')
-
-legend('log(S/I)','log(L/M)','log(L/S)')
-
-%%
-
-close all
-
-for i=[6:9,13:21]
-    figure,
-    scatter3(log2(squeeze(mean(cs(i,:,:),2))),pc2,pc1n)
-    title(plt_lbls{i})
-    axis equal
-    
-    xlabel('target signal')
-    ylabel('PC2')
-    zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
-    view(2)
-end
-
-%%
-
-close all
-
-for i=[6:9,13:21]
-    figure,
-    scatter3(log2(squeeze(mean(cs(i,:,:),2))),pc3,pc1n)
-    title(plt_lbls{i})
-    axis equal
-    
-    xlabel('target signal')
-    ylabel('PC3')
-    zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
-    view(2)
-end
-
-%%
-
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure

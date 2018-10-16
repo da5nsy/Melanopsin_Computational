@@ -2,6 +2,8 @@
 
 % Producing figures for a project overview
 
+% Now merged into melcomp_3.m
+
 clc, clear, close all
 
 base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Project Overview Presentation';
@@ -336,12 +338,12 @@ if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 % yticks('auto')
 
 %%
-[cs,pc_melcomp,plt_lbls] = melcomp_3;
+[cs,pc_p,plt_lbls] = melcomp_3;
 
 % L against PC1
 figure(1)
 cla
-scatter(squeeze(mean(cs(1,:,:),2)),pc_melcomp.SCORE(:,1),'k.')
+scatter(squeeze(mean(cs(1,:,:),2)),pc_p.SCORE(:,1),'k.')
 xlabel(plt_lbls{1})
 ylabel('PC 1')
 xlim('auto')
@@ -349,7 +351,7 @@ xticks('auto')
 ylim('auto')
 yticks('auto')
 
-f_SI = polyfit(squeeze(mean(cs(1,:,:),2)),pc_melcomp.SCORE(:,1),1);
+f_SI = polyfit(squeeze(mean(cs(1,:,:),2)),pc_p.SCORE(:,1),1);
 x = linspace(min(squeeze(mean(cs(1,:,:),2))),max(squeeze(mean(cs(1,:,:),2))));
 y = x*f_SI(1)+f_SI(2);
 plot(x,y)
@@ -358,7 +360,7 @@ if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 % S/I against PC2
 cla
-scatter(squeeze(mean(cs(18,:,:),2)),pc_melcomp.SCORE(:,2),'k.')
+scatter(squeeze(mean(cs(18,:,:),2)),pc_p.SCORE(:,2),'k.')
 xlabel(plt_lbls{18})
 ylabel('PC 2')
 xlim('auto')
@@ -366,7 +368,7 @@ xticks('auto')
 ylim('auto')
 yticks('auto')
 
-f_SI = polyfit(squeeze(mean(cs(18,:,:),2)),pc_melcomp.SCORE(:,2),1);
+f_SI = polyfit(squeeze(mean(cs(18,:,:),2)),pc_p.SCORE(:,2),1);
 x = linspace(min(squeeze(mean(cs(18,:,:),2))),max(squeeze(mean(cs(18,:,:),2))));
 y = x*f_SI(1)+f_SI(2);
 plot(x,y)
@@ -375,7 +377,7 @@ if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %% 3D plot - basic (same as previous but without line and with a third dimension)
 cla
-scatter3(squeeze(mean(cs(18,:,:),2)),pc_melcomp.SCORE(:,2),pc_melcomp.SCORE(:,1),'k.')
+scatter3(squeeze(mean(cs(18,:,:),2)),pc_p.SCORE(:,2),pc_p.SCORE(:,1),'k.')
 %set(gca,'Color',repmat(c_norm(18,2),3,1))
 xlabel(plt_lbls{18})
 ylabel('PC 2')
@@ -385,9 +387,9 @@ zlabel('PC 1')
 
 SoI = squeeze(mean(cs(18,:,:),2)); %signal of interest, OR S-over-I (take your pick!)
 SoIL = log2(SoI); %Log SoI
-pc1 = pc_melcomp.SCORE(:,1);
-pc2 = pc_melcomp.SCORE(:,2);
-pc3 = pc_melcomp.SCORE(:,3);
+pc1 = pc_p.SCORE(:,1);
+pc2 = pc_p.SCORE(:,2);
+pc3 = pc_p.SCORE(:,3);
 pc1n = (pc1-min(pc1)).^(1/4); %pc1 normalised
 
 cla

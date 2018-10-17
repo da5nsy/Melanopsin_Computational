@@ -1,13 +1,9 @@
-function melcomp_3(fv_ind,sv_ind)
+function corr_return = melcomp_3(fv_ind,sv_ind)
 
 % fv_ind = 18; % first value index
 % sv_ind = 1; %second value index
 
-try
-    nargin;
-catch
-    clear, clc, close all
-end
+%clear, clc, close all
 
 base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Project Overview Presentation';
 
@@ -364,15 +360,15 @@ plt_lbls{19} = '(S+I)/(L+M)';
 plt_lbls{20} = 'S/I fit m';
 plt_lbls{21} = 'S/I fit c';
 
-c = zeros(size(cs,1),nPC);
+crl = zeros(size(cs,1),nPC);
 for j=1:nPC
     for i=1:size(cs,1)
-        c(i,j) = corr(squeeze(mean(cs(i,:,:),2)),pc_p.score(:,j));
+        crl(i,j) = corr(squeeze(mean(cs(i,:,:),2)),pc_p.score(:,j));
     end
 end
-c=abs(c);
+crl=abs(crl);
 
-c_norm = c;
+c_norm = crl;
 for i=1:j %leftover, be careful
     c_norm(:,i) = c_norm(:,i) - min(c_norm(:,i));
     c_norm(:,i) = c_norm(:,i)/max(c_norm(:,i));
@@ -384,7 +380,7 @@ if plt_viz
     hold on
     
     subplot(1,2,1)
-    imagesc(c)
+    imagesc(crl)
     colorbar
     title('correlation between signal and PC weight')
     xlabel('PC')
@@ -478,7 +474,7 @@ plot([488,488],[min(ylim),max(ylim)],'k:')
 plot(SToWls(S_vrhel),sur_vrhel_n./sur_vrhel_n(26,:))
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
-%% 
+%% Scatter plots between...
 
 %L against PC1
 figure(1)
@@ -513,8 +509,12 @@ if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %% 3D plot - basic (same as previous but without line and with a third dimension)
 
-% fv_ind = 18; % first value index
-% sv_ind = 1; %second value index
+if and(exist('fv_ind','var'),exist('sv_ind','var'))
+else
+    fv_ind = 18; % first value index
+    sv_ind = 1; %second value index
+    disp(['using default values for fv_ind and sv_ind: ',num2str(fv_ind),', ',num2str(sv_ind)])
+end
 
 fv = squeeze(mean(cs(fv_ind,:,:),2));
 sv = squeeze(mean(cs(sv_ind,:,:),2)); 
@@ -526,10 +526,10 @@ xlabel(plt_lbls{fv_ind})
 ylabel('PC2')
 zlabel(plt_lbls{sv_ind})
 
-% how to visualize in 2D? !!!!!!!!!!!!!!!!!1
+% needs to be 3D, make gif? !!!!!!!!!!!!
 % if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
-%% Plot showing segmentation by PC1
+%% Plot showing segmentation by sv value
 
 plt_seg = 1;
 
@@ -569,9 +569,10 @@ if plt_seg
     end
 end
 
+% would be better as 3D gif !!!!!!!!!!!
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
-%%
+%% Assess trends in fitted lines through data
 plt_ass = 1;
 
 if plt_ass
@@ -603,7 +604,7 @@ end
 
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
-%%
+%% Visualise model fit to data
 
 figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
 hold on
@@ -619,7 +620,10 @@ for i=linspace(min(sv),max(sv))
     plot3(x,y,ones(100,1)*i,'r')
 end
 
-%%
+% needs to be 3D, make gif? !!!!!!!!!!!!
+% if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
+%% Consider 2D correlation of model to PC2
 
 figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
 hold on
@@ -643,7 +647,12 @@ xlabel(['Estimated PC2 based on ' plt_lbls{fv_ind}])
 ylabel('PC2')
 zlabel(plt_lbls{sv_ind})
 
+% %hard code print with additional prefix
+% print([base,'\f7_',num2str(fv_ind)],ff); 
 
-print([base,'\f7_',num2str(fv_ind)],ff);
+if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
+%%
+corr_return = corr(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2));
 
 end

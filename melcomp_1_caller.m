@@ -1,6 +1,6 @@
 clear, clc, close all;
 
-try load('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\results.mat')
+try load('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\melcomp_1_results.mat')
 catch
 
     %figure, hold on %to get figure to plot, also turn on 'plot_it' in melcomp
@@ -9,7 +9,7 @@ catch
 
     tic
     for i= 1:length(range)
-        [MB1_minSD(i),MB2_minSD(i),melpeak(i),MB1_zeroSD(i),MB2_zeroSD(i),spread(:,i),MBx_m(:,:,i)]=melcomp(range(i));
+        [MB1_minSD(i),MB2_minSD(i),melpeak(i),MB1_zeroSD(i),MB2_zeroSD(i),spread(:,i),MBx_m(:,:,i)]=melcomp_1(range(i));
         disp(melpeak(i))
         drawnow
     end

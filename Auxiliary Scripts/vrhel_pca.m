@@ -25,7 +25,8 @@ end
 
 %% Nat only
 
-sur_vrhel_n = sur_vrhel(:,[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141]);
+% sur_vrhel_n = sur_vrhel(:,[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141]);
+sur_vrhel_n = sur_vrhel(:,[1:44,65,69,81:154]);
 figure,plot(sur_vrhel_n)
 
 p_n = pca(sur_vrhel_n');

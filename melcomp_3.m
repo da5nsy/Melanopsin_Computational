@@ -1,3 +1,8 @@
+function melcomp_3(fv_ind,sv_ind)
+
+% fv_ind = 18; % first value index
+% sv_ind = 1; %second value index
+
 try
     nargin;
 catch
@@ -7,7 +12,7 @@ end
 base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Project Overview Presentation';
 
 ff = '-dtiff'; %file format
-p  = 1; %print? (aka save?), set to 1 to begin saving
+p  = 0; %print? (aka save?), set to 1 to begin saving
 
 plot_where = [800,50];
 plot_size  = [800,375];
@@ -28,8 +33,9 @@ load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_da
 T_SPD=final; clear final
 S_SPD=[300,5,161];
 
-% try load SPD.mat addI %bit slow so I saved it out
+% try load melcomp_3_addI.mat %bit slow so I saved it out
 % catch
+%     disp('he')
 %     % Additional SPD info (source: personal correspondance with J. Hernández-Andrés)
 %     [addI.NUM,addI.TXT,addI.RAW] = xlsread('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\add_info.xlsx');
 %     for i=1:length(T_SPD) %a lot of stupid code just to get the date and time out
@@ -479,7 +485,7 @@ figure(1)
 cla
 scatter(squeeze(mean(cs(1,:,:),2)),pc_p.score(:,1),'k.')
 xlabel(plt_lbls{1})
-ylabel('PC 1')
+ylabel('PC1')
 xlim('auto')
 xticks('auto')
 ylim('auto')
@@ -496,7 +502,7 @@ if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 cla
 scatter(squeeze(mean(cs(18,:,:),2)),pc_p.score(:,2),'k.')
 xlabel(plt_lbls{18})
-ylabel('PC 2')
+ylabel('PC2')
 
 f_SI2 = polyfit(squeeze(mean(cs(18,:,:),2)),pc_p.score(:,2),1);
 x = linspace(min(squeeze(mean(cs(18,:,:),2))),max(squeeze(mean(cs(18,:,:),2))));
@@ -506,25 +512,19 @@ plot(x,y)
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %% 3D plot - basic (same as previous but without line and with a third dimension)
-cla
-scatter3(squeeze(mean(cs(18,:,:),2)),pc_p.score(:,2),pc_p.score(:,1),'k.')
-%set(gca,'Color',repmat(c_norm(18,2),3,1))
-xlabel(plt_lbls{18})
-ylabel('PC 2')
-zlabel('PC 1')
 
-% how to visualize in 2D? !!!!!!!!!!!!!!!!!1
-% if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+% fv_ind = 18; % first value index
+% sv_ind = 1; %second value index
 
-%% 3D plot - log(S/I) against (normalised(PC1)).^(1/4)
-
-pc1n = (pc_p.score(:,1)-min(pc_p.score(:,1))).^(1/4);
+fv = squeeze(mean(cs(fv_ind,:,:),2));
+sv = squeeze(mean(cs(sv_ind,:,:),2)); 
 
 cla
-scatter3(log2(squeeze(mean(cs(18,:,:),2))),pc_p.score(:,2),pc1n,'b.')
-xlabel('log2(S/I)')
+scatter3(fv,pc_p.score(:,2),sv,'k.')
+
+xlabel(plt_lbls{fv_ind})
 ylabel('PC2')
-zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
+zlabel(plt_lbls{sv_ind})
 
 % how to visualize in 2D? !!!!!!!!!!!!!!!!!1
 % if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
@@ -533,34 +533,35 @@ zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
 
 plt_seg = 1;
 
-NoD = 30; %nnumber of divisions
-m1 = max(pc1n);
+NoD = 40; %nnumber of divisions
+mI = max(sv);
 cols = lines(NoD); %cols = jet(n);
 
-sc_t = [log2(squeeze(mean(cs(18,:,:),2))) pc_p.score(:,2)]; %scatter temp
+sc_t = [fv pc_p.score(:,2)]; %scatter temp
 sc = NaN([size(sc_t) NoD]);
 
 if plt_seg
-    figure('Position',[plot_where 800 800]), hold on
+    figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
+    hold on
     set(gca, 'FontSize', 16)
-    set(gcf,'defaultLineLineWidth',2)
     
-    xlabel('log2(S/I)')
+    xlabel(plt_lbls{fv_ind})
     ylabel('PC2')
-    zlabel('(PC1-min(PC1)).^(1/4)','Interpreter','none')
+    zlabel(plt_lbls{sv_ind})
+    
     axis tight
     cla
     
     for i=1:NoD
-        block(i,[1 2]) = [(i-1)*(m1/NoD), i*(m1/NoD)]; %compute lower and upper bounds for block
-        sc(and(pc1n>=(block(i,1)),pc1n<block(i,2)),:,i) = sc_t(and(pc1n>=(block(i,1)),pc1n<block(i,2)),:); %sorts values into order based on block membership
-        fit_t(i,:) = polyfit(sc(~isnan(sc(:,1,i)),1,i),sc(~isnan(sc(:,2,i)),2,i),1); %fitty, lol. Seriously though, temp.
+        block(i,[1 2]) = [(i-1)*(mI/NoD), i*(mI/NoD)]; %compute lower and upper bounds for block
+        sc(and(sv>=(block(i,1)),sv<block(i,2)),:,i) = sc_t(and(sv>=(block(i,1)),sv<block(i,2)),:); %sorts values into order based on block membership
+        fit_t(i,:) = polyfit(sc(~isnan(sc(:,1,i)),1,i),sc(~isnan(sc(:,2,i)),2,i),1); %fit temp
         
         x_seg = linspace(min(sc(:,1,i)),max(sc(:,1,i)),20);
         y_seg = (fit_t(i,1) * x_seg) + fit_t(i,2);
         
         if any(fit_t(i,:))
-            scatter3(sc(:,1,i),sc(:,2,i),pc1n,[],cols(i,:),'.');
+            scatter3(sc(:,1,i),sc(:,2,i),sv,[],cols(i,:),'.');
             plot3(x_seg,y_seg,repmat(mean(block(i,:)),size(x_seg,2),1),'Color',cols(i,:));
         end
         drawnow
@@ -571,30 +572,78 @@ end
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %%
-
 plt_ass = 1;
 
 if plt_ass
-    figure('Position',[plot_where 800 800]), hold on
+    figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
+    hold on
     set(gca, 'FontSize', 16)
-    set(gcf,'defaultLineLineWidth',2)
     
-    x_ass = mean(block(and(fit_t(:,1),fit_t(:,2)),:),2);
-    y_1 = fit_t(and(fit_t(:,1),fit_t(:,2)),1);
-    y_2 = fit_t(and(fit_t(:,1),fit_t(:,2)),2);
-    plot(x_ass,y_1,'r')
-    plot(x_ass,y_2,'b')
+    fit_t_idx = and(fit_t(:,1),fit_t(:,2));
+    x_ass = mean(block(fit_t_idx,:),2);
+    y_1 = fit_t(fit_t_idx,1);
+    y_2 = fit_t(fit_t_idx,2);
+    scatter(x_ass,y_1,'ro')
+    scatter(x_ass,y_2,'bo')
     
-    p_1 = polyfit(log(x_ass),log(y_1),2);
-    p_2 = real(polyfit(log(x_ass),log(y_2),2)); %goes imaginary due to negative numbers (I think?)
-    y_1p = polyval(p_1, log(x_ass));
-    y_2p = polyval(p_2, log(x_ass));
+    xlabel(plt_lbls{sv_ind})
+    ylabel('Value in line of best fit')
     
-    plot(x_ass,exp(y_1p),'r:')
-    plot(x_ass,exp(y_2p),'b:')
+    p_1 = polyfit(x_ass,y_1,1);
+    p_2 = polyfit(x_ass,y_2,1);
+    y_1p = polyval(p_1, x_ass);
+    y_2p = polyval(p_2, x_ass);
+    
+    plot(x_ass,y_1p,'r:')
+    plot(x_ass,y_2p,'b:')
     
     
     legend('m','c',num2str(p_1),num2str(p_2),'Location','Northwest')
 end
 
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
+%%
+
+figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
+hold on
+set(gca, 'FontSize', 16)
+
+scatter3(fv,pc_p.score(:,2),sv,'k.')
+
+for i=linspace(min(sv),max(sv))
+    x = linspace(min(fv),max(fv));
+    m = (p_1(1) * i) + p_1(2); %fits better without second terms but there's no logical argument for why to exclude them
+    c = (p_2(1) * i) + p_2(2);
+    y = m*x + c;
+    plot3(x,y,ones(100,1)*i,'r')
+end
+
+%%
+
+figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
+hold on
+set(gca, 'FontSize', 16)
+
+m = p_1(1) * sv + p_1(2);
+c = p_2(1) * sv + p_2(2);
+
+estimatedPC2 =  m .* (fv) + c; 
+
+%scatter(estimatedPC2,pc_p.score(:,2),'k.')
+
+scatter3(estimatedPC2,pc_p.score(:,2),sv,'k.')
+plot(estimatedPC2,polyval(polyfit(estimatedPC2,pc_p.score(:,2),1),estimatedPC2),'k')
+
+scatter3(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),sv(sv>0.5),'g.')
+y = polyval(polyfit(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),1),estimatedPC2(sv>0.5));
+plot(estimatedPC2(sv>0.5),y,'g')
+
+xlabel(['Estimated PC2 based on ' plt_lbls{fv_ind}])
+ylabel('PC2')
+zlabel(plt_lbls{sv_ind})
+
+
+print([base,'\f7_',num2str(fv_ind)],ff);
+
+end

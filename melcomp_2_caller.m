@@ -1,12 +1,12 @@
 clear, clc, close all
 
 for i=1:12%[6:9,12]
-    melcomp(i)
+    melcomp_2(i)
 end
 
 %%
 
-melcomp(1,1,1,1)
+melcomp_2(1,1,1,1)
 view(75,20)
 
 % PF_SPD = 1;

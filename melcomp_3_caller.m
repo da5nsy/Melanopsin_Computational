@@ -1,3 +1,4 @@
+%%
 clear
 clc
 close all
@@ -8,7 +9,7 @@ for i=1:21
         close all
         clc
         
-        a(i,j) = melcomp_3(i,j);
+        [corr_return(i,j), p_1(i,j,:), p_2(i,j,:)] = melcomp_3(i,j);
     end
 end
 
@@ -36,7 +37,7 @@ plt_lbls{20} = 'S/I fit m';
 plt_lbls{21} = 'S/I fit c';
 
 figure,
-plot(abs(a))
+plot(abs(corr_return))
 ylim([0 1])
 ylabel('Correlation')
 xticks(1:21)

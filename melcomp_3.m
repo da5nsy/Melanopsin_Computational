@@ -1,9 +1,9 @@
-function corr_return = melcomp_3(fv_ind,sv_ind)
+function [corr_return, p_1, p_2] = melcomp_3(fv_ind,sv_ind)
 
 % fv_ind = 18; % first value index
 % sv_ind = 1; %second value index
 
-%clear, clc, close all
+clear, clc, close all
 
 base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Project Overview Presentation';
 
@@ -79,6 +79,11 @@ if plt_refs
     plot(SToWls(S_SRF),T_SRF) %all
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 end
+
+% T_SRF = mean(T_SRF,2); 
+%This is to check the effect of averaging the
+%reflectances at this stage rather than later in the process. 
+%Spolier: nothing changes! (except a couple of errors being thrown.
 
 %% SSF (Spectral Sensitivity Functions)
 
@@ -291,8 +296,22 @@ end
 f_m = permute(repmat(fit(:,1),1,1,size(LMSRI,2)),[2,3,1]); % Mx + c
 f_c = permute(repmat(fit(:,2),1,1,size(LMSRI,2)),[2,3,1]); % mx + C
 
-% - % Checking
+%% - % Checking
 
+% figure, hold on
+% scatter(log10(LMSRI(3,:,1)),log10(LMSRI(5,:,1)))
+% x = linspace(-2,0);
+% y = fit(1,1)*x;
+% plot(x,y)
+% 
+% 
+% figure, hold on
+% scatter(log10(LMSRI(3,:,2)),log10(LMSRI(5,:,2)))
+% x = linspace(-2,0);
+% y = repmat(fit(2,2), length(x),1);
+% plot(x,y)
+% 
+% % - %
 % figure('defaultLineLineWidth',2), hold on
 % xlabel('log(S)'); ylabel('log(I)');
 % %axis equal
@@ -303,20 +322,18 @@ f_c = permute(repmat(fit(:,2),1,1,size(LMSRI,2)),[2,3,1]); % mx + C
 %     x_t = linspace(min(log10(LMSRI(3,:,i))),max(log10(LMSRI(3,:,i))));
 %     y_t = x_t*fit(i,1) + fit(i,2);
 %     
-%     x_t2 = linspace(min(log10(LMSRI(3,:,i))),max(log10(LMSRI(3,:,i))));
-%     y_t2 = x_t*f_m(1,1,i) + f_c(1,1,i);
+%      x_t2 = linspace(min(log10(LMSRI(3,:,i))),max(log10(LMSRI(3,:,i))));
+%      y_t2 = x_t*f_m(1,1,i) + f_c(1,1,i);
 %     
-%     plot3(x_t,y_t,ones(100,1)*i,'r')
-%     %plot3(x_t2,y_t2,ones(100,1)*i,'g:')%     
+%     %plot3(x_t,y_t,ones(100,1)*i,'r')
+%     plot3(x_t2,y_t2,ones(100,1)*i,'g:')%     
 % end
 % 
-% view(-43,0)
-% 
-% figure,
-% scatter3(f_m(1,1,:),f_c(1,1,:),pc_p.score(:,2))
-% xlabel('f_m'); ylabel('f_c');
-
-
+% %view(-43,0)
+% % 
+% % figure,
+% % scatter3(f_m(1,1,:),f_c(1,1,:),pc_p.score(:,2))
+% % xlabel('f_m'); ylabel('f_c');
 
 %% Calc correlation between
 
@@ -408,7 +425,7 @@ end
 
 % plot scatters with backrounds the colours of the strength of correlation
 
-plt_sca = 0;
+plt_sca = 1;
 if plt_sca
     figure,
     for i=1:size(cs,1)
@@ -422,6 +439,34 @@ if plt_sca
             set(gca,'XTickLabel',[])
             set(gca,'Color',repmat(c_norm(i,j),3,1))
             axis tight
+        end
+    end
+end
+
+
+plt_sca2 = 1;
+if plt_sca2
+    counter = 1;
+    figure('Position',[plot_where 250 900])
+    for i=[6:9, 13:18]
+        for j=2
+            subplot(length([6:9, 13:18]),1,counter), hold on
+            counter = counter + 1;
+            scatter(squeeze(mean(cs(i,:,:),2)),pc_p.score(:,j),'r.')
+            %ylabel(plt_lbls{i},'rotation',0)
+            legend(plt_lbls{i},'AutoUpdate', 'Off')
+            set(gca,'XTick',[])
+            set(gca,'XTickLabel',[])
+            set(gca,'YTick',[])
+            set(gca,'YTickLabel',[])
+            
+            set(gca,'Color',repmat(c_norm(i,j),3,1))
+            axis tight
+            
+            pft = polyfit(squeeze(mean(cs(i,:,:),2)),pc_p.score(:,j),1);
+            x = linspace(min(squeeze(mean(cs(i,:,:),2))),max(squeeze(mean(cs(i,:,:),2))));
+            y = pft(1)*x +pft(2);
+            plot(x,y,'k')
         end
     end
 end
@@ -611,6 +656,11 @@ hold on
 set(gca, 'FontSize', 16)
 
 scatter3(fv,pc_p.score(:,2),sv,'k.')
+xlabel(plt_lbls{fv_ind})
+% ylabel({'PC2',...
+%     ['or (',num2str(p_1(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_1(2),3),') * ',plt_lbls{fv_ind},...
+%     ' + ','(',num2str(p_2(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_2(2),3),')']})
+zlabel(plt_lbls{sv_ind})
 
 for i=linspace(min(sv),max(sv))
     x = linspace(min(fv),max(fv));
@@ -622,6 +672,12 @@ end
 
 % needs to be 3D, make gif? !!!!!!!!!!!!
 % if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+
+legend({'Data: PC2',['Model: (',num2str(p_1(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_1(2),3),') * ',plt_lbls{fv_ind},...
+    ' + (',num2str(p_2(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_2(2),3),')']})
+
+% %hard code print with additional prefix
+print([base,'\f6\f6_',num2str(fv_ind),'_',num2str(sv_ind)],ff); 
 
 %% Consider 2D correlation of model to PC2
 
@@ -643,12 +699,14 @@ scatter3(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),sv(sv>0.5),'g.')
 y = polyval(polyfit(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),1),estimatedPC2(sv>0.5));
 plot(estimatedPC2(sv>0.5),y,'g')
 
-xlabel(['Estimated PC2 based on ' plt_lbls{fv_ind}])
+%xlabel(['Estimated PC2 based on ' plt_lbls{fv_ind}])
+xlabel(['(',num2str(p_1(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_1(2),3),') * ',plt_lbls{fv_ind},...
+    ' + (',num2str(p_2(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_2(2),3),')'])
 ylabel('PC2')
 zlabel(plt_lbls{sv_ind})
 
 % %hard code print with additional prefix
-% print([base,'\f7_',num2str(fv_ind)],ff); 
+print([base,'\f7\f7_',num2str(fv_ind),'_',num2str(sv_ind)],ff); 
 
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 

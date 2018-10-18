@@ -715,7 +715,7 @@ corr_return = corr(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2));
 
 return
 
-%%
+%% New version of 'Calc correlation between' taking into account amended signals
 
 lore = load('melcomp_3_correlation_results.mat') %loaded results
 

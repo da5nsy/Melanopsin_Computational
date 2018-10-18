@@ -385,10 +385,10 @@ for j=1:nPC
 end
 crl=abs(crl);
 
-c_norm = crl;
+crl_norm = crl;
 for i=1:j %leftover, be careful
-    c_norm(:,i) = c_norm(:,i) - min(c_norm(:,i));
-    c_norm(:,i) = c_norm(:,i)/max(c_norm(:,i));
+    crl_norm(:,i) = crl_norm(:,i) - min(crl_norm(:,i));
+    crl_norm(:,i) = crl_norm(:,i)/max(crl_norm(:,i));
 end
 
 plt_viz = 1;
@@ -409,7 +409,7 @@ if plt_viz
     set(gca, 'FontSize', 16)
     
     subplot(1,2,2)
-    imagesc(c_norm)
+    imagesc(crl_norm)
     colorbar
     title('normalised')
     xlabel('PC')
@@ -425,7 +425,7 @@ end
 
 % plot scatters with backrounds the colours of the strength of correlation
 
-plt_sca = 1;
+plt_sca = 0;
 if plt_sca
     figure,
     for i=1:size(cs,1)
@@ -437,7 +437,7 @@ if plt_sca
             end
             set(gca,'YTickLabel',[])
             set(gca,'XTickLabel',[])
-            set(gca,'Color',repmat(c_norm(i,j),3,1))
+            set(gca,'Color',repmat(crl_norm(i,j),3,1))
             axis tight
         end
     end
@@ -460,7 +460,7 @@ if plt_sca2
             set(gca,'YTick',[])
             set(gca,'YTickLabel',[])
             
-            set(gca,'Color',repmat(c_norm(i,j),3,1))
+            set(gca,'Color',repmat(crl_norm(i,j),3,1))
             axis tight
             
             pft = polyfit(squeeze(mean(cs(i,:,:),2)),pc_p.score(:,j),1);
@@ -712,5 +712,52 @@ if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
 %%
 corr_return = corr(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2));
+
+return
+
+%%
+
+lore = load('melcomp_3_correlation_results.mat') %loaded results
+
+plt_viz = 1;
+if plt_viz
+    figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
+    hold on
+    
+    crl2 = crl;
+    crl2(:,2) = max(lore.corr_return');
+    
+    subplot(1,2,1)
+    imagesc(crl2)
+    colorbar
+    title('correlation between signal and PC weight')
+    xlabel('PC')
+    
+    set(gca, 'XTick', 1:nPC);
+    set(gca, 'YTick', 1:size(cs,1));
+    set(gca, 'YTickLabel', plt_lbls);
+    colormap('gray');
+    set(gca, 'FontSize', 16)
+    
+    crl_norm2 = crl2;
+    for i=1:3 %leftover, be careful
+        crl_norm2(:,i) = crl_norm2(:,i) - min(crl_norm2(:,i));
+        crl_norm2(:,i) = crl_norm2(:,i) / max(crl_norm2(:,i));
+    end
+    
+    subplot(1,2,2)
+    imagesc(crl_norm2)
+    colorbar
+    title('normalised')
+    xlabel('PC')
+    
+    set(gca, 'XTick', 1:nPC);
+    set(gca, 'YTick', 1:size(cs,1));
+    set(gca, 'YTickLabel', plt_lbls);
+    colormap('gray');   
+    set(gca, 'FontSize', 16)
+    
+    if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+end
 
 end

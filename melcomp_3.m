@@ -677,7 +677,7 @@ legend({'Data: PC2',['Model: (',num2str(p_1(1),3),' * ',plt_lbls{sv_ind},' + ',n
     ' + (',num2str(p_2(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_2(2),3),')']})
 
 % %hard code print with additional prefix
-print([base,'\f6\f6_',num2str(fv_ind),'_',num2str(sv_ind)],ff); 
+%print([base,'\f6\f6_',num2str(fv_ind),'_',num2str(sv_ind)],ff); 
 
 %% Consider 2D correlation of model to PC2
 
@@ -697,7 +697,7 @@ plot(estimatedPC2,polyval(polyfit(estimatedPC2,pc_p.score(:,2),1),estimatedPC2),
 
 scatter3(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),sv(sv>0.5),'g.')
 y = polyval(polyfit(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),1),estimatedPC2(sv>0.5));
-plot(estimatedPC2(sv>0.5),y,'g')
+plot3(estimatedPC2(sv>0.5),y,1:length(y),'g')
 
 %xlabel(['Estimated PC2 based on ' plt_lbls{fv_ind}])
 xlabel(['(',num2str(p_1(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_1(2),3),') * ',plt_lbls{fv_ind},...
@@ -706,7 +706,7 @@ ylabel('PC2')
 zlabel(plt_lbls{sv_ind})
 
 % %hard code print with additional prefix
-print([base,'\f7\f7_',num2str(fv_ind),'_',num2str(sv_ind)],ff); 
+%print([base,'\f7\f7_',num2str(fv_ind),'_',num2str(sv_ind)],ff); 
 
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
@@ -717,7 +717,7 @@ return
 
 %% New version of 'Calc correlation between' taking into account amended signals
 
-lore = load('melcomp_3_correlation_results.mat') %loaded results
+lore = load('melcomp_3_correlation_results.mat'); %loaded results
 
 plt_viz = 1;
 if plt_viz

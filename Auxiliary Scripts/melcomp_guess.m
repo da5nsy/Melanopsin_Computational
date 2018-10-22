@@ -10,7 +10,7 @@ catch
 end
 
 tic
-[~, LMSRI] = melcomp(2,2,1,9,NaN,offset); % [pc, LMSRI] = melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
+[~, LMSRI] = melcomp_2(2,2,1,9,NaN,offset); % [pc, LMSRI] = melcomp_2(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
 toc
 
 % PF_SPD
@@ -28,8 +28,8 @@ toc
 %% Testing S:I ratio.
 
 cols = jet(size(LMSRI,3));
-ds_r = 1; %downsample reflectances. %8000 for Foster data
-ds_i = 10; %downsample illums. %3 for CIE D
+ds_r = 10; %downsample reflectances. %8000 for Foster data
+ds_i = 1; %downsample illums. %3 for CIE D
 
 for i=1:ds_i:size(LMSRI,3)
     %scatter(log10(LMSRI(3,1:ds_r:end,i)),log10(LMSRI(5,1:ds_r:end,i)),'MarkerEdgeColor',cols(i,:))
@@ -47,9 +47,15 @@ axis equal
 xlabel('log(S)')
 ylabel('log(I)')
 
+load melcomp_3_pc_p.mat
+
 figure, hold on
-plot(fit(1:ds_i:end,1),'o')
-plot(fit(1:ds_i:end,2),'o')
+plot3(1:length(1:ds_i:size(LMSRI,3)),fit(1:ds_i:end,1),pc_p.score(1:ds_i:size(LMSRI,3),2),'o')
+plot3(1:length(1:ds_i:size(LMSRI,3)),fit(1:ds_i:end,2),pc_p.score(1:ds_i:size(LMSRI,3),2),'o')
+ 
+% figure, hold on
+% plot3(1:i,fit(1:i,1),pc_p.score(1:i,2),'.')
+% plot3(1:i,fit(1:i,2),pc_p.score(1:i,2),'.')
 
 return %if this is being called from somewhere else, end here
 

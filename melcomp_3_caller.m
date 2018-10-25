@@ -4,13 +4,14 @@ clc
 close all
 
 for i=1:21
-    for j=1:5
+    %for j=1:5
+    j=1;
         
         close all
-        clc
+        %clc
         
         [corr_return(i,j), p_1(i,j,:), p_2(i,j,:)] = melcomp_3(i,j);
-    end
+    %end
 end
 
 %%

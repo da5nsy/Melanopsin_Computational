@@ -3,7 +3,7 @@ function [corr_return, p_1, p_2] = melcomp_3(fv_ind,sv_ind)
 % fv_ind = 18; % first value index
 % sv_ind = 1; %second value index
 
-clear, clc, close all
+%clear, clc, close all
 
 base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Project Overview Presentation';
 
@@ -31,7 +31,6 @@ S_SPD=[300,5,161];
 
 % try load melcomp_3_addI.mat %bit slow so I saved it out
 % catch
-%     disp('he')
 %     % Additional SPD info (source: personal correspondance with J. Hernández-Andrés)
 %     [addI.NUM,addI.TXT,addI.RAW] = xlsread('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\add_info.xlsx');
 %     for i=1:length(T_SPD) %a lot of stupid code just to get the date and time out
@@ -698,6 +697,8 @@ plot(estimatedPC2,polyval(polyfit(estimatedPC2,pc_p.score(:,2),1),estimatedPC2),
 scatter3(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),sv(sv>0.5),'g.')
 y = polyval(polyfit(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),1),estimatedPC2(sv>0.5));
 plot3(estimatedPC2(sv>0.5),y,1:length(y),'g')
+
+%disp(polyfit(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),1))
 
 %xlabel(['Estimated PC2 based on ' plt_lbls{fv_ind}])
 xlabel(['(',num2str(p_1(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_1(2),3),') * ',plt_lbls{fv_ind},...

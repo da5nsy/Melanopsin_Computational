@@ -3,65 +3,74 @@ clear, clc, close all
 load melcomp_3_fullWorkspace.mat
 load melcomp_3_correlation_results.mat
 
-%%
-n_smp = 20; %number of samples
-light = 500;
+cs_b = cs(:,:,squeeze(mean(cs(1,:,:),2))>0.5); %cs_bright. Same criterea as curve fitting. Arbitrary threshold. Here only applies to L, not ideal.
 
-figure, hold on
 
-for light = 500:520
+%% Plot visualisation of how close estimates of PC2 are from different signals
+
+plt_pc2estimates = 0;
+
+if plt_pc2estimates
+    reflectances = [1:5:size(cs_b,2)];
+    illuminants = [1:100:size(cs_b,3)];
     
-    plot([0,n_smp],[pc_p.score(light,2),pc_p.score(light,2)],'k:')
+    figure, hold on
     
-    for smp=1:n_smp
+    for illum = 150%illuminants
         
-        fv = 7;
-        sv = 1;
+        plot3([0,max(reflectances)],[pc_p.score(illum,2),pc_p.score(illum,2)],[illum illum],'k:')
         
-        y = (p_1(fv,sv,1) * cs(sv,smp,light) + p_1(fv,sv,2))...
-            * cs(fv,smp,light) + ...
-            (p_2(fv,sv,1) * cs(sv,smp,light) + p_2(fv,sv,2));
-        scatter(smp,y,'g')
-        
-        fv = 18;
-        sv = 1;
-        
-        y = (p_1(fv,sv,1) * cs(sv,smp,light) + p_1(fv,sv,2))...
-            * cs(fv,smp,light) + ...
-            (p_2(fv,sv,1) * cs(sv,smp,light) + p_2(fv,sv,2));
-        scatter(smp,y,'r')
+        for ref = 1:size(cs_b,2)%reflectances
+            
+            fv = 14;
+            sv = 3;
+            
+            y = (p_1(fv,sv,1) * cs_b(sv,ref,illum) + p_1(fv,sv,2))...
+                * cs_b(fv,ref,illum) + ...
+                (p_2(fv,sv,1) * cs_b(sv,ref,illum) + p_2(fv,sv,2));
+            scatter3(ref,y,illum,'g')
+            
+            fv = 18;
+            sv = 1;
+            
+            y = (p_1(fv,sv,1) * cs_b(sv,ref,illum) + p_1(fv,sv,2))...
+                * cs_b(fv,ref,illum) + ...
+                (p_2(fv,sv,1) * cs_b(sv,ref,illum) + p_2(fv,sv,2));
+            scatter3(ref,y,illum,'r')
+        end
     end
+    
+    xlabel('Reflectance Sample')
+    ylabel('Predicted PC2')
+    zlabel('Illuminant')
+    legend({'line','14,3','18,1'})
+    
+    xticks(1:120)
+    
+    load sur_vrhel_withLabels.mat
+    %labels_vrhel_nat = [labels_vrhel([1:44,65,69,81:154]).label];
+    xticklabels([labels_vrhel([1:44,65,69,81:154]).label])
+    set(gca,'XTickLabelRotation',90)
 end
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 %%
 
-% for i=1:21
-%     for j=1:2600
-%         a(i,j) = std(cs(i,:,j));
-%     end
-% end
-%
-% %%
-% figure, hold on
-% for i=1:21
-%     plot3(1:100,a(i,1:100),ones(100)*i)
-% end
-%
-% xlabel('Illumination #')
-% ylabel('standard deviation of signals')
-% zlabel('signal')
-%
-% ylim([0 0.2])
+for i=1:21
+    for j=1:length(cs_b)
+        a(i,j) = std(cs_b(i,:,j));
+    end
+end
+
+%%
+figure, hold on
+for i=1:21
+    plot3(1:100,a(i,1:100),ones(100)*i)
+end
+
+xlabel('Illumination #')
+ylabel('standard deviation of signals')
+zlabel('signal')
+
+ylim([0 0.2])

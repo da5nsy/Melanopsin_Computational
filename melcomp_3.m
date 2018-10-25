@@ -761,4 +761,85 @@ if plt_viz
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 end
 
+%% Shortcut to this section
+
+clear, clc, close all
+
+load melcomp_3_fullWorkspace.mat
+load melcomp_3_correlation_results.mat
+
+%% Calculate predicted values of PC2
+
+% Removes cs values for illuminants which are low (2600 -> 1547)
+cs_b = cs(:,:,squeeze(mean(cs(1,:,:),2))>0.5); %cs_bright. Same criterea as curve fitting. Arbitrary threshold. Here only applies to L, not ideal.
+
+cs_b_pc2est = zeros(size(cs_b));
+
+sv_ind = 1;
+
+for i = 1:size(cs,1) % signal
+    for j= 1:size(cs,2) % reflectance
+        for k = 1:size(cs_b,3) % illuminant
+            cs_b_pc2est(i,j,k) = ...
+                (p_1(i,sv_ind,1) * cs_b(sv_ind,j,k) + p_1(i,sv_ind,2))...
+                * cs_b(i,j,k) + ...
+                (p_2(i,sv_ind,1) * cs_b(sv_ind,j,k) + p_2(i,sv_ind,2));
+        end
+    end
+end
+
+% figure, hold on
+% plot([0,120],[pc_p.score(1,2),pc_p.score(1,2)])
+% scatter(1:120,cs_b_pc2est(1,:,1))
+% scatter(1:120,cs_b_pc2est(18,:,1))
+% legend
+
+%% Plot visualisation of how close estimates of PC2 are from different signals
+
+plt_pc2estimates = 0;
+
+if plt_pc2estimates
+    reflectances = [1:5:size(cs_b,2)];
+    illuminants = [1:100:size(cs_b,3)];
+    
+    figure, hold on
+    
+    for illum = 150%illuminants
+        
+        plot3([0,max(reflectances)],[pc_p.score(illum,2),pc_p.score(illum,2)],[illum illum],'k:')
+        
+        for ref = 1:size(cs_b,2)%reflectances
+            
+            fv_ind = 14;
+            sv_ind = 3;
+            
+            y = (p_1(fv_ind,sv_ind,1) * cs_b(sv_ind,ref,illum) + p_1(fv_ind,sv_ind,2))...
+                * cs_b(fv_ind,ref,illum) + ...
+                (p_2(fv_ind,sv_ind,1) * cs_b(sv_ind,ref,illum) + p_2(fv_ind,sv_ind,2));
+            scatter3(ref,y,illum,'g')
+            
+            fv_ind = 18;
+            sv_ind = 1;
+            
+            y = (p_1(fv_ind,sv_ind,1) * cs_b(sv_ind,ref,illum) + p_1(fv_ind,sv_ind,2))...
+                * cs_b(fv_ind,ref,illum) + ...
+                (p_2(fv_ind,sv_ind,1) * cs_b(sv_ind,ref,illum) + p_2(fv_ind,sv_ind,2));
+            scatter3(ref,y,illum,'r')
+        end
+    end
+    
+    xlabel('Reflectance Sample')
+    ylabel('Predicted PC2')
+    zlabel('Illuminant')
+    legend({'line','14,3','18,1'})
+    
+    xticks(1:120)
+    
+    load sur_vrhel_withLabels.mat
+    %labels_vrhel_nat = [labels_vrhel([1:44,65,69,81:154]).label];
+    xticklabels([labels_vrhel([1:44,65,69,81:154]).label])
+    set(gca,'XTickLabelRotation',90)
+end
+
+
 end

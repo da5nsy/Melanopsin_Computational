@@ -3,7 +3,7 @@ function [corr_return, p_1, p_2] = melcomp_3(fv_ind,sv_ind)
 % fv_ind = 18; % first value index
 % sv_ind = 1; %second value index
 
-%clear, clc, close all
+clear, clc, close all
 
 base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Project Overview Presentation';
 
@@ -79,9 +79,9 @@ if plt_refs
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 end
 
-% T_SRF = mean(T_SRF,2); 
+% T_SRF = mean(T_SRF,2);
 %This is to check the effect of averaging the
-%reflectances at this stage rather than later in the process. 
+%reflectances at this stage rather than later in the process.
 %Spolier: nothing changes! (except a couple of errors being thrown.
 
 %% SSF (Spectral Sensitivity Functions)
@@ -290,7 +290,7 @@ end
 
 for i=1:size(LMSRI,3)
     fit(i,:) = polyfit(log10(LMSRI(3,:,i)),log10(LMSRI(5,:,i)),1);
-end 
+end
 
 f_m = permute(repmat(fit(:,1),1,1,size(LMSRI,2)),[2,3,1]); % Mx + c
 f_c = permute(repmat(fit(:,2),1,1,size(LMSRI,2)),[2,3,1]); % mx + C
@@ -302,34 +302,34 @@ f_c = permute(repmat(fit(:,2),1,1,size(LMSRI,2)),[2,3,1]); % mx + C
 % x = linspace(-2,0);
 % y = fit(1,1)*x;
 % plot(x,y)
-% 
-% 
+%
+%
 % figure, hold on
 % scatter(log10(LMSRI(3,:,2)),log10(LMSRI(5,:,2)))
 % x = linspace(-2,0);
 % y = repmat(fit(2,2), length(x),1);
 % plot(x,y)
-% 
+%
 % % - %
 % figure('defaultLineLineWidth',2), hold on
 % xlabel('log(S)'); ylabel('log(I)');
 % %axis equal
-% 
+%
 % for i = 1:10:2600
 %     %scatter3(log10(LMSRI(3,:,i)),log10(LMSRI(5,:,i)),ones(120,1)*i,'k','filled')
-%         
+%
 %     x_t = linspace(min(log10(LMSRI(3,:,i))),max(log10(LMSRI(3,:,i))));
 %     y_t = x_t*fit(i,1) + fit(i,2);
-%     
+%
 %      x_t2 = linspace(min(log10(LMSRI(3,:,i))),max(log10(LMSRI(3,:,i))));
 %      y_t2 = x_t*f_m(1,1,i) + f_c(1,1,i);
-%     
+%
 %     %plot3(x_t,y_t,ones(100,1)*i,'r')
-%     plot3(x_t2,y_t2,ones(100,1)*i,'g:')%     
+%     plot3(x_t2,y_t2,ones(100,1)*i,'g:')%
 % end
-% 
+%
 % %view(-43,0)
-% % 
+% %
 % % figure,
 % % scatter3(f_m(1,1,:),f_c(1,1,:),pc_p.score(:,2))
 % % xlabel('f_m'); ylabel('f_c');
@@ -376,18 +376,18 @@ plt_lbls{19} = '(S+I)/(L+M)';
 plt_lbls{20} = 'S/I fit m';
 plt_lbls{21} = 'S/I fit c';
 
-%original:
+%% original:
 figure,
 scatter3(squeeze(mean(cs(18,:,:),2)),pc_p.score(:,2),pc_p.score(:,1),'k.')
 
-%new:
-figure,
+%% new:
+figure, hold on
 scatter3(cs(18,:),...
     repelem(pc_p.score(:,2),size(cs,2)),...
     repelem(pc_p.score(:,1),size(cs,2)),...
     'k.')
 
-%new:
+%% new2:
 for fv_ind=1:size(cs,1)
     figure,
     scatter3(cs(fv_ind,:),...
@@ -400,6 +400,29 @@ for fv_ind=1:size(cs,1)
     zlabel('PC1')
 end
 
+%% new3:
+
+removeLowVals = 0;
+
+if removeLowVals
+    x = cs(18,cs(1,:) > 0.5); %the 18th signal (S/I) where the first signal (L) is greater than 0.5
+    y1 = repelem(pc_p.score(:,2),size(cs,2))';
+    y = y1(cs(1,:) > 0.5);
+    z = cs(1,cs(1,:) > 0.5);
+else
+    x = cs(18,:); %the 18th signal (S/I) where the first signal (L) is greater than 0.5
+    y = repelem(pc_p.score(:,2),size(cs,2))';
+    
+    z = cs(1,:);
+end
+
+figure,
+scatter3(x,y,z,'k.')
+%scatter3(x,y,z,10,'MarkerEdgeColor',[0.1,0.1,0.1],'MarkerEdgeAlpha',0.5)
+
+xlabel(plt_lbls(18))
+ylabel('PC2')
+zlabel(plt_lbls(1))
 
 %%
 
@@ -443,7 +466,7 @@ if plt_viz
     set(gca, 'XTick', 1:nPC);
     set(gca, 'YTick', 1:size(cs,1));
     set(gca, 'YTickLabel', plt_lbls);
-    colormap('gray');   
+    colormap('gray');
     set(gca, 'FontSize', 16)
     
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
@@ -588,7 +611,7 @@ else
 end
 
 fv = squeeze(mean(cs(fv_ind,:,:),2));
-sv = squeeze(mean(cs(sv_ind,:,:),2)); 
+sv = squeeze(mean(cs(sv_ind,:,:),2));
 
 cla
 scatter3(fv,pc_p.score(:,2),sv,'k.')
@@ -703,7 +726,7 @@ legend({'Data: PC2',['Model: (',num2str(p_1(1),3),' * ',plt_lbls{sv_ind},' + ',n
     ' + (',num2str(p_2(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_2(2),3),')']})
 
 % %hard code print with additional prefix
-%print([base,'\f6\f6_',num2str(fv_ind),'_',num2str(sv_ind)],ff); 
+%print([base,'\f6\f6_',num2str(fv_ind),'_',num2str(sv_ind)],ff);
 
 %% Consider 2D correlation of model to PC2
 
@@ -714,7 +737,7 @@ set(gca, 'FontSize', 16)
 m = p_1(1) * sv + p_1(2);
 c = p_2(1) * sv + p_2(2);
 
-estimatedPC2 =  m .* (fv) + c; 
+estimatedPC2 =  m .* (fv) + c;
 
 %scatter(estimatedPC2,pc_p.score(:,2),'k.')
 
@@ -734,7 +757,7 @@ ylabel('PC2')
 zlabel(plt_lbls{sv_ind})
 
 % %hard code print with additional prefix
-%print([base,'\f7\f7_',num2str(fv_ind),'_',num2str(sv_ind)],ff); 
+%print([base,'\f7\f7_',num2str(fv_ind),'_',num2str(sv_ind)],ff);
 
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
@@ -782,7 +805,7 @@ if plt_viz
     set(gca, 'XTick', 1:nPC);
     set(gca, 'YTick', 1:size(cs,1));
     set(gca, 'YTickLabel', plt_lbls);
-    colormap('gray');   
+    colormap('gray');
     set(gca, 'FontSize', 16)
     
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
@@ -826,7 +849,7 @@ for i = illuminants
     scatter(1:120,cs_b_pc2est(1,:,i),[],[.2,.9,0],'filled','MarkerFaceAlpha',.7)
     legend({'PC2',['Estimate based on ',char(plt_lbls(14))],...
         ['Estimate based on ',char(plt_lbls(18))],...
-        ['Estimate based on ',char(plt_lbls(1))]}) 
+        ['Estimate based on ',char(plt_lbls(1))]})
     
     ylim([-2 2])
 end

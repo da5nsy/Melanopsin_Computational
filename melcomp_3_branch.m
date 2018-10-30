@@ -376,6 +376,33 @@ plt_lbls{19} = '(S+I)/(L+M)';
 plt_lbls{20} = 'S/I fit m';
 plt_lbls{21} = 'S/I fit c';
 
+%original:
+figure,
+scatter3(squeeze(mean(cs(18,:,:),2)),pc_p.score(:,2),pc_p.score(:,1),'k.')
+
+%new:
+figure,
+scatter3(cs(18,:),...
+    repelem(pc_p.score(:,2),size(cs,2)),...
+    repelem(pc_p.score(:,1),size(cs,2)),...
+    'k.')
+
+%new:
+for fv_ind=1:size(cs,1)
+    figure,
+    scatter3(cs(fv_ind,:),...
+        repelem(pc_p.score(:,2),size(cs,2)),...
+        repelem(pc_p.score(:,1),size(cs,2)),...
+        'k.')
+    
+    xlabel(plt_lbls(fv_ind))
+    ylabel('PC2')
+    zlabel('PC1')
+end
+
+
+%%
+
 crl = zeros(size(cs,1),nPC);
 for j=1:nPC
     for i=1:size(cs,1)

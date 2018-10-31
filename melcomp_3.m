@@ -376,6 +376,63 @@ plt_lbls{19} = '(S+I)/(L+M)';
 plt_lbls{20} = 'S/I fit m';
 plt_lbls{21} = 'S/I fit c';
 
+exploratory_figs = 0;
+
+if exploratory_figs %open question of whether z should be pc1 or L
+    
+    % mean of data (as above):
+    figure,
+    scatter3(squeeze(mean(cs(18,:,:),2)),...
+        pc_p.score(:,2),...
+        pc_p.score(:,1),...
+        'k.')
+    
+    % all data (for S/I, aka 18)
+    figure, hold on
+    scatter3(cs(18,:),...
+        repelem(pc_p.score(:,2),size(cs,2)),...
+        repelem(pc_p.score(:,1),size(cs,2)),...
+        'k.')
+    
+    % all data for all signals
+    for fv_ind=1:size(cs,1)
+        figure,
+        scatter3(cs(fv_ind,:),...
+            repelem(pc_p.score(:,2),size(cs,2)),...
+            repelem(pc_p.score(:,1),size(cs,2)),...
+            'k.')
+        
+        xlabel(plt_lbls(fv_ind))
+        ylabel('PC2')
+        zlabel('PC1')
+    end
+    
+    % all data for S/I removing low values
+    
+    removeLowVals = 1;
+    
+    if removeLowVals
+        x = cs(18,cs(1,:) > 0.5); %the 18th signal (S/I) where the first signal (L) is greater than 0.5
+        y1 = repelem(pc_p.score(:,2),size(cs,2))';
+        y = y1(cs(1,:) > 0.5);
+        z = cs(1,cs(1,:) > 0.5);
+    else
+        x = cs(18,:); %the 18th signal (S/I) where the first signal (L) is greater than 0.5
+        y = repelem(pc_p.score(:,2),size(cs,2))';
+        
+        z = cs(1,:);
+    end
+    
+    figure,
+    scatter3(x,y,z,'k.')
+    %scatter3(x,y,z,10,'MarkerEdgeColor',[0.1,0.1,0.1],'MarkerEdgeAlpha',0.5)
+    
+    xlabel(plt_lbls(18))
+    ylabel('PC2')
+    zlabel(plt_lbls(1))
+    
+end
+
 crl = zeros(size(cs,1),nPC);
 for j=1:nPC
     for i=1:size(cs,1)
@@ -416,7 +473,7 @@ if plt_viz
     set(gca, 'XTick', 1:nPC);
     set(gca, 'YTick', 1:size(cs,1));
     set(gca, 'YTickLabel', plt_lbls);
-    colormap('gray');   
+    colormap('gray');
     set(gca, 'FontSize', 16)
     
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure

@@ -58,9 +58,98 @@ title('Average correlation, across all illums')
 
 %%
 
-for i=1:size(LMSRI,3)
-    fit(i,:) = polyfit(log10(LMSRI(3,:,i)),log10(LMSRI(5,:,i)),1);
-end 
+f=zeros(5,5,size(cs,3),2);
+
+for i=1:5
+    for j = 1:5
+        for ill = 1:size(cs,3)
+            f(i,j,ill,:) = polyfit(log10(LMSRI(i,:,ill)),log10(LMSRI(j,:,ill)),1);
+        end
+    end
+    disp(i)
+end
+
+%%
+figure, imagesc(f(:,:,1,1))
+colorbar
+axis image
+colormap('gray')
+
+xticks(1:5); xticklabels(plt_lbls(1:5));
+yticks(1:5); yticklabels(plt_lbls(1:5));
+
+%%
+ill = 1;
+
+cols = lines(2);
+
+figure, hold on
+scatter(log10(LMSRI(3,:,ill)),log10(LMSRI(2,:,ill)),...
+    [],cols(1,:),'filled','MarkerFaceAlpha',0.5)
+x = linspace(min(log10(LMSRI(3,:,ill))),max(log10(LMSRI(3,:,ill))));
+y = x * f(3,2,ill,1) + f(3,2,ill,2);
+plot(x,y,'Color',cols(1,:))
+
+scatter(log10(LMSRI(2,:,ill)),log10(LMSRI(3,:,ill)),...
+    [],cols(2,:),'filled','MarkerFaceAlpha',0.5)
+x = linspace(min(log10(LMSRI(2,:,ill))),max(log10(LMSRI(2,:,ill))));
+y = x * f(2,3,ill,1) + f(2,3,ill,2);
+plot(x,y,'Color',cols(2,:))
+
+plot(x,x,'k:')
+
+axis image
+
+%%
+
+polyfit(log10(LMSRI(2,:,ill)),log10(LMSRI(3,:,ill)),1)
+polyfit(log10(LMSRI(3,:,ill)),log10(LMSRI(2,:,ill)),1)
+
+%%
+clear, close all
+
+rng(1)
+x = linspace(0,1,25);
+y = rand(1,25);
+
+figure, hold on
+scatter(x,y)
+scatter(y,x)
+
+p1 = polyfit(x,y,1);
+p2 = polyfit(y,x,1);
+
+plot(x,x*p1(1)+p1(2))
+plot(y,y*p2(1)+p2(2))
+
+axis image
+legend
+
+plot(x,x,'k:')
+
+
+%%
+
+clear, close all
+
+rng(1)
+x = linspace(0,1,25);
+y = x*2-1;
+
+figure, hold on
+scatter(x,y)
+scatter(y,x)
+
+p1 = polyfit(x,y,1);
+p2 = polyfit(y,x,1);
+
+plot(x,x*p1(1)+p1(2))
+plot(y,y*p2(1)+p2(2))
+
+axis image
+legend('Location','best')
+
+plot(x,x,'k:')
 
 
 

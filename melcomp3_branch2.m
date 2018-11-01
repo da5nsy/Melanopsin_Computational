@@ -36,7 +36,7 @@ for j=1:5
         xlim([0 md])
         ylim([0 md])
         xticklabels([])
-        yticklabels([])        
+        yticklabels([])
         set(gca,'Color',repmat(c_each(i,j,ill),3,1))
         
         text(md/10,md-md/10,num2str(c_each(i,j,ill),2))
@@ -56,7 +56,7 @@ title('Average correlation, across all illums')
 
 % I don't like how the diag values are 1. Distracts from meaningful values
 
-%%
+%% Calculate lines of best fit under each illum
 
 f=zeros(5,5,size(cs,3),2);
 
@@ -69,7 +69,7 @@ for i=1:5
     disp(i)
 end
 
-%%
+%% Visualise the first illum m scores
 figure, imagesc(f(:,:,1,1))
 colorbar
 axis image
@@ -100,57 +100,71 @@ plot(x,x,'k:')
 
 axis image
 
+% %%
+%
+% polyfit(log10(LMSRI(2,:,ill)),log10(LMSRI(3,:,ill)),1)
+% polyfit(log10(LMSRI(3,:,ill)),log10(LMSRI(2,:,ill)),1)
+%
+% %%
+% clear, close all
+%
+% rng(1)
+% x = linspace(0,1,25);
+% y = rand(1,25);
+%
+% figure, hold on
+% scatter(x,y)
+% scatter(y,x)
+%
+% p1 = polyfit(x,y,1);
+% p2 = polyfit(y,x,1);
+%
+% plot(x,x*p1(1)+p1(2))
+% plot(y,y*p2(1)+p2(2))
+%
+% axis image
+% legend
+%
+% plot(x,x,'k:')
+%
+%
+% %%
+%
+% clear, close all
+%
+% x = linspace(0,1,25);
+% y = x*2-1;
+% y(5) = -0.9;
+% y(2) = -0.5;
+% y(4) = -0.2;
+% y(9) = -0.7;
+%
+% figure, hold on
+% scatter(x,y)
+% scatter(y,x)
+%
+% p1 = polyfit(x,y,1);
+% p2 = polyfit(y,x,1);
+%
+% plot(x,x*p1(1)+p1(2))
+% plot(y,y*p2(1)+p2(2))
+%
+% axis image
+% legend('Location','best')
+%
+% plot(x,x,'k:')
+
 %%
 
-polyfit(log10(LMSRI(2,:,ill)),log10(LMSRI(3,:,ill)),1)
-polyfit(log10(LMSRI(3,:,ill)),log10(LMSRI(2,:,ill)),1)
-
-%%
-clear, close all
-
-rng(1)
-x = linspace(0,1,25);
-y = rand(1,25);
-
-figure, hold on
-scatter(x,y)
-scatter(y,x)
-
-p1 = polyfit(x,y,1);
-p2 = polyfit(y,x,1);
-
-plot(x,x*p1(1)+p1(2))
-plot(y,y*p2(1)+p2(2))
-
-axis image
-legend
-
-plot(x,x,'k:')
-
-
-%%
-
-clear, close all
-
-rng(1)
-x = linspace(0,1,25);
-y = x*2-1;
-
-figure, hold on
-scatter(x,y)
-scatter(y,x)
-
-p1 = polyfit(x,y,1);
-p2 = polyfit(y,x,1);
-
-plot(x,x*p1(1)+p1(2))
-plot(y,y*p2(1)+p2(2))
-
-axis image
-legend('Location','best')
-
-plot(x,x,'k:')
-
-
-
-
+for i=1:5
+    for j=1:5
+        if i==j
+            continue
+        end
+        figure,
+        scatter3(f(i,j,:,1),pc_p.score(:,2),pc_p.score(:,1),'k.')
+        
+        xlabel(plt_lbls(i))
+        ylabel(plt_lbls(j))
+    end
+end

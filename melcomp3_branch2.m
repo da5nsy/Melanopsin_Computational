@@ -118,59 +118,7 @@ if plt_nonSymmetricalLinesDemo
     axis image
 end
 
-% %%
-%
-% polyfit(log10(LMSRI(2,:,ill)),log10(LMSRI(3,:,ill)),1)
-% polyfit(log10(LMSRI(3,:,ill)),log10(LMSRI(2,:,ill)),1)
-%
-% %%
-% clear, close all
-%
-% rng(1)
-% x = linspace(0,1,25);
-% y = rand(1,25);
-%
-% figure, hold on
-% scatter(x,y)
-% scatter(y,x)
-%
-% p1 = polyfit(x,y,1);
-% p2 = polyfit(y,x,1);
-%
-% plot(x,x*p1(1)+p1(2))
-% plot(y,y*p2(1)+p2(2))
-%
-% axis image
-% legend
-%
-% plot(x,x,'k:')
-%
-%
-% %%
-%
-% clear, close all
-%
-% x = linspace(0,1,25);
-% y = x*2-1;
-% y(5) = -0.9;
-% y(2) = -0.5;
-% y(4) = -0.2;
-% y(9) = -0.7;
-%
-% figure, hold on
-% scatter(x,y)
-% scatter(y,x)
-%
-% p1 = polyfit(x,y,1);
-% p2 = polyfit(y,x,1);
-%
-% plot(x,x*p1(1)+p1(2))
-% plot(y,y*p2(1)+p2(2))
-%
-% axis image
-% legend('Location','best')
-%
-% plot(x,x,'k:')
+
 
 %% Plot the spiral for each m and c score
 
@@ -208,3 +156,77 @@ if plt_c_scores
         end
     end
 end
+
+%% Plot showing segmentation by sv value
+
+plt_seg = 1;
+
+sv = pc_p.score(:,1)-min(pc_p.score(:,1)); %Using PC1 as sv for now (!!!!!!!!!!!!!!!!!)
+
+NoD  = 40; %number of divisions
+mI   = max(sv);
+cols = lines(NoD); %cols = jet(n);
+sc_t = [fv pc_p.score(:,2)]; %scatter temp
+
+block = zeros(NoD,2); 
+fit_t = zeros(NoD,2);
+sc    = NaN([size(sc_t) NoD]); %scatter
+
+if plt_seg
+    figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
+    hold on
+    set(gca, 'FontSize', 16)
+    
+    xlabel(plt_lbls{fv_ind}) %!!!!!!!!!!!!!
+    ylabel('PC2')
+    zlabel(plt_lbls{sv_ind}) %!!!!!!!!!!!!!
+    
+    axis tight
+    cla
+end
+    
+for i=1:NoD
+    block(i,[1 2]) = [(i-1)*(mI/NoD), i*(mI/NoD)]; %compute lower and upper bounds for block
+    bmi = and(sv>=(block(i,1)),sv<block(i,2)); %block membership index
+    sc(bmi,:,i) = sc_t(bmi,:); %sorts values into order based on block membership
+    fit_t(i,:) = polyfit(sc(~isnan(sc(:,1,i)),1,i),sc(~isnan(sc(:,2,i)),2,i),1); %fit temp
+
+    if any(fit_t(i,:)) && plt_seg
+        x_seg = linspace(min(sc(:,1,i)),max(sc(:,1,i)),20);
+        y_seg = (fit_t(i,1) * x_seg) + fit_t(i,2);
+        scatter3(sc(:,1,i),sc(:,2,i),sv,[],cols(i,:),'.');
+        plot3(x_seg,y_seg,repmat(mean(block(i,:)),size(x_seg,2),1),'Color',cols(i,:));
+        drawnow
+    end    
+end
+
+%% Assess trends in fitted lines through data
+plt_ass = 1;
+
+if plt_ass
+    figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
+    hold on
+    set(gca, 'FontSize', 16)
+    
+    fit_t_idx = and(fit_t(:,1),fit_t(:,2));
+    x_ass = mean(block(fit_t_idx,:),2);
+    y_1 = fit_t(fit_t_idx,1);
+    y_2 = fit_t(fit_t_idx,2);
+    scatter(x_ass,y_1,'ro')
+    scatter(x_ass,y_2,'bo')
+    
+    xlabel(plt_lbls{sv_ind})
+    ylabel('Value in line of best fit')
+    
+    p_1 = polyfit(x_ass,y_1,1);
+    p_2 = polyfit(x_ass,y_2,1);
+    y_1p = polyval(p_1, x_ass);
+    y_2p = polyval(p_2, x_ass);
+    
+    plot(x_ass,y_1p,'r:')
+    plot(x_ass,y_2p,'b:')
+    
+    
+    legend('m','c',num2str(p_1),num2str(p_2),'Location','Northwest')
+end
+

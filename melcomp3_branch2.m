@@ -15,9 +15,9 @@ for i=1:size(cs,3)
 end
 c_av = mean(c_each,3); %mean across all illuminants
 
-%% Plot the different signals against eachother and look at correlation (FOR ILLUMINANT #1)
+%% Plot the different signals against eachother and look at correlation (FOR ILLUMINANT #ill)
 
-plt_relBetweenSignals = 0;
+plt_relBetweenSignals = 1;
 
 if plt_relBetweenSignals
     ill = 500;
@@ -30,6 +30,7 @@ if plt_relBetweenSignals
                 continue
             end
             subplot(5,5,i+(j-1)*5)
+            hold on
             scatter(cs(j,:,ill),cs(i,:,ill),'k.') %only plotting points for 1 illuminant
             xlabel(plt_lbls(j))
             ylabel(plt_lbls(i))
@@ -42,13 +43,24 @@ if plt_relBetweenSignals
             set(gca,'Color',repmat(c_each(i,j,ill),3,1))
             
             text(md/10,md-md/10,num2str(c_each(i,j,ill),2))
+            
+            %calculate fits
+            reg1 = polyfit(cs(j,:,ill),cs(i,:,ill),1);
+            reg2 = orthogonalRegress(cs(j,:,ill),cs(i,:,ill));
+            
+            xlin = linspace(min(cs(j,:,ill)),max(cs(j,:,ill)));
+            ylin1 = xlin*reg1(1) + reg1(2);
+            ylin2 = xlin*reg2(1) + reg2(2);
+            
+            plot(xlin,ylin1)
+            plot(xlin,ylin2)
         end
     end
 end
 
 %% Average correlation, across all illums
 
-plt_c_av = 0;
+plt_c_av = 1;
 
 if plt_c_av
     figure,
@@ -81,7 +93,7 @@ catch %takes roughly 30 seconds
     save('melcomp_3_correlationBetweenSignalsForEachIllum.mat','f')
 end
 
-plt_firstIllumMScores = 0; % Visualise the first illum m scores
+plt_firstIllumMScores = 1; % Visualise the first illum m scores
 if plt_firstIllumMScores
     figure,
     imagesc(f(:,:,1,1))
@@ -95,7 +107,7 @@ end
 
 %%
 
-plt_SymmetricalLinesDemo = 0;
+plt_SymmetricalLinesDemo = 1;
 
 if plt_SymmetricalLinesDemo
     
@@ -122,52 +134,47 @@ end
 
 %% Plot the spiral for each m and c score
 
-plt_m_scores = 0;
-plt_c_scores = 0;
+plt_scores = 1;
+MorC = 1; %1=m, 2=c
 
-if plt_m_scores
+figure, hold on
+cols = hsv(11);
+k=1;
+
+if plt_scores
     for i=1:5
         for j=1:5
-            if i==j
+            if i <= j
                 continue
             end
-            figure,
-            scatter3(f(i,j,:,1),pc_p.score(:,2),pc_p.score(:,1),'k.')
+            k=k+1;
             
-            xlabel(['x = ',plt_lbls{i},', y = ',plt_lbls{j}])
+            scatter3(f(i,j,:,MorC),pc_p.score(:,2),pc_p.score(:,1),'.',...
+                'MarkerEdgeColor',cols(k,:),...
+                'DisplayName',[plt_lbls{i},' against ',plt_lbls{j}])
+            
+            %xlabel([plt_lbls{i},' against ',plt_lbls{j}])
             ylabel('PC2')
             zlabel('PC1')
-            title('m scores')
+            title(['scores: ',num2str(MorC)])
+            
+            %zlim([-2 max(zlim)])
         end
     end
 end
 
-if plt_c_scores
-    for i=1:5
-        for j=1:5
-            if i==j
-                continue
-            end
-            figure,
-            scatter3(f(i,j,:,2),pc_p.score(:,2),pc_p.score(:,1),'k.')
-            
-            xlabel(['x = ',num2str(i),', y = ',num2str(i)])
-            ylabel('PC2')
-            zlabel('PC1')
-            title('c scores')
-        end
-    end
-end
+
+legend
 
 
 %% Plot showing segmentation by s3
 
-plt_seg = 1;
+plt_seg = 0;
 plt_ass = 1;
 
 MorC = 1; %1=m, 2=c
 
-NoD  = 40; %number of divisions
+NoD  = 30; %number of divisions
 cols = lines(NoD); %cols = jet(n);
 
 block = zeros(NoD,2);
@@ -184,7 +191,7 @@ for s1i = 1:5
         mI = max(s3);
         
         
-        sc    = NaN([size(sc_t) NoD]); %scatter
+        sc = NaN([size(sc_t) NoD]); %scatter
         
         if plt_seg
             figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
@@ -203,7 +210,7 @@ for s1i = 1:5
             block(i,[1 2]) = [(i-1)*(mI/NoD), i*(mI/NoD)]; %compute lower and upper bounds for block
             bmi = and(s3>=(block(i,1)),s3<block(i,2)); %block membership index
             sc(bmi,:,i) = sc_t(bmi,:); %sorts values into order based on block membership
-            fit_t(i,:,s1i,s2i) = orthogonalRegress(sc(~isnan(sc(:,1,i)),1,i),sc(~isnan(sc(:,2,i)),2,i)); %fit temp
+            fit_t(i,:,s1i,s2i) = polyfit(sc(~isnan(sc(:,1,i)),1,i),sc(~isnan(sc(:,2,i)),2,i),1); %fit temp
             fit_t(isnan(fit_t)) = 0;
             
             if any(fit_t(i,:,s1i,s2i)) && plt_seg
@@ -230,8 +237,8 @@ for s1i = 1:5
             xlabel([plt_lbls{s1i},' against ',plt_lbls{s2i}])
             ylabel('Value in line of best fit')
             
-            p_1([1,2],s1i,s2i) = orthogonalRegress(x_ass,y_1);
-            p_2([1,2],s1i,s2i) = orthogonalRegress(x_ass,y_2);
+            p_1([1,2],s1i,s2i) = polyfit(x_ass,y_1,1);
+            p_2([1,2],s1i,s2i) = polyfit(x_ass,y_2,1);
             y_1p = polyval(p_1([1,2],s1i,s2i), x_ass);
             y_2p = polyval(p_2([1,2],s1i,s2i), x_ass);
             
@@ -270,63 +277,81 @@ for s1i = 1:5
         
         xlabel(['(',num2str(p_1(1,s1i,s2i),3),' * PC1 + ',num2str(p_1(2,s1i,s2i),3),...
             ') * f(',num2str(s1i),',',num2str(s2i),...
-             ') + (',num2str(p_2(1,s1i,s2i),3),' * PC1 + ',num2str(p_2(2,s1i,s2i),3),')'])
+            ') + (',num2str(p_2(1,s1i,s2i),3),' * PC1 + ',num2str(p_2(2,s1i,s2i),3),')'])
         ylabel('PC2')
         zlabel('PC1')
+        
+        axis equal
     end
 end
 
 %% Guesstimates game
 
+clearvars -except cs p_1 p_2 pc_p
+
 MorC = 1;
 
-% OK, here's the game:
-% You get the cs for n surfaces under 1 illuminant.
-% Tell me what the PC2 score for that illuminant is.
-
-g_nSur=4; % number of surfaces
-
-%rng(4);
-g_ref_ind = randi(size(cs,2),g_nSur,1); %surfaces index  
-g_ill_ind = randi(size(cs,2),1,1);
-
-g_cs = cs(1:5,g_ref_ind,g_ill_ind);
-
-for i=1:5
-    for j=1:5
-        if i == j
-            continue
+for k=1:size(cs,3)
+    
+    % OK, here's the game:
+    % You get the cs for n surfaces under 1 illuminant.
+    % Tell me what the PC2 score for that illuminant is.
+    
+    g_nSur=120; % number of surfaces
+    
+    %rng(4);
+    g_ref_ind = 1:120;  %randi(size(cs,2),g_nSur,1) %surfaces index
+    g_ill_ind = k;% randi(size(cs,2),1,1)
+    
+    g_cs = cs(1:5,g_ref_ind,g_ill_ind);
+    
+    for i=1:5
+        for j=1:5
+            if i == j
+                continue
+            end
+            g_fits(:,i,j) = orthogonalRegress(log10(g_cs(i,:)),log10(g_cs(j,:)));
+            
+            
+            m = p_1(1,i,j) * (pc_p.score(g_ill_ind,1)-min(pc_p.score(:,1))) + p_1(2,i,j);
+            c = p_2(1,i,j) * (pc_p.score(g_ill_ind,1)-min(pc_p.score(:,1))) + p_2(2,i,j);
+            
+            g_estimatedPC2(i,j) =  m .* g_fits(MorC,i,j) + c;
         end
-        g_fits(:,i,j) = orthogonalRegress(g_cs(i,:),g_cs(j,:));
-        
-        
-        m = p_1(1,i,j) * (pc_p.score(g_ill_ind,1)-min(pc_p.score(:,1))) + p_1(2,i,j);
-        c = p_2(1,i,j) * (pc_p.score(g_ill_ind,1)-min(pc_p.score(:,1))) + p_2(2,i,j);
-        
-        g_estimatedPC2(i,j) =  m .* g_fits(MorC,i,j) + c;
     end
+    
+    correct_answer = pc_p.score(g_ill_ind,2);
+    
+    %
+    i=3;
+    j=5;
+    
+    % figure, hold on
+    % scatter(log10(g_cs(i,:)),log10(g_cs(j,:)))
+    %
+    % xlin = linspace(min(log10(g_cs(i,:))),max(log10(g_cs(i,:))));
+    % ylin = g_fits(1,i,j)*xlin+g_fits(2,i,j);
+    % plot(xlin,ylin)
+    
+    %
+    
+    g_estimatedPC2_diff(k,:,:) = abs(g_estimatedPC2 - correct_answer);
+    % figure,
+    % imagesc(g_estimatedPC2_diff)
+    % colormap('gray')
+    
 end
 
-correct_answer = pc_p.score(g_ill_ind,2)
-
 %%
-i=1;
-j=3;
+a = squeeze(mean(g_estimatedPC2_diff,1))
 
-figure, hold on
-scatter(g_cs(i,:),g_cs(j,:))
+figure,
+imagesc(a)
+colormap('gray')
 
-x = linspace(min(g_cs(i,:)),max(g_cs(i,:)));
-y = g_fits(1,i,j)*x+g_fits(2,i,j);
-plot(x,y)
+colorbar
 
-% Now I should be able to look up, for example, that m value, at this value
-% of pc1, and get a pc2 estimate.
-
-
-%%
-correct_answer = pc_p.score(g_ill_ind,2)
-
-
-
-
+axis image
+% xticks(1:5); xticklabels(plt_lbls{1:5});
+% yticks(1:5); yticklabels(plt_lbls{1:5});
+% 

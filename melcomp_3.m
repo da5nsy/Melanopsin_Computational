@@ -773,6 +773,18 @@ corr_return = corr(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2));
 
 return
 
+%% Scatter FULL data
+
+figure, hold on
+for ref = 1:120
+    scatter3(cs(18,ref,:),pc_p.score(:,2),pc_p.score(:,1),'.')
+end
+
+figure, hold on
+for ref = 1:120
+    scatter3(cs(14,ref,:),pc_p.score(:,2),pc_p.score(:,1),'.')
+end
+
 %% New version of 'Calc correlation between' taking into account amended signals
 
 lore = load('melcomp_3_correlation_results.mat'); %loaded results

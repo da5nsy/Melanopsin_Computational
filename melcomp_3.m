@@ -79,9 +79,9 @@ if plt_refs
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 end
 
-% T_SRF = mean(T_SRF,2); 
+% T_SRF = mean(T_SRF,2);
 %This is to check the effect of averaging the
-%reflectances at this stage rather than later in the process. 
+%reflectances at this stage rather than later in the process.
 %Spolier: nothing changes! (except a couple of errors being thrown.
 
 %% SSF (Spectral Sensitivity Functions)
@@ -290,7 +290,7 @@ end
 
 for i=1:size(LMSRI,3)
     fit(i,:) = polyfit(log10(LMSRI(3,:,i)),log10(LMSRI(5,:,i)),1);
-end 
+end
 
 f_m = permute(repmat(fit(:,1),1,1,size(LMSRI,2)),[2,3,1]); % Mx + c
 f_c = permute(repmat(fit(:,2),1,1,size(LMSRI,2)),[2,3,1]); % mx + C
@@ -302,34 +302,34 @@ f_c = permute(repmat(fit(:,2),1,1,size(LMSRI,2)),[2,3,1]); % mx + C
 % x = linspace(-2,0);
 % y = fit(1,1)*x;
 % plot(x,y)
-% 
-% 
+%
+%
 % figure, hold on
 % scatter(log10(LMSRI(3,:,2)),log10(LMSRI(5,:,2)))
 % x = linspace(-2,0);
 % y = repmat(fit(2,2), length(x),1);
 % plot(x,y)
-% 
+%
 % % - %
 % figure('defaultLineLineWidth',2), hold on
 % xlabel('log(S)'); ylabel('log(I)');
 % %axis equal
-% 
+%
 % for i = 1:10:2600
 %     %scatter3(log10(LMSRI(3,:,i)),log10(LMSRI(5,:,i)),ones(120,1)*i,'k','filled')
-%         
+%
 %     x_t = linspace(min(log10(LMSRI(3,:,i))),max(log10(LMSRI(3,:,i))));
 %     y_t = x_t*fit(i,1) + fit(i,2);
-%     
+%
 %      x_t2 = linspace(min(log10(LMSRI(3,:,i))),max(log10(LMSRI(3,:,i))));
 %      y_t2 = x_t*f_m(1,1,i) + f_c(1,1,i);
-%     
+%
 %     %plot3(x_t,y_t,ones(100,1)*i,'r')
-%     plot3(x_t2,y_t2,ones(100,1)*i,'g:')%     
+%     plot3(x_t2,y_t2,ones(100,1)*i,'g:')%
 % end
-% 
+%
 % %view(-43,0)
-% % 
+% %
 % % figure,
 % % scatter3(f_m(1,1,:),f_c(1,1,:),pc_p.score(:,2))
 % % xlabel('f_m'); ylabel('f_c');
@@ -618,7 +618,7 @@ else
 end
 
 fv = squeeze(mean(cs(fv_ind,:,:),2));
-sv = squeeze(mean(cs(sv_ind,:,:),2)); 
+sv = squeeze(mean(cs(sv_ind,:,:),2));
 
 cla
 scatter3(fv,pc_p.score(:,2),sv,'k.')
@@ -733,7 +733,7 @@ legend({'Data: PC2',['Model: (',num2str(p_1(1),3),' * ',plt_lbls{sv_ind},' + ',n
     ' + (',num2str(p_2(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_2(2),3),')']})
 
 % %hard code print with additional prefix
-%print([base,'\f6\f6_',num2str(fv_ind),'_',num2str(sv_ind)],ff); 
+%print([base,'\f6\f6_',num2str(fv_ind),'_',num2str(sv_ind)],ff);
 
 %% Consider 2D correlation of model to PC2
 
@@ -744,7 +744,7 @@ set(gca, 'FontSize', 16)
 m = p_1(1) * sv + p_1(2);
 c = p_2(1) * sv + p_2(2);
 
-estimatedPC2 =  m .* (fv) + c; 
+estimatedPC2 =  m .* (fv) + c;
 
 %scatter(estimatedPC2,pc_p.score(:,2),'k.')
 
@@ -764,7 +764,7 @@ ylabel('PC2')
 zlabel(plt_lbls{sv_ind})
 
 % %hard code print with additional prefix
-%print([base,'\f7\f7_',num2str(fv_ind),'_',num2str(sv_ind)],ff); 
+%print([base,'\f7\f7_',num2str(fv_ind),'_',num2str(sv_ind)],ff);
 
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
@@ -824,7 +824,7 @@ if plt_viz
     set(gca, 'XTick', 1:nPC);
     set(gca, 'YTick', 1:size(cs,1));
     set(gca, 'YTickLabel', plt_lbls);
-    colormap('gray');   
+    colormap('gray');
     set(gca, 'FontSize', 16)
     
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
@@ -858,7 +858,21 @@ for i = 1:size(cs,1) % signal
 end
 
 %% Visualise performance for a subset of illuminants and colour signals
-illuminants = 5:100:size(cs_b,3);
+illuminants = 30:200:size(cs_b,3);
+ds= 5;
+
+% for i = illuminants
+%     figure, hold on
+%     plot([0,120],[pc_p.score(i,2),pc_p.score(i,2)],'k')
+%     scatter(1:120,cs_b_pc2est(14,:,i),[],[0,.45,.74],'filled','MarkerFaceAlpha',.7)
+%     scatter(1:120,cs_b_pc2est(18,:,i),[],[.85,.3,0],'filled','MarkerFaceAlpha',.7)
+%     scatter(1:120,cs_b_pc2est(1,:,i),[],[.2,.9,0],'filled','MarkerFaceAlpha',.7)
+%     legend({'PC2',['Estimate based on ',char(plt_lbls(14))],...
+%         ['Estimate based on ',char(plt_lbls(18))],...
+%         ['Estimate based on ',char(plt_lbls(1))]})
+%
+%     ylim([-2 2])
+% end
 
 for i = illuminants
     figure, hold on
@@ -868,9 +882,78 @@ for i = illuminants
     scatter(1:120,cs_b_pc2est(1,:,i),[],[.2,.9,0],'filled','MarkerFaceAlpha',.7)
     legend({'PC2',['Estimate based on ',char(plt_lbls(14))],...
         ['Estimate based on ',char(plt_lbls(18))],...
-        ['Estimate based on ',char(plt_lbls(1))]}) 
+        ['Estimate based on ',char(plt_lbls(1))]})
     
     ylim([-2 2])
+    
+    plot([0,120],[mean(cs_b_pc2est(14,1:ds:end,i)),mean(cs_b_pc2est(14,1:ds:end,i))],'Color',[0,.45,.74],'LineStyle',':') %mean or median? !!!!!!!
+    plot([0,120],[mean(cs_b_pc2est(18,1:ds:end,i)),mean(cs_b_pc2est(18,1:ds:end,i))],'Color',[.85,.3,0],'LineStyle',':')
+    plot([0,120],[mean(cs_b_pc2est(1,1:ds:end,i)),mean(cs_b_pc2est(1,1:ds:end,i))],'Color',[.2,.9,0],'LineStyle',':')
 end
+
+%%
+
+%create a vector of all the actual pc2 scores, for only the 'bright' illums
+pc2_b = pc_p.score(squeeze(mean(cs(1,:,:),2))>0.5,2);
+
+nRefInd = [120,100,80,60,40,20,15,10,7,6,5,4,3,2,1]; %list of different numbers of reflectances
+
+for j=1:length(nRefInd)
+    
+    
+    nRef = nRefInd(j); %number of reflectances
+    % !!!!!!!! since it's random there will be different results each time
+    refs = randi(size(cs,2),nRef,1); %pick the actual refs
+    
+    for i = 1:size(cs_b,3)
+        %calculate the average over n reflectances
+        cs_b_pc2est_av(:,i,j) = median(cs_b_pc2est(:,refs,i),2);
+    end
+    
+    for i=1:size(cs_b,1)
+        %calculate difference between actual pc2 and estimated pc2
+        cs_b_pc2est_diff(i,:,j) = cs_b_pc2est_av(i,:,j) - pc2_b';
+    end
+    
+    % for i=1:size(cs_b,1)
+    %     %plot histograms of errors
+    %     figure,
+    %     hist(cs_b_pc2est_diff(i,:),100)
+    %     title(plt_lbls{i})
+    %     xlim([-1 1])
+    % end
+end
+
+%%
+figure, hold on
+scatter(1:size(cs_b,1),std(cs_b_pc2est_diff(:,:,1)'),'filled')
+scatter(1:size(cs_b,1),mean(abs(cs_b_pc2est_diff(:,:,1)')),'filled')
+scatter(1:size(cs_b,1),median(abs(cs_b_pc2est_diff(:,:,1)')),'filled')
+grid on
+set(gca, 'XTick', 1:size(cs_b,1));
+set(gca, 'XTickLabel', plt_lbls);
+grid on
+set(gca, 'XTick', 1:size(cs_b,1));
+set(gca, 'XTickLabel', plt_lbls);
+%ylim([0 0.2])
+xtickangle(45)
+legend('std','mean','median')
+
+%%
+
+% caution: these figures are highly influenced by the random selection of refs above
+
+
+figure('units','normalized','outerposition',[0 0 1 1]), hold on
+for i = 1:size(cs_b_pc2est_diff,3)
+    scatter(1:size(cs_b,1),mean(abs(cs_b_pc2est_diff(:,:,i)')),[],[i/size(cs_b_pc2est_diff,3),0,0],'filled') 
+end
+
+grid on
+set(gca, 'XTick', 1:size(cs_b,1));
+set(gca, 'XTickLabel', plt_lbls);
+ylim([0 0.2])
+legend(num2str(nRefInd(:)))
+xtickangle(45)
 
 end

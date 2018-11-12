@@ -846,49 +846,50 @@ cs_b_pc2est = zeros(size(cs_b)); %create variable to contain estimates of pc2 fo
 
 sv_ind = 1;
 
+% for i = 1:size(cs,1) % signal
+%     for j= 1:size(cs,2) % reflectance
+%         for k = 1:size(cs_b,3) % illuminant
+%             cs_b_pc2est(i,j,k) = ...
+%                 (p_1(i,sv_ind,1) * cs_b(sv_ind,j,k) + p_1(i,sv_ind,2))...
+%                 * cs_b(i,j,k) + ...
+%                 (p_2(i,sv_ind,1) * cs_b(sv_ind,j,k) + p_2(i,sv_ind,2));
+%         end
+%     end
+% end
+
+pc1_b = pc_p.score(squeeze(mean(cs(1,:,:),2))>0.5,1);
+
 for i = 1:size(cs,1) % signal
     for j= 1:size(cs,2) % reflectance
         for k = 1:size(cs_b,3) % illuminant
             cs_b_pc2est(i,j,k) = ...
-                (p_1(i,sv_ind,1) * cs_b(sv_ind,j,k) + p_1(i,sv_ind,2))...
+                (p_1(i,sv_ind,1) * pc1_b(k) + p_1(i,sv_ind,2))...
                 * cs_b(i,j,k) + ...
-                (p_2(i,sv_ind,1) * cs_b(sv_ind,j,k) + p_2(i,sv_ind,2));
+                (p_2(i,sv_ind,1) * pc1_b(k) + p_2(i,sv_ind,2));
         end
     end
 end
 
 %% Visualise performance for a subset of illuminants and colour signals
-illuminants = 30:200:size(cs_b,3);
-ds= 5;
-
-% for i = illuminants
-%     figure, hold on
-%     plot([0,120],[pc_p.score(i,2),pc_p.score(i,2)],'k')
-%     scatter(1:120,cs_b_pc2est(14,:,i),[],[0,.45,.74],'filled','MarkerFaceAlpha',.7)
-%     scatter(1:120,cs_b_pc2est(18,:,i),[],[.85,.3,0],'filled','MarkerFaceAlpha',.7)
-%     scatter(1:120,cs_b_pc2est(1,:,i),[],[.2,.9,0],'filled','MarkerFaceAlpha',.7)
-%     legend({'PC2',['Estimate based on ',char(plt_lbls(14))],...
-%         ['Estimate based on ',char(plt_lbls(18))],...
-%         ['Estimate based on ',char(plt_lbls(1))]})
-%
-%     ylim([-2 2])
-% end
+illuminants = 1:200:size(cs_b,3);
+ds= 10;
 
 for i = illuminants
     figure, hold on
-    plot([0,120],[pc_p.score(i,2),pc_p.score(i,2)],'k')
-    scatter(1:120,cs_b_pc2est(14,:,i),[],[0,.45,.74],'filled','MarkerFaceAlpha',.7)
-    scatter(1:120,cs_b_pc2est(18,:,i),[],[.85,.3,0],'filled','MarkerFaceAlpha',.7)
-    scatter(1:120,cs_b_pc2est(1,:,i),[],[.2,.9,0],'filled','MarkerFaceAlpha',.7)
-    legend({'PC2',['Estimate based on ',char(plt_lbls(14))],...
-        ['Estimate based on ',char(plt_lbls(18))],...
-        ['Estimate based on ',char(plt_lbls(1))]})
+    plot([0,120],[pc_p.score(i,2),pc_p.score(i,2)],'k','DisplayName','PC2')
+    scatter(1:120,cs_b_pc2est(14,:,i),[],[0,.45,.74],'filled','MarkerFaceAlpha',.7,'DisplayName',['Estimate based on ',char(plt_lbls(14))])
+    scatter(1:120,cs_b_pc2est(18,:,i),[],[.85,.3,0],'filled','MarkerFaceAlpha',.7,'DisplayName',['Estimate based on ',char(plt_lbls(18))])
+    scatter(1:120,cs_b_pc2est(1,:,i),[],[.2,.9,0],'filled','MarkerFaceAlpha',.7,'DisplayName',['Estimate based on ',char(plt_lbls(1))])
+    
+    scatter(1:120,cs_b_pc2est(end-1,:,i),[],[.2,0,0],'filled','MarkerFaceAlpha',.7,'DisplayName',['Estimate based on ',char(plt_lbls(end-1))])
+    
+    plot([0,120],[mean(cs_b_pc2est(14,1:ds:end,i)),mean(cs_b_pc2est(14,1:ds:end,i))],'Color',[0,.45,.74],'LineStyle',':','DisplayName',['Mean of ',char(plt_lbls(14)),'estimates (ds=',num2str(ds),')'])
+    plot([0,120],[mean(cs_b_pc2est(18,1:ds:end,i)),mean(cs_b_pc2est(18,1:ds:end,i))],'Color',[.85,.3,0],'LineStyle',':','DisplayName',['Mean of ',char(plt_lbls(18)),'estimates (ds=',num2str(ds),')'])
+    plot([0,120],[mean(cs_b_pc2est(1,1:ds:end,i)),mean(cs_b_pc2est(1,1:ds:end,i))],'Color',[.2,.9,0],'LineStyle',':','DisplayName',['Mean of ',char(plt_lbls(1)),'estimates (ds=',num2str(ds),')'])
+    
+    legend
     
     ylim([-2 2])
-    
-    plot([0,120],[mean(cs_b_pc2est(14,1:ds:end,i)),mean(cs_b_pc2est(14,1:ds:end,i))],'Color',[0,.45,.74],'LineStyle',':') %mean or median? !!!!!!!
-    plot([0,120],[mean(cs_b_pc2est(18,1:ds:end,i)),mean(cs_b_pc2est(18,1:ds:end,i))],'Color',[.85,.3,0],'LineStyle',':')
-    plot([0,120],[mean(cs_b_pc2est(1,1:ds:end,i)),mean(cs_b_pc2est(1,1:ds:end,i))],'Color',[.2,.9,0],'LineStyle',':')
 end
 
 %%
@@ -907,7 +908,7 @@ for j=1:length(nRefInd)
     
     for i = 1:size(cs_b,3)
         %calculate the average over n reflectances
-        cs_b_pc2est_av(:,i,j) = median(cs_b_pc2est(:,refs,i),2);
+        cs_b_pc2est_av(:,i,j) = mean(cs_b_pc2est(:,refs,i),2);
     end
     
     for i=1:size(cs_b,1)
@@ -915,13 +916,15 @@ for j=1:length(nRefInd)
         cs_b_pc2est_diff(i,:,j) = cs_b_pc2est_av(i,:,j) - pc2_b';
     end
     
-    % for i=1:size(cs_b,1)
-    %     %plot histograms of errors
-    %     figure,
-    %     hist(cs_b_pc2est_diff(i,:),100)
-    %     title(plt_lbls{i})
-    %     xlim([-1 1])
-    % end
+end
+
+%%
+for i=1:size(cs_b,1)
+    %plot histograms of errors
+    figure,
+    hist(cs_b_pc2est_diff(i,:,1),100)
+    title(plt_lbls{i})
+    xlim([-1 1])
 end
 
 %%

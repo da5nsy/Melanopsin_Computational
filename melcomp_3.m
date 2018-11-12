@@ -846,29 +846,30 @@ cs_b_pc2est = zeros(size(cs_b)); %create variable to contain estimates of pc2 fo
 
 sv_ind = 1;
 
-% for i = 1:size(cs,1) % signal
-%     for j= 1:size(cs,2) % reflectance
-%         for k = 1:size(cs_b,3) % illuminant
-%             cs_b_pc2est(i,j,k) = ...
-%                 (p_1(i,sv_ind,1) * cs_b(sv_ind,j,k) + p_1(i,sv_ind,2))...
-%                 * cs_b(i,j,k) + ...
-%                 (p_2(i,sv_ind,1) * cs_b(sv_ind,j,k) + p_2(i,sv_ind,2));
-%         end
-%     end
-% end
-
-pc1_b = pc_p.score(squeeze(mean(cs(1,:,:),2))>0.5,1);
-
 for i = 1:size(cs,1) % signal
     for j= 1:size(cs,2) % reflectance
         for k = 1:size(cs_b,3) % illuminant
             cs_b_pc2est(i,j,k) = ...
-                (p_1(i,sv_ind,1) * pc1_b(k) + p_1(i,sv_ind,2))...
+                (p_1(i,sv_ind,1) * cs_b(sv_ind,j,k) + p_1(i,sv_ind,2))...
                 * cs_b(i,j,k) + ...
-                (p_2(i,sv_ind,1) * pc1_b(k) + p_2(i,sv_ind,2));
+                (p_2(i,sv_ind,1) * cs_b(sv_ind,j,k) + p_2(i,sv_ind,2));
         end
     end
 end
+
+% %Using PC1 instead of L
+% pc1_b = pc_p.score(squeeze(mean(cs(1,:,:),2))>0.5,1);
+% 
+% for i = 1:size(cs,1) % signal
+%     for j= 1:size(cs,2) % reflectance
+%         for k = 1:size(cs_b,3) % illuminant
+%             cs_b_pc2est(i,j,k) = ...
+%                 (p_1(i,sv_ind,1) * pc1_b(k) + p_1(i,sv_ind,2))...
+%                 * cs_b(i,j,k) + ...
+%                 (p_2(i,sv_ind,1) * pc1_b(k) + p_2(i,sv_ind,2));
+%         end
+%     end
+% end
 
 %% Visualise performance for a subset of illuminants and colour signals
 illuminants = 1:200:size(cs_b,3);
@@ -883,9 +884,9 @@ for i = illuminants
     
     scatter(1:120,cs_b_pc2est(end-1,:,i),[],[.2,0,0],'filled','MarkerFaceAlpha',.7,'DisplayName',['Estimate based on ',char(plt_lbls(end-1))])
     
-    plot([0,120],[mean(cs_b_pc2est(14,1:ds:end,i)),mean(cs_b_pc2est(14,1:ds:end,i))],'Color',[0,.45,.74],'LineStyle',':','DisplayName',['Mean of ',char(plt_lbls(14)),'estimates (ds=',num2str(ds),')'])
-    plot([0,120],[mean(cs_b_pc2est(18,1:ds:end,i)),mean(cs_b_pc2est(18,1:ds:end,i))],'Color',[.85,.3,0],'LineStyle',':','DisplayName',['Mean of ',char(plt_lbls(18)),'estimates (ds=',num2str(ds),')'])
-    plot([0,120],[mean(cs_b_pc2est(1,1:ds:end,i)),mean(cs_b_pc2est(1,1:ds:end,i))],'Color',[.2,.9,0],'LineStyle',':','DisplayName',['Mean of ',char(plt_lbls(1)),'estimates (ds=',num2str(ds),')'])
+    plot([0,120],[mean(cs_b_pc2est(14,1:ds:end,i)),mean(cs_b_pc2est(14,1:ds:end,i))],'Color',[0,.45,.74],'LineStyle',':','DisplayName',['Mean of ',char(plt_lbls(14)),' estimates (ds=',num2str(ds),')'])
+    plot([0,120],[mean(cs_b_pc2est(18,1:ds:end,i)),mean(cs_b_pc2est(18,1:ds:end,i))],'Color',[.85,.3,0],'LineStyle',':','DisplayName',['Mean of ',char(plt_lbls(18)),' estimates (ds=',num2str(ds),')'])
+    plot([0,120],[mean(cs_b_pc2est(1,1:ds:end,i)),mean(cs_b_pc2est(1,1:ds:end,i))],'Color',[.2,.9,0],'LineStyle',':','DisplayName',['Mean of ',char(plt_lbls(1)),' estimates (ds=',num2str(ds),')'])
     
     legend
     
@@ -899,48 +900,54 @@ pc2_b = pc_p.score(squeeze(mean(cs(1,:,:),2))>0.5,2);
 
 nRefInd = [120,100,80,60,40,20,15,10,7,6,5,4,3,2,1]; %list of different numbers of reflectances
 
-for j=1:length(nRefInd)
+figure,
+for rep=1:100
     
-    
-    nRef = nRefInd(j); %number of reflectances
-    % !!!!!!!! since it's random there will be different results each time
-    refs = randi(size(cs,2),nRef,1); %pick the actual refs
-    
-    for i = 1:size(cs_b,3)
-        %calculate the average over n reflectances
-        cs_b_pc2est_av(:,i,j) = mean(cs_b_pc2est(:,refs,i),2);
+    for j=1:length(nRefInd)
+        
+        
+        nRef = nRefInd(j); %number of reflectances
+        % !!!!!!!! since it's random there will be different results each time
+        refs = randi(size(cs,2),nRef,1); %pick the actual refs
+        
+        for i = 1:size(cs_b,3)
+            %calculate the average over n reflectances
+            cs_b_pc2est_av(:,i,j) = mean(cs_b_pc2est(:,refs,i),2);
+        end
+        
+        for i=1:size(cs_b,1)
+            %calculate difference between actual pc2 and estimated pc2
+            cs_b_pc2est_diff(i,:,j) = cs_b_pc2est_av(i,:,j) - pc2_b';
+        end
+        
     end
     
-    for i=1:size(cs_b,1)
-        %calculate difference between actual pc2 and estimated pc2
-        cs_b_pc2est_diff(i,:,j) = cs_b_pc2est_av(i,:,j) - pc2_b';
-    end
+    %
+    % for i=1:size(cs_b,1)
+    %     %plot histograms of errors
+    %     figure,
+    %     hist(cs_b_pc2est_diff(i,:,1),100)
+    %     title(plt_lbls{i})
+    %     xlim([-1 1])
+    % end
+    
+    %
+    %figure,
+    hold on
+    %scatter(1:size(cs_b,1),std(cs_b_pc2est_diff(:,:,1)'),'filled','r','MarkerFaceAlpha',.1)
+    scatter(1:size(cs_b,1),mean(abs(cs_b_pc2est_diff(:,:,1)')),'filled','g','MarkerFaceAlpha',.1)
+    %scatter(1:size(cs_b,1),median(abs(cs_b_pc2est_diff(:,:,1)')),'filled','b','MarkerFaceAlpha',.1)
+    grid on
+    set(gca, 'XTick', 1:size(cs_b,1));
+    set(gca, 'XTickLabel', plt_lbls);
+    grid on
+    set(gca, 'XTick', 1:size(cs_b,1));
+    set(gca, 'XTickLabel', plt_lbls);
+    ylim([0 0.2])
+    xtickangle(45)
+    %legend('std','mean','median')
     
 end
-
-%%
-for i=1:size(cs_b,1)
-    %plot histograms of errors
-    figure,
-    hist(cs_b_pc2est_diff(i,:,1),100)
-    title(plt_lbls{i})
-    xlim([-1 1])
-end
-
-%%
-figure, hold on
-scatter(1:size(cs_b,1),std(cs_b_pc2est_diff(:,:,1)'),'filled')
-scatter(1:size(cs_b,1),mean(abs(cs_b_pc2est_diff(:,:,1)')),'filled')
-scatter(1:size(cs_b,1),median(abs(cs_b_pc2est_diff(:,:,1)')),'filled')
-grid on
-set(gca, 'XTick', 1:size(cs_b,1));
-set(gca, 'XTickLabel', plt_lbls);
-grid on
-set(gca, 'XTick', 1:size(cs_b,1));
-set(gca, 'XTickLabel', plt_lbls);
-%ylim([0 0.2])
-xtickangle(45)
-legend('std','mean','median')
 
 %%
 
@@ -949,7 +956,7 @@ legend('std','mean','median')
 
 figure('units','normalized','outerposition',[0 0 1 1]), hold on
 for i = 1:size(cs_b_pc2est_diff,3)
-    scatter(1:size(cs_b,1),mean(abs(cs_b_pc2est_diff(:,:,i)')),[],[i/size(cs_b_pc2est_diff,3),0,0],'filled') 
+    scatter(1:size(cs_b,1),mean(abs(cs_b_pc2est_diff(:,:,i)')),[],[i/size(cs_b_pc2est_diff,3),0,0],'filled')
 end
 
 grid on

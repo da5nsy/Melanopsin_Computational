@@ -923,27 +923,27 @@ for rep=1:100
     end
     
     %
-    % for i=1:size(cs_b,1)
-    %     %plot histograms of errors
-    %     figure,
-    %     hist(cs_b_pc2est_diff(i,:,1),100)
-    %     title(plt_lbls{i})
-    %     xlim([-1 1])
-    % end
+%     for i=1:size(cs_b,1)
+%         %plot histograms of errors
+%         figure,
+%         hist(cs_b_pc2est_diff(i,:,1),100)
+%         title(plt_lbls{i})
+%         xlim([-1 1])
+%     end
     
     %
     %figure,
     hold on
-    %scatter(1:size(cs_b,1),std(cs_b_pc2est_diff(:,:,1)'),'filled','r','MarkerFaceAlpha',.1)
-    scatter(1:size(cs_b,1),mean(abs(cs_b_pc2est_diff(:,:,1)')),'filled','g','MarkerFaceAlpha',.1)
-    %scatter(1:size(cs_b,1),median(abs(cs_b_pc2est_diff(:,:,1)')),'filled','b','MarkerFaceAlpha',.1)
+    scatter(1:size(cs_b,1),std(cs_b_pc2est_diff(:,:,1)'),'filled','k','MarkerFaceAlpha',.05)
+    %scatter(1:size(cs_b,1),mean(abs(cs_b_pc2est_diff(:,:,1)')),'filled','k','MarkerFaceAlpha',.05)
+    %scatter(1:size(cs_b,1),median(abs(cs_b_pc2est_diff(:,:,1)')),'filled','b','MarkerFaceAlpha',.05)
     grid on
     set(gca, 'XTick', 1:size(cs_b,1));
     set(gca, 'XTickLabel', plt_lbls);
     grid on
-    set(gca, 'XTick', 1:size(cs_b,1));
+    set(gca, 'XTick', 1:size(cs_b,1));  
     set(gca, 'XTickLabel', plt_lbls);
-    ylim([0 0.2])
+    %ylim([0 0.2])
     xtickangle(45)
     %legend('std','mean','median')
     

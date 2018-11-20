@@ -1,4 +1,4 @@
-function [MB1_minSD,MB2_minSD,melpeak,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melcomp_old(offset)
+function [MB1_minSD,MB2_minSD,melpeak,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melcomp_1(offset)
 
 %% Research questions:
 %
@@ -19,7 +19,7 @@ function [MB1_minSD,MB2_minSD,melpeak,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melco
 if ~exist('offset','var'); clear, clc, close all; end %clears everything, unless we're inside a function
 
 % Include reflectances?
-InclReflectances=1;
+InclReflectances=1; 
 % Only the natural ones?
 NatOnly = 1;
 
@@ -245,7 +245,7 @@ end
 % signals against any of the other available signals improves the ability
 % to signal chromaticity as a one dimensional variable.
 
-plot_comb=  0;
+plot_comb=  1;
 if plot_comb
     plotOrder={'L','M','S','Mel'};
     ScalePlot=0;
@@ -281,7 +281,7 @@ if plot_comb
     set(sp(16),'Color',[.8,.8,.8])
     %
     
-    auto_rotate=    0;
+    auto_rotate=    1;
     saveGif=        0; %save a 360 gif?
     
     if auto_rotate
@@ -309,7 +309,7 @@ end
 
 %% MB axes
 
-plot_MBa=   0;
+plot_MBa=   1;
 if plot_MBa
     clear sp
     
@@ -379,7 +379,7 @@ end
 
 %% L vs L+M
 
-plot_LvsLM= 0;
+plot_LvsLM= 1;
 if plot_LvsLM
     plotOrder={'L','M','S','Mel'};
     
@@ -551,7 +551,7 @@ end
 
 
 %% Hard code factors
-plot_hc=    0;
+plot_hc=    1;
 
 if plot_hc
     fac1=   0.25;

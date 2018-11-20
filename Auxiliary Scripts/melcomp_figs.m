@@ -24,7 +24,7 @@ catch %else, use default values
     disp('using default values') %!!!!!!!!!!!!!! this is not displaying currently !!!!!!!!!!!!!!!!
 end
 
-% melcomp.m reference notes:
+% melcomp_2.m reference notes:
 % PF_SPD = 1;
 % % 1 = CIE D series
 % % 2 = Hernández-Andrés+
@@ -123,7 +123,7 @@ end
 %% Fig: chromaticities
 
 figure('Position',[plot_where plot_size])
-melcomp(1,1,1,1,'3D'); %Z-ax is arbitrary here
+melcomp_2(1,1,1,1,'3D'); %Z-ax is arbitrary here
 view(0,90)
 xlim([0.5 1])
 
@@ -136,7 +136,7 @@ end
 % Not currently used
 
 figure('Position',[plot_where plot_size])
-melcomp(1,1,1,9,'3D'); %final number sets Z-axis selection, 1 = 'L'
+melcomp_2(1,1,1,9,'3D'); %final number sets Z-axis selection, 1 = 'L'
 xlim([0.5 1])
 view(340,40)
 set(gcf,'color','w');
@@ -150,7 +150,7 @@ end
 figure('Position',[plot_where plot_size.*[1,2.5]]) %bigger plot than standard
 for i=1:5
     subplot(5,2,i*2-1)
-    melcomp(1,1,1,i,'3D'); %final number sets Z-axis selection, 1 = 'L'
+    melcomp_2(1,1,1,i,'3D'); %final number sets Z-axis selection, 1 = 'L'
     view(0,0)
     xlim([0.6 0.8])
     if i ~= 5
@@ -160,7 +160,7 @@ for i=1:5
 end
 for i=1:5
     subplot(5,2,i*2)
-    melcomp(1,1,1,i,'3D'); %final number sets Z-axis selection, 1 = 'L'
+    melcomp_2(1,1,1,i,'3D'); %final number sets Z-axis selection, 1 = 'L'
     view(90,0)
     ylim([0 0.8])
     if i ~= 5
@@ -183,7 +183,7 @@ figure('Position',[plot_where plot_size.*[1,2]]) %bigger plot than standard
 
 for i=6:9
     subplot(4,2,(i-5)*2-1)
-    melcomp(1,1,1,i,'3D'); %final number sets Z-axis selection, 1 = 'L'
+    melcomp_2(1,1,1,i,'3D'); %final number sets Z-axis selection, 1 = 'L'
     view(0,0)
     xlim([0.6 0.8])
     if i ~= 9
@@ -193,7 +193,7 @@ for i=6:9
 end
 for i=6:9
     subplot(4,2,(i-5)*2)
-    melcomp(1,1,1,i,'3D'); %final number sets Z-axis selection, 1 = 'L'
+    melcomp_2(1,1,1,i,'3D'); %final number sets Z-axis selection, 1 = 'L'
     view(90,0)
     ylim([0 0.8])
     if i ~= 9
@@ -214,17 +214,17 @@ end
 
 figure('Position',[plot_where plot_size.*[1,3]])
 subplot(3,2,[1,4])
-melcomp(1,1,1,9,'CTR');
+melcomp_2(1,1,1,9,'CTR');
 text(0.02,0.98,'A','Units', 'Normalized', 'VerticalAlignment', 'Top')
 
 subplot(3,2,5)
-melcomp(1,1,1,9,'CTR');
+melcomp_2(1,1,1,9,'CTR');
 view(0,0)
 legend('off')
 text(0.02,0.98,'B','Units', 'Normalized', 'VerticalAlignment', 'Top')
 
 subplot(3,2,6)
-melcomp(1,1,1,9,'CTR');
+melcomp_2(1,1,1,9,'CTR');
 view(90,0)
 legend('off')
 text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top')
@@ -255,7 +255,7 @@ end
 
 %% Fig: inputs
 
-%copied out of melcomp.m
+%copied out of melcomp_2.m
 
 figure('Position',[plot_where plot_size.*[1,2]])
 

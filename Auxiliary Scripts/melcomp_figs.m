@@ -19,7 +19,7 @@ catch %else, use default values
     ff = '-depsc'; %file format
     %ff = '-dpdf';
     
-    p = 0; % 0 = figures display but don't save. 1 = figures display and save.
+    p = 1; % 0 = figures display but don't save. 1 = figures display and save.
     
     disp('using default values') %!!!!!!!!!!!!!! this is not displaying currently !!!!!!!!!!!!!!!!
 end

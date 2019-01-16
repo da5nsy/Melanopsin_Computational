@@ -1,4 +1,4 @@
-function [pc, LMSRI] = melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
+function [pc, LMSRI] = melcomp_2(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
 
 % TO DO
 % - check that lm work out the same when I calculate them without the PTB
@@ -184,7 +184,7 @@ pltc_alt=pltc_alt(:,randperm(size(T_refs,2)),:); %this particular random permuta
 
 %% Plot third dimension
 
-plt_3D = 1; % hard-code, 0 = off, 1 = on
+plt_3D = 0; % hard-code, 0 = off, 1 = on
 try strcmp(plt,'3D'); % allow overwrite from function call
     if strcmp(plt,'3D')
         plt_3D = 1;
@@ -260,7 +260,7 @@ end
 
 %% Correction through rotation
 
-plt_CTR = 1;
+plt_CTR = 0;
 try strcmp(plt,'CTR');
     if strcmp(plt,'CTR')
         plt_CTR = 1;

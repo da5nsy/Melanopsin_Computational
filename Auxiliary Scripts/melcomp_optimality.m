@@ -23,7 +23,7 @@ Ip = S_mel(mloc); %Mel peak
 t_range_ex=t_range(1):t_range(2):t_range(3);
 
 for i=t_range_ex
-    pc(i-t_range(1)+1) = melcomp(1,1,1,9,NaN,i); %principal components    
+    pc(i-t_range(1)+1) = melcomp_2(1,1,1,9,NaN,i); %principal components    
     ex(i-t_range(1)+1,:) = pc(i-t_range(1)+1).explained; %explained
     if prog %progress
         disp(i)
@@ -83,7 +83,7 @@ plt_viz = 0;
 if plt_viz
     for i = 1:length(locs)
         figure,
-        melcomp(1,1,1,9,'3D',t_range_ex(locs(i)));
+        melcomp_2(1,1,1,9,'3D',t_range_ex(locs(i)));
         title(Ip+t_range_ex(locs(i)))
     end
 end
@@ -93,12 +93,12 @@ end
 % for i=range(1):range(2)
 %     figure('units','normalized','outerposition',[0 0 1 1]), hold on
 %     subplot(1,2,1)
-%     melcomp(1,1,1,9,'3D',i);
+%     melcomp_2(1,1,1,9,'3D',i);
 %     view(0,0)
 %     zlim([0 1])
 %     
 %     subplot(1,2,2)
-%     melcomp(1,1,1,9,'3D',i);
+%     melcomp_2(1,1,1,9,'3D',i);
 %     view(90,0)
 %     zlim([0 1])
 %     

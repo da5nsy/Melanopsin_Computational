@@ -20,3 +20,20 @@ view(75,20)
 % 
 % PF_obs = 1;
 % % 1 = PTB Smith-Pokorny
+
+%%
+clc, clear, close all
+
+%[pc, LMSRI] = melcomp(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
+
+for i = -10:10
+    offset = i*10;
+    [pc(i+11), LMSRI(:,:,:,+11)] = melcomp_2(2,1,1,9,0,offset);
+end
+
+%%
+
+ex = [pc.explained];
+
+figure,
+plot(ex(3,:))

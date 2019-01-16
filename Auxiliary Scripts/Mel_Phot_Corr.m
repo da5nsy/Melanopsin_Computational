@@ -89,8 +89,8 @@ R_a = (LMS_a(1,:)+LMS_a(2,:))./Mel_a;
 % figure, hold on
 % histogram(R_d,'BinWidth',0.1,'Normalization','probability')
 % histogram(R_a,'BinWidth',0.1,'Normalization','probability')
-xlabel('(L+M) / I')
-ylabel('Probability')
+% xlabel('(L+M) / I')
+% ylabel('Probability')
 
 %log x-axis
 R_dl=log10(R_d);

@@ -882,7 +882,7 @@ for i = illuminants
     scatter(1:120,cs_b_pc2est(18,:,i),[],[.85,.3,0],'filled','MarkerFaceAlpha',.7,'DisplayName',['Estimate based on ',char(plt_lbls(18))])
     scatter(1:120,cs_b_pc2est(1,:,i),[],[.2,.9,0],'filled','MarkerFaceAlpha',.7,'DisplayName',['Estimate based on ',char(plt_lbls(1))])
     
-    scatter(1:120,cs_b_pc2est(end-1,:,i),[],[.2,0,0],'filled','MarkerFaceAlpha',.7,'DisplayName',['Estimate based on ',char(plt_lbls(end-1))])
+    %scatter(1:120,cs_b_pc2est(end-1,:,i),[],[.2,0,0],'filled','MarkerFaceAlpha',.7,'DisplayName',['Estimate based on ',char(plt_lbls(end-1))])
     
     plot([0,120],[mean(cs_b_pc2est(14,1:ds:end,i)),mean(cs_b_pc2est(14,1:ds:end,i))],'Color',[0,.45,.74],'LineStyle',':','DisplayName',['Mean of ',char(plt_lbls(14)),' estimates (ds=',num2str(ds),')'])
     plot([0,120],[mean(cs_b_pc2est(18,1:ds:end,i)),mean(cs_b_pc2est(18,1:ds:end,i))],'Color',[.85,.3,0],'LineStyle',':','DisplayName',['Mean of ',char(plt_lbls(18)),' estimates (ds=',num2str(ds),')'])
@@ -901,7 +901,7 @@ pc2_b = pc_p.score(squeeze(mean(cs(1,:,:),2))>0.5,2);
 nRefInd = [120,100,80,60,40,20,15,10,7,6,5,4,3,2,1]; %list of different numbers of reflectances
 
 figure,
-for rep=1:100
+for rep=1:20
     
     for j=1:length(nRefInd)
         

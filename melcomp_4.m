@@ -6,6 +6,8 @@ load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_da
 T_SPD=final; clear final
 S_SPD=[300,5,161];
 
+T_SPD = T_SPD(:,1:100:end);
+
 %% SRFs (Spectral Reflectance Functions)
 
 load sur_vrhel
@@ -42,7 +44,7 @@ T_mel  = SplineCmf(S_mel,T_mel,S_sh)'; %extend? !!!!!!!!!!
 T_LMSRI=[T_SSF,T_rods,T_mel];
 S_LMSRI=S_sh;
 
-%%
+%% Calculate signals
 
 for i=1:size(T_SPD,2)
     T_rad(:,:,i)  = T_SRF.*T_SPD(:,i);
@@ -53,9 +55,7 @@ end
 
 LMSRI_ill = repmat(LMSRI_ill,1,120);
 
-%%
-
-slm_obj = LMSRI(3,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:));
+slm_obj = LMSRI(3,:,:)./(LMSRI(1,:,:));
 si_obj = LMSRI(3,:,:)./LMSRI(5,:,:);
 
 slm_ill = LMSRI_ill(3,:,:)./(LMSRI_ill(1,:,:)+LMSRI_ill(2,:,:));
@@ -65,11 +65,25 @@ slm_ill = LMSRI_ill(3,:,:)./(LMSRI_ill(1,:,:)+LMSRI_ill(2,:,:));
 figure,
 subplot(1,2,1)
 scatter(slm_obj(:),slm_ill(:),'k.')
-xlim([0 1.2])
+xlim([0 2])
 xlabel('slm_obj','Interpreter','None')
 ylabel('slm_ill','Interpreter','None')
 
 subplot(1,2,2)
 scatter(si_obj(:),slm_ill(:),'k.')
-xlim([0 1.2])
+xlim([0 2])
+xlabel('si_obj','Interpreter','None')
+
+%%
+
+figure,
+subplot(1,2,1)
+scatter(mean(slm_obj,2),mean(slm_ill,2),'k.')
+xlim([0 2])
+xlabel('slm_obj','Interpreter','None')
+ylabel('slm_ill','Interpreter','None')
+
+subplot(1,2,2)
+scatter(mean(si_obj,2),mean(slm_ill,2),'k.')
+xlim([0 2])
 xlabel('si_obj','Interpreter','None')

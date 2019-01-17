@@ -10,9 +10,9 @@ catch
     %default values
     ss=1;
     prog=1;
-    t_range = [-100,5,300];
+    t_range = [-100,5,250];
     disp('Using default values');
-    spd = 1;
+    spd = 2;
 end
 
 %Compute melanopic peak sensitivity
@@ -95,24 +95,31 @@ end
 
 %%
 %Old way which plots the changing shape 
-range = [-100,100];
 
-for i=range(1):range(2)
-    figure('units','normalized','outerposition',[0 0 1 1]), hold on
+t_range = [-100,3,200];
+
+figure('units','normalized','outerposition',[0.3 0.3 0.5 0.5]), hold on
+
+for i=t_range(1):t_range(2):t_range(3)
     subplot(1,2,1)
     melcomp_2(1,1,1,9,'3D',i);
-    view(0,0)
-    zlim([0 1])
+    view(40,30)
+    zlim([0 3])
+    text(0.1,0.1,num2str(i))
+    rmv_lbls
     
     subplot(1,2,2)
     melcomp_2(1,1,1,9,'3D',i);
-    view(90,0)
-    zlim([0 1])
+    view(50,30)
+    zlim([0 3])
+    text(0.1,0.1,num2str(i))
+    rmv_lbls
     
     drawnow
-    if i~=range(2)
+    if i~=range(3)
         clf
     end
+    
 end
 
 end

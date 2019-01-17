@@ -233,10 +233,10 @@ if plt_3D
     end
     
     if plt_real_cols == 1
-        scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_RGB(:,:)','v','filled') %with colours of objects
+        scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_RGB(:,:)','v','filled','MarkerFaceAlpha',.4,'MarkerEdgeAlpha',.4) %with colours of objects
         hold on
     else
-        scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_alt(:,:)','v','filled') %with arbitrary colours
+        scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_alt(:,:)','v','filled','MarkerFaceAlpha',.4,'MarkerEdgeAlpha',.4) %with arbitrary colours
         hold on
     end
     if plt_lines

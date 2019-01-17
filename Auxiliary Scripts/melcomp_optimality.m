@@ -96,27 +96,32 @@ end
 %%
 %Old way which plots the changing shape 
 
-t_range = [-100,3,200];
+t_range = [-100,2,200];
 
 figure('units','normalized','outerposition',[0.3 0.3 0.5 0.5]), hold on
 
 for i=t_range(1):t_range(2):t_range(3)
     subplot(1,2,1)
     melcomp_2(1,1,1,9,'3D',i);
-    view(40,30)
+    view(20,10)
+    camproj('perspective')
     zlim([0 3])
     text(0.1,0.1,num2str(i))
     rmv_lbls
     
     subplot(1,2,2)
     melcomp_2(1,1,1,9,'3D',i);
-    view(50,30)
+    view(22,10)
+    camproj('perspective')
     zlim([0 3])
     text(0.1,0.1,num2str(i))
     rmv_lbls
-    
+   
     drawnow
-    if i~=range(3)
+    if i == t_range(1)
+        waitforbuttonpress
+    end
+    if i ~= t_range(3)
         clf
     end
     

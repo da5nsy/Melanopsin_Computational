@@ -127,4 +127,26 @@ for i=t_range(1):t_range(2):t_range(3)
     
 end
 
+%%
+
+t_range = [-100,20,200];
+lt = length(t_range(1):t_range(2):t_range(3));
+counter = 1;
+
+figure('units','normalized','outerposition',[0.3 0.3 0.5 0.5]), hold on
+
+for i=t_range(1):t_range(2):t_range(3)
+    subplot(ceil(sqrt(lt)),ceil(sqrt(lt)),counter)
+    melcomp_2(1,1,1,9,'3D',i);
+    view(-170,45)
+    xlim([0.5 1])
+    zlim([0 1])
+    text(0.6,0.1,num2str(i))
+    rmv_lbls
+   
+    drawnow  
+    counter = counter +1;
+    
+end
+
 end

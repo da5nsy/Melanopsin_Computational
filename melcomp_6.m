@@ -1,26 +1,41 @@
 clear
 clc
 
-%% Load data
+%%
 
-% Tables from CIE 170-2:2015
+S = [390 1 441]; 
+%SToWls(S)
 
-% live:     http://files.cie.co.at/813_Tables_CIE_170-2.xls
-% archive:  https://web.archive.org/web/20190121134312/http://files.cie.co.at/813_Tables_CIE_170-2.xls
+T_quantal_PTB = ComputeCIEConeFundamentals(S,10,32,3);
+T_energy_PTB = EnergyToQuanta(S,T_quantal_PTB')';
 
-T_CIE_MB_10 = xlsread('C:\Users\cege-user\Dropbox\UCL\Data\Colour standards\813_Tables_CIE_170-2.xls','Table 10.6','B2:D90');
-S_CIE_MB_10 = [390,5,89];
+%figure, plot(T_energy_PTB')
 
-%% Plot spectral locus
+%%
 
-figure,
-scatter(T_CIE_MB_10(:,1),T_CIE_MB_10(:,3))
-xlim([0.4,1])
+%Scaling factors from Eq. 8.5 from CIE 170-2:2015
+sf = [0.69283932, 0.34967567, 0.05547858];
 
-%% 
+LMS_EE = sum(T_energy_PTB').*sf;
 
-EE = ones(length(T_CIE_MB_10),1);
+l = LMS_EE(1)/(LMS_EE(1)+LMS_EE(2))
+m = LMS_EE(2)/(LMS_EE(1)+LMS_EE(2));
+s = LMS_EE(3)/(LMS_EE(1)+LMS_EE(2))
 
-T_CIE_MB_10'*EE;
+% l =
+% 
+%     0.7091
+% 
+% 
+% s =
+% 
+%     0.0207
+
+
+% From CIE 170-2:2015, pg 12:
+
+% "The MacLeod–Boynton chromaticity diagram for 10° field size is shown in Figure 8.3. In
+% particular, Illuminant E (the equi-energetic spectrum) is represented at
+% (0,699 237; 0,025 841)."
 
 

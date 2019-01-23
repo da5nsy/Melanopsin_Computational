@@ -12,7 +12,7 @@ catch
     prog=1;
     t_range = [-100,5,250];
     disp('Using default values');
-    spd = 2;
+    spd = 1;
 end
 
 %Compute melanopic peak sensitivity

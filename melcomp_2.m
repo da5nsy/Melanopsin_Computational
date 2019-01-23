@@ -34,6 +34,7 @@ catch
     
     PF_obs = 1;
     % 1 = PTB Smith-Pokorny
+    % 2 = Stockman & Sharpe 10deg
 end
 
 %% Load Daylight SPD
@@ -106,10 +107,18 @@ end
 % Load Observer
 if PF_obs == 1
     % Smith-Pokorny, for use with MacLeod Boynton diagram
-    load T_cones_sp T_cones_sp S_cones_sp
+    load T_cones_sp.mat T_cones_sp S_cones_sp
     T_obs = T_cones_sp;
     S_obs = S_cones_sp;
     clear T_cones_sp S_cones_sp
+    
+elseif PF_obs == 2
+    % Stockman & Sharpe, for use with MacLeod Boynton diagram, 
+    % as per CIE 170-2:2015
+    load T_cones_ss10.mat T_cones_ss10 S_cones_ss10
+    T_obs = T_cones_ss10;
+    S_obs = S_cones_ss10;
+    clear T_cones_ss10 S_cones_ss10
 else
     error('obs selection failed')
 end
@@ -158,7 +167,7 @@ plt_lines     = 0; %plot lines on the graph connecting points (good for when usi
 for i=1:size(T_SPD,2)
     T_rad(:,:,i)  = T_refs.*T_SPD(:,i);
     LMSRI(:,:,i)  = T_LMSRI'*T_rad(:,:,i);
-    lsri(1:2,:,i) = LMSToMacBoyn(LMSRI(1:3,:,i));    
+    lsri(1:2,:,i) = LMSToMacBoynDG(LMSRI(1:3,:,i));    
     lsri(3,:,i)   = LMSRI(4,:,i)./(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)); 
     lsri(4,:,i)   = LMSRI(5,:,i)./(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)); 
     % used the same scalars for luminance as are in the LMSToMAcBoyn

@@ -19,7 +19,7 @@ function [MB1_minSD,MB2_minSD,melpeak,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melco
 if ~exist('offset','var'); clear, clc, close all; end %clears everything, unless we're inside a function
 
 % Include reflectances?
-InclReflectances=1; 
+InclReflectances=0; 
 % Only the natural ones?
 NatOnly = 1;
 
@@ -239,6 +239,21 @@ if plot_predict
         
     end
 end
+
+% %single plot
+% scatter3(...
+%     MB(1,:),...
+%     MB(2,:),...
+%     LMSM(i,:),...
+%     dS,...
+%     'MarkerEdgeColor',dMEC,...
+%     'MarkerFaceColor',dMFC,...
+%     'LineWidth',dLW...
+%     )
+% xlim([0 1]);ylim([0 1]);%zlim([0 20])
+% xlabel('MB1');ylabel('MB2');
+% zlabel(plotOrder{i});        
+
 %% Does any combination of the above perform better? (Yes)
 
 % In the following graphs, I ask whether a ratio of any of the available

@@ -4,7 +4,7 @@ try
     nargin;
 catch
     %If we're not inside a function, clear everything and make a full-screen figure
-    clear, clc, close all
+    clear, clc, %close all
     figure('units','normalized','outerposition',[0 0 1 1]), hold on
     
     %default values
@@ -148,5 +148,18 @@ for i=t_range(1):t_range(2):t_range(3)
     counter = counter +1;
     
 end
+
+%%
+% 
+% clear, clc, close all
+% 
+% figure,
+% melcomp_2(1,1,2,9,'3D',-50);
+% 
+figure,
+melcomp_2(2,1,2,9,'3D');
+% 
+% figure,
+% melcomp_2(1,1,2,9,'3D',75);
 
 end

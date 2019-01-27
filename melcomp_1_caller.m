@@ -73,3 +73,16 @@ for i=1:size(MBx_m,3)-40
     drawnow
     title(melpeak(i))
 end
+
+%% - %% Visualiser
+
+clear, clc, close all;
+
+for i=-100:10:100
+    melcomp_1(i)
+    axis auto
+    axis equal
+    title(i)
+    drawnow
+    pause(0.5)
+end

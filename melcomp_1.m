@@ -19,7 +19,7 @@ function [MB1_minSD,MB2_minSD,melpeak,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melco
 if ~exist('offset','var'); clear, clc, close all; end %clears everything, unless we're inside a function
 
 % Include reflectances?
-InclReflectances=0; 
+InclReflectances=1; 
 % Only the natural ones?
 NatOnly = 1;
 
@@ -518,8 +518,7 @@ if plot_MBbas
             MB(2,:,i),...
             'filled')
     end
-    axis equal
-    xlim([0 1]);ylim([0 1]);
+    xlim([0.4 1]);ylim([0 1]);
     xticks(0:0.2:1)
     yticks(0:0.2:1)
     xlabel('MB1');ylabel('MB2');
@@ -591,8 +590,7 @@ if plot_hc
             MB2(2,:,i),...
             'filled')
     end
-    axis equal
-    xlim([0 1]);ylim([-0.5 0.5]);
+    xlim([0.4 1]);ylim([-0.5 0.5]);
     xticks(-1:0.2:1)
     yticks(-1:0.2:1)
     xlabel('MBx1');ylabel('MBx2')

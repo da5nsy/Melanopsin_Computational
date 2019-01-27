@@ -183,7 +183,7 @@ dLW=.1;
 % This is unsurprsing as the first principal component daylight is very
 % broad.
 
-plot_corr=   1;
+plot_corr=   0;
 if plot_corr
     plotOrder={'L','M','S','Mel'};
     figure('units','normalized','outerposition',[0 0 1 1])
@@ -213,7 +213,7 @@ end
 % They all flatline as chromaticity changes, and then shoot up and slightly
 % back on themselves in that boomerang shape.
 
-plot_predict=   1;
+plot_predict=   0;
 if plot_predict
     plotOrder={'L','M','S','Mel'};
     
@@ -260,7 +260,7 @@ end
 % signals against any of the other available signals improves the ability
 % to signal chromaticity as a one dimensional variable.
 
-plot_comb=  1;
+plot_comb=  0;
 if plot_comb
     plotOrder={'L','M','S','Mel'};
     ScalePlot=0;
@@ -324,7 +324,7 @@ end
 
 %% MB axes
 
-plot_MBa=   1;
+plot_MBa=   0;
 if plot_MBa
     clear sp
     
@@ -394,7 +394,7 @@ end
 
 %% L vs L+M
 
-plot_LvsLM= 1;
+plot_LvsLM= 0;
 if plot_LvsLM
     plotOrder={'L','M','S','Mel'};
     
@@ -499,7 +499,7 @@ end
 
 %% Basic MB plot
 
-plot_MBbas= 1;
+plot_MBbas= 0;
 
 if plot_MBbas
     figure, hold on
@@ -563,57 +563,9 @@ if plot_MBbas
     
 end
 
-
-%% Hard code factors
-plot_hc=    1;
-
-if plot_hc
-    fac1=   0.25;
-    fac2=   -1.4;
-    
-    MB2=MB;
-    MB2(1,:,:)=MB(1,:,:)+fac1*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
-    MB2(2,:,:)=MB(2,:,:)+fac2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
-
-%     % multiplicative version
-%     fac1=   -0.23;
-%     fac2=   1.7;
-%     
-%     MB2=MB;
-%     MB2(1,:,:)=MB(1,:,:).*(1-fac1*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:))));
-%     MB2(2,:,:)=MB(2,:,:).*(1-fac2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:))));
-    
-    figure, hold on
-    for i = 2:size(spectra,3)
-        scatter(...
-            MB2(1,:,i),...
-            MB2(2,:,i),...
-            'filled')
-    end
-    xlim([0.4 1]);ylim([-0.5 0.5]);
-    xticks(-1:0.2:1)
-    yticks(-1:0.2:1)
-    xlabel('MBx1');ylabel('MBx2')
-    grid on
-    
-    % for i = 1:359
-    %     camorbit(1,0,'data',[0 0 1]);
-    %     drawnow
-    %     frame = getframe(1);
-    %     im{i} = frame2im(frame);
-    %     [A,map] = rgb2ind(im{i},256);
-    %     if i == 1
-    %         imwrite(A,map,filename2,'gif','LoopCount',Inf,'DelayTime',0.005);
-    %     else
-    %         imwrite(A,map,filename2,'gif','WriteMode','append','DelayTime',0.005);
-    %     end
-    % end
-    
-end
-
 %% Iterations
 
-plot_it=    1;
+plot_it=    0;
 
 if ~exist('offset','var') && plot_it; figure, hold on; end
 
@@ -671,6 +623,55 @@ MB2_zeroSD = MBx2std(2,MBx2std(1,:)==0);
 % melwavelength=SToWls(S_melanopsin);
 % melpeak=melwavelength(melpeakloc);
 % title(sprintf('Mel peak-%d nm',melpeak))
+
+%% Hard code factors
+plot_hc=    1;
+
+if plot_hc
+    fac1=   MBx1std(1,MB1_minSD_loc); %0.25;
+    fac2=   MBx2std(1,MB2_minSD_loc); %-1.4;
+    
+    MB2=MB;
+    MB2(1,:,:)=MB(1,:,:)+fac1*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
+    MB2(2,:,:)=MB(2,:,:)+fac2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:)));
+
+%     % multiplicative version
+%     fac1=   -0.23;
+%     fac2=   1.7;
+%     
+%     MB2=MB;
+%     MB2(1,:,:)=MB(1,:,:).*(1-fac1*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:))));
+%     MB2(2,:,:)=MB(2,:,:).*(1-fac2*(LMSM(4,:,:)./(LMSM(1,:,:)+LMSM(2,:,:))));
+    
+    figure, hold on
+    for i = 2:size(spectra,3)
+        scatter(...
+            MB2(1,:,i),...
+            MB2(2,:,i),...
+            'filled')
+    end
+    xlim([0.4 1]);ylim([-0.5 0.5]);
+    xticks(-1:0.2:1)
+    yticks(-1:0.2:1)
+    xlabel('MBx1');ylabel('MBx2')
+    grid on
+    
+    % for i = 1:359
+    %     camorbit(1,0,'data',[0 0 1]);
+    %     drawnow
+    %     frame = getframe(1);
+    %     im{i} = frame2im(frame);
+    %     [A,map] = rgb2ind(im{i},256);
+    %     if i == 1
+    %         imwrite(A,map,filename2,'gif','LoopCount',Inf,'DelayTime',0.005);
+    %     else
+    %         imwrite(A,map,filename2,'gif','WriteMode','append','DelayTime',0.005);
+    %     end
+    % end
+    
+end
+
+
 
 %% What is the inter-object distance?
 

@@ -28,8 +28,8 @@ figure, hold on
 plot([melpeak(range==0),melpeak(range==0)],[0,max([MB1_zeroSD,MB2_zeroSD])],'k','LineWidth',4,'DisplayName','Mel Peak')
 if norm
     plot(melpeak,ones(length(melpeak),1),'Color',[0.5,0.5,0.5],'LineWidth',4,'DisplayName','Baseline SD')
-    scatter(melpeak,MB1_minSD/max(MB1_minSD),'r','filled','DisplayName','MB1: Min SD')
-    scatter(melpeak,MB2_minSD/max(MB2_minSD),'b','filled','DisplayName','MB2: Min SD')
+    scatter(melpeak,MB1_minSD/max(MB1_minSD),'r','filled','DisplayName','MB1')
+    scatter(melpeak,MB2_minSD/max(MB2_minSD),'b','filled','DisplayName','MB2')
     
     
 else
@@ -43,25 +43,28 @@ end
 
 legend('Location','best')
 
-xlabel('Hypothetical Melanopic Peak (nm)')
-ylabel('Minimum standard deviation')
+xlabel('Nominal Melanopic Peak (nm)')
+ylabel('Minimum standard deviation of whole set (normalised)')
+
+%save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Thesis\Melanopsin Computational\figs\opt.pdf")
 
 %% Plot one over the other
 
 figure, hold on
-scatter(melpeak,MB1_minSD/max(MB1_minSD),'r','filled')
-scatter(melpeak,MB2_minSD/max(MB2_minSD),'b','filled')
-title('Min SD for each object')
+scatter(melpeak,spread(1,:)/max(spread(1,:)),'r','filled','DisplayName','MB1')
+scatter(melpeak,spread(2,:)/max(spread(2,:)),'b','filled','DisplayName','MB2')
+legend('Location','best')
+xlabel('Nominal Melanopic Peak (nm)')
+ylabel('SD of the set of means of objects (normalised)')
+%save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Thesis\Melanopsin Computational\figs\sdmeans.pdf")
 
 figure, hold on
-scatter(melpeak,spread(1,:)/max(spread(1,:)),'r','filled')
-scatter(melpeak,spread(2,:)/max(spread(2,:)),'b','filled')
-title('SD of the set of means of objects')
-
-figure, hold on
-scatter(melpeak,spread(1,:)./MB1_minSD,'r','filled')
-scatter(melpeak,spread(2,:)./MB2_minSD,'b','filled')
-title('SD of set / Min SD for each object')
+scatter(melpeak,(spread(1,:)/max(spread(1,:)))./(MB1_minSD/max(MB1_minSD)),'r','filled','DisplayName','MB1')
+scatter(melpeak,(spread(2,:)/max(spread(2,:)))./(MB2_minSD/max(MB2_minSD)),'b','filled','DisplayName','MB2')
+legend('Location','best')
+xlabel('Nominal Melanopic Peak (nm)')
+ylabel('SD of set / Min SD for each object')
+%save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Thesis\Melanopsin Computational\figs\setoverobj.pdf")
 
 %% Plot the averages over wavelength
 figure, hold on
@@ -76,7 +79,7 @@ end
 
 %% - %% Visualiser
 
-clear, clc, close all;
+clear, clc, %close all;
 
 for i=-100:10:100
     melcomp_1(i)
@@ -84,5 +87,8 @@ for i=-100:10:100
     axis equal
     title(i)
     drawnow
-    pause(0.5)
+    %pause(0.5)
 end
+
+
+

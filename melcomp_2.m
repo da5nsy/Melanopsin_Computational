@@ -11,7 +11,7 @@ function [pc, LMSRI] = melcomp_2(PF_SPD,PF_refs,PF_obs,Z_ax,plt,offset)
 %   neccessarily a 'salient object'?
 % - Include the Foster+ 2004 images (slightly difficult because of
 %   different sampling ranges/intervals)
-%
+% - S_sh doesn't currently consider T_mel or T_rods - should it?
 
 %% Pre-flight checks
 % Setting things here controls what data is used and in what way

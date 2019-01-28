@@ -8,7 +8,7 @@ plot_size  = [800,400];
 
 min_l_scale = 0.62;
 max_l_scale = 0.82;
-max_s_scale = 0.035;
+max_s_scale = 0.04;
 
 set(0,'defaultAxesFontName', 'Courier')
 
@@ -29,7 +29,7 @@ clear S_melanopsin T_melanopsin
 % Load reflectance data
 
 load sur_vrhel
-refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
+refs=[87, 93, 134, 137, 138, 65, 19, 24, 140, 26];
 T_SRF = sur_vrhel(:,refs);
 S_SRF = S_vrhel;
 clear sur_vrhel S_vrhel
@@ -45,9 +45,11 @@ T_SPD=final; clear final
 T_SPD = T_SPD(:,1:20:end);
 S_SPD=[300,5,161];
 
-%reduce all data down to the common range/interval
-S_sh = [max([S_SPD(1),S_SRF(1),S_SSF(1)]),max([S_SPD(2),S_SRF(2),S_SSF(2)]),min([S_SPD(3),S_SRF(3),S_SSF(3)])]; %S_shared: work out what the lowest common denominator for the range/interval of the data is
-%S_sh = [400,5,61]; % brute force way to do something like the variableweights thing
+%% reduce all data down to the common range/interval
+S_sh = [max([S_SPD(1),S_SRF(1),S_SSF(1),S_rods(1),S_mel(1)]),...
+    max([S_SPD(2),S_SRF(2),S_SSF(2),S_rods(2),S_mel(2)]),...
+    min([S_SPD(3),S_SRF(3),S_SSF(3),S_rods(3),S_mel(3)])]; 
+%S_shared: work out what the lowest common denominator for the range/interval of the data is
 
 T_SPD = SplineSpd(S_SPD,T_SPD,S_sh,1); % extend == 1: Cubic spline, extends with last value in that direction
 T_SRF = SplineSrf(S_SRF,T_SRF,S_sh,1);
@@ -105,8 +107,7 @@ lsri(4,:,:) = t_i(2,:,:); clear t_i
 
 %compute colours for display
 pltc_alt = repmat(jet(size(T_SRF,2))',1,1,size(T_SPD,2)); 
-rng(7);
-pltc_alt=pltc_alt(:,randperm(size(T_SRF,2)),:); 
+rng(7); pltc_alt=pltc_alt(:,randperm(size(T_SRF,2)),:); %best combo for differentiating close chromaticities
 
 %plot MB with points, not normalised
 rng(1); n_ill = randi(size(T_SPD,2)); %pick a random spectrum (55th)
@@ -127,6 +128,7 @@ for i=1:length(refs)
 end
 save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBsingleset_n_text.pdf")
 
+scatter(0.699237,0.025841,'rs')
 
 %%
 % all points, in colour
@@ -146,7 +148,7 @@ lsri_m2 = mean(lsri,2);
 scatter(squeeze(lsri_m2(1,:,:)),squeeze(lsri_m2(2,:,:)),'r*')
 save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBmeans.pdf")
 
-%Grey world adaptation
+%% Grey world adaptation
 corrector = lsri_m2-lsri_m2(:,:,1);
 lsri_mc = lsri_m2 - corrector;
 lsri_c = lsri - corrector;
@@ -163,8 +165,7 @@ save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\O
 %would be nice to bring plot on piece by piece
 %and to get all of this to loop instead of being seperate
 
-close all
-figure('Position',[plot_where plot_size]), hold on
+figure(2,'Position',[plot_where plot_size]), hold on
 
 s(1) = subplot(1,2,1);
 hold on
@@ -210,9 +211,9 @@ for i=1:length(plotOrderNums)
 end
 
 %lsri
-plotOrderNums = [1,2];
-plotOrderNames = {'{\itl}_{MB}','{\itl}_{MB}'};
-plotOrderSaveNames = {'lmb','smb'};
+plotOrderNums = [1,2,4];
+plotOrderNames = {'{\itl}_{MB}','{\itl}_{MB}','{\iti}_{MB}'};
+plotOrderSaveNames = {'lmb','smb','imb'};
 for i=1:length(plotOrderNums)
     cla(s(1))
     cla(s(2))

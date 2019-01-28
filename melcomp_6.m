@@ -29,7 +29,7 @@ clear S_melanopsin T_melanopsin
 % Load reflectance data
 
 load sur_vrhel
-refs=[87, 93, 134, 137, 138, 65, 19, 24, 140, 26];
+refs=[38, 33, 134, 137, 138, 65, 19, 24, 140, 26];
 T_SRF = sur_vrhel(:,refs);
 S_SRF = S_vrhel;
 clear sur_vrhel S_vrhel
@@ -51,11 +51,11 @@ S_sh = [max([S_SPD(1),S_SRF(1),S_SSF(1),S_rods(1),S_mel(1)]),...
     min([S_SPD(3),S_SRF(3),S_SSF(3),S_rods(3),S_mel(3)])]; 
 %S_shared: work out what the lowest common denominator for the range/interval of the data is
 
-T_SPD = SplineSpd(S_SPD,T_SPD,S_sh,1); % extend == 1: Cubic spline, extends with last value in that direction
-T_SRF = SplineSrf(S_SRF,T_SRF,S_sh,1);
-T_SSF  = SplineCmf(S_SSF,T_SSF,S_sh,1)';
-T_rods = SplineCmf(S_rods,T_rods,S_sh)'; %extend? !!!!!!!!!!
-T_mel  = SplineCmf(S_mel,T_mel,S_sh)'; %extend? !!!!!!!!!!
+T_SPD = SplineSpd(S_SPD,T_SPD,S_sh);
+T_SRF = SplineSrf(S_SRF,T_SRF,S_sh,1); %ended with same value
+T_SSF  = SplineCmf(S_SSF,T_SSF,S_sh)';
+T_rods = SplineCmf(S_rods,T_rods,S_sh)';
+T_mel  = SplineCmf(S_mel,T_mel,S_sh)';
 [S_SPD, S_SRF, S_SSF, S_rods, S_mel] = deal(S_sh);
 
 % combine sensitivity vectors
@@ -73,7 +73,7 @@ RGB = XYZToSRGBPrimary(T_xyz1931);
 RGB(RGB<0) = 0;
 RGB(RGB>1) = 1;
 
-figure('Position',[plot_where plot_size]), hold on
+figure('Name','MB','Position',[plot_where plot_size]), hold on
 scatter(spectral_locus(1,:),spectral_locus(2,:),[],RGB','filled')
 xlim([0.5 1])
 ylim([0 1])
@@ -128,7 +128,7 @@ for i=1:length(refs)
 end
 save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBsingleset_n_text.pdf")
 
-scatter(0.699237,0.025841,'rs')
+%scatter(0.699237,0.025841,'rs') EE white
 
 %%
 % all points, in colour
@@ -165,7 +165,7 @@ save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\O
 %would be nice to bring plot on piece by piece
 %and to get all of this to loop instead of being seperate
 
-figure(2,'Position',[plot_where plot_size]), hold on
+figure('Name','split','Position',[plot_where plot_size]), hold on
 
 s(1) = subplot(1,2,1);
 hold on
@@ -230,28 +230,71 @@ for i=1:length(plotOrderNums)
 end
 
 %%
-figure('Position',[plot_where plot_size]), hold on
-xlim([min_l_scale max_l_scale])
-ylim([0 max_s_scale])
-xticks([min_l_scale max_l_scale])
-yticks([0 max_s_scale])
-xlabel('{\itl}_{MB}');
-ylabel('{\its}_{MB}');
-
-scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
-
-scatter(lsri(1,:),lsri(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+figure(1)
 
 cla
-%scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
-
 scatter(lsri(1,:)-lsri(1,:),lsri(2,:)-lsri(1,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
 axis('auto')
+xticks([])
+yticks([])
 
-xticks([min_l_scale max_l_scale])
-yticks([0 max_s_scale])
+xlabel('{\itl}_{MB} - {\itl}_{MB}');
+ylabel('{\its}_{MB} - {\itl}_{MB}');
 
-%save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MB.pdf")
+save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBminMB1.pdf")
+
+cla
+scatter(lsri(1,:)-lsri(2,:),lsri(2,:)-lsri(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+axis('auto')
+xticks([])
+yticks([])
+
+xlabel('{\itl}_{MB} - {\its}_{MB}');
+ylabel('{\its}_{MB} - {\its}_{MB}');
+
+save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBminMB2.pdf")
+
+
+sf = [-0.4350,+0.2300];
+cla
+scatter(lsri(1,:)-sf(1)*lsri(4,:),lsri(2,:)-sf(2)*lsri(4,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+axis('auto')
+xticks([])
+yticks([])
+
+xlabel('{\itl}_{MB} - {\itk_1i}_{MB}');
+ylabel('{\its}_{MB} - {\itk_2i}_{MB}');
+
+save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBminMB3.pdf")
+
+%% SRF
+
+figure('Position',[plot_where plot_size],'defaultLineLineWidth',4), hold on
+for i=1:length(refs)
+    plot(SToWls(S_sh),T_SRF(:,i),'Color',pltc_alt(:,i,1),'DisplayName',char(labels_vrhel(refs(i)).label));
+end
+xlim([S_sh(1), S_sh(1)+S_sh(2)*S_sh(3)])
+
+xticks('auto')
+yticks([min(ylim) max(ylim)])
+
+xlabel('Wavelength (nm)')
+ylabel('Reflectance (/1)')
+
+l = legend;
+l.FontSize = 6;
+l.Location = 'northwest';
+
+save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\SRF.pdf")
+
+
+
+%%
+
+
+% figure, hold on
+% 
+% scatter3(lsri(1,:),lsri(2,:),lsri(4,:))
 
 
 %%

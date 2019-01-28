@@ -6,6 +6,10 @@ clear, clc, close all
 plot_where = [500,200];
 plot_size  = [800,400];
 
+min_l_scale = 0.62;
+max_l_scale = 0.82;
+max_s_scale = 0.035;
+
 set(0,'defaultAxesFontName', 'Courier')
 
 %% Data
@@ -85,14 +89,19 @@ save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\O
 
 T_rad = zeros([S_sh(3),size(T_SRF,2),size(T_SPD,2)]);
 LMSRI = zeros([size(T_LMSRI,2),size(T_SRF,2),size(T_SPD,2)]);
+lsri  = zeros([4,size(T_SRF,2),size(T_SPD,2)]); %hard coded 4
+t_r   = zeros([2,size(T_SRF,2),size(T_SPD,2)]);
+t_i   = zeros([2,size(T_SRF,2),size(T_SPD,2)]);
 
 for i=1:size(T_SPD,2)
     T_rad(:,:,i)  = T_SRF.*T_SPD(:,i);
     LMSRI(:,:,i)  = T_LMSRI'*T_rad(:,:,i);
-    lsri(1:2,:,i) = LMSToMacBoynDG(LMSRI(1:3,:,i));    
-%     lsri(3,:,i)   = LMSRI(4,:,i)./(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)); 
-%     lsri(4,:,i)   = LMSRI(5,:,i)./(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)); 
+    lsri(1:2,:,i) = LMSToMacBoynDG(LMSRI(1:3,:,i),T_SSF',T_lum');
+    t_r(:,:,i)    = LMSToMacBoynDG(LMSRI([1,2,4],:,i),[T_SSF(:,1:2)';T_rods'],T_lum');
+    t_i(:,:,i)    = LMSToMacBoynDG(LMSRI([1,2,5],:,i),[T_SSF(:,1:2)';T_mel'],T_lum');
 end
+lsri(3,:,:) = t_r(2,:,:); clear t_r
+lsri(4,:,:) = t_i(2,:,:); clear t_i
 
 %compute colours for display
 pltc_alt = repmat(jet(size(T_SRF,2))',1,1,size(T_SPD,2)); 
@@ -105,10 +114,10 @@ scatter(lsri(1,:,n_ill),lsri(2,:,n_ill),[],pltc_alt(:,:,n_ill)','filled','Marker
 save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBsingleset_nn.pdf")
 
 %rescale diagram
-xlim([0.6 0.8])
-ylim([0 0.02])
-xticks([0.6 0.8])
-yticks([0 0.02])
+xlim([min_l_scale max_l_scale])
+ylim([0 max_s_scale])
+xticks([min_l_scale max_l_scale])
+yticks([0 max_s_scale])
 save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBsingleset_n.pdf")
 
 %add labels
@@ -149,7 +158,7 @@ xlabel('{\it }_{ }');
 ylabel('{\it }_{ }');
 save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBc.pdf")
 
-%% Melanopic power
+%% Splits
 
 %would be nice to bring plot on piece by piece
 %and to get all of this to loop instead of being seperate
@@ -162,183 +171,69 @@ hold on
 s(2) = subplot(1,2,2);
 hold on
 
-xlim(s(1),[0.6 0.8])
-xticks(s(1),[0.6 0.8])
+xlim(s(1),[min_l_scale max_l_scale])
+xticks(s(1),[min_l_scale max_l_scale])
 xlabel(s(1),'{\itl}_{MB}');
 yticks(s(1),[])
 
-xlim(s(2),[0 0.02])
-xticks(s(2),[0 0.02])
+xlim(s(2),[0 max_s_scale])
+xticks(s(2),[0 max_s_scale])
 xlabel(s(2),'{\its}_{MB}');
 yticks(s(2),[])
 
 save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_empty.pdf")
 
-ylabel(s(1),['{\it',plotOrderNames{i},'}']);
-scatter(s(1),lsri(1,:),LMSRI(plotOrderNums(i),:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-scatter(s(2),lsri(2,:),LMSRI(plotOrderNums(i),:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+ylabel(s(1),'{\itI}');
+scatter(s(1),lsri(1,:),LMSRI(5,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+scatter(s(2),lsri(2,:),LMSRI(5,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
 yticks(s(1),[min(ylim),max(ylim)])
-yticks(s(2),[min(ylim),max(ylim)])
+yticks(s(2),[])
 
 save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_I_grey.pdf")
 
+%LMSRI
 plotOrderNums = [5,1,2,3];
 plotOrderNames = {'I','L','M','S'};
-for i=1:4
+for i=1:length(plotOrderNums)
+    cla(s(1))
+    cla(s(2))
+    
     ylabel(s(1),['{\it',plotOrderNames{i},'}']);    
     
     scatter(s(1),lsri(1,:),LMSRI(plotOrderNums(i),:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
     scatter(s(2),lsri(2,:),LMSRI(plotOrderNums(i),:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
     
     yticks(s(1),[min(ylim),max(ylim)])
-    yticks(s(2),[min(ylim),max(ylim)])
+    yticks(s(2),[])
     
     save2pdf(['C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_',plotOrderNames{i},'.pdf'])
 end
 
-
-%%
-
-close all
-figure('Position',[plot_where plot_size]), hold on
-
-subplot(1,2,1);
-scatter(lsri(1,:),LMSRI(5,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-xlim([0.6 0.8])
-xticks([0.6 0.8])
-yticks([min(ylim),max(ylim)])
-xlabel('{\itl}_{MB}');
-ylabel('{\itI}');
-
-subplot(1,2,2);
-scatter(lsri(2,:),LMSRI(5,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-xlim([0 0.02])
-xticks([0 0.02])
-xlabel('{\its}_{MB}');
-yticks([])
-
-
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_Mel_col.pdf")
-
-%%
-
-close all
-figure('Position',[plot_where plot_size]), hold on
-
-subplot(1,2,1);
-scatter(lsri(1,:),LMSRI(1,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-xlim([0.6 0.8])
-xticks([0.6 0.8])
-yticks([min(ylim),max(ylim)])
-xlabel('{\itl}_{MB}');
-ylabel('{\itL}');
-
-subplot(1,2,2);
-scatter(lsri(2,:),LMSRI(1,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-xlim([0 0.02])
-xticks([0 0.02])
-xlabel('{\its}_{MB}');
-yticks([])
-
-
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_L.pdf")
-
-%%
-
-close all
-figure('Position',[plot_where plot_size]), hold on
-
-subplot(1,2,1);
-scatter(lsri(1,:),LMSRI(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-xlim([0.6 0.8])
-xticks([0.6 0.8])
-yticks([min(ylim),max(ylim)])
-xlabel('{\itl}_{MB}');
-ylabel('{\itM}');
-
-subplot(1,2,2);
-scatter(lsri(2,:),LMSRI(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-xlim([0 0.02])
-xticks([0 0.02])
-xlabel('{\its}_{MB}');
-yticks([])
-
-
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_M.pdf")
-
-%%
-
-close all
-figure('Position',[plot_where plot_size]), hold on
-
-subplot(1,2,1);
-scatter(lsri(1,:),LMSRI(3,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-xlim([0.6 0.8])
-xticks([0.6 0.8])
-yticks([min(ylim),max(ylim)])
-xlabel('{\itl}_{MB}');
-ylabel('{\itS}');
-
-subplot(1,2,2);
-scatter(lsri(2,:),LMSRI(3,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-xlim([0 0.02])
-xticks([0 0.02])
-xlabel('{\its}_{MB}');
-yticks([])
-
-
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_S.pdf")
-
-%%
-close all
-figure('Position',[plot_where plot_size]), hold on
-
-subplot(1,2,1);
-scatter(lsri(1,:),lsri(1,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-xlim([0.6 0.8])
-xticks([0.6 0.8])
-yticks([min(ylim),max(ylim)])
-xlabel('{\itl}_{MB}');
-ylabel('{\itl}_{MB}');
-
-subplot(1,2,2);
-scatter(lsri(2,:),lsri(1,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-xlim([0 0.02])
-xticks([0 0.02])
-xlabel('{\its}_{MB}');
-yticks([])
-
-
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_lmb.pdf")
-
-%%
-close all
-figure('Position',[plot_where plot_size]), hold on
-
-subplot(1,2,1);
-scatter(lsri(1,:),lsri(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-xlim([0.6 0.8])
-xticks([0.6 0.8])
-yticks([min(ylim),max(ylim)])
-xlabel('{\itl}_{MB}');
-ylabel('{\its}_{MB}');
-
-subplot(1,2,2);
-scatter(lsri(2,:),lsri(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-xlim([0 0.02])
-xticks([0 0.02])
-xlabel('{\its}_{MB}');
-yticks([])
-
-
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_smb.pdf")
+%lsri
+plotOrderNums = [1,2];
+plotOrderNames = {'{\itl}_{MB}','{\itl}_{MB}'};
+plotOrderSaveNames = {'lmb','smb'};
+for i=1:length(plotOrderNums)
+    cla(s(1))
+    cla(s(2))
+    
+    ylabel(s(1),plotOrderNames{i});    
+    
+    scatter(s(1),lsri(1,:),lsri(plotOrderNums(i),:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+    scatter(s(2),lsri(2,:),lsri(plotOrderNums(i),:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+    
+    yticks(s(1),[min(ylim),max(ylim)])
+    yticks(s(2),[])
+    
+    save2pdf(['C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_',plotOrderSaveNames{i},'.pdf'])
+end
 
 %%
 figure('Position',[plot_where plot_size]), hold on
-xlim([0.6 0.8])
-ylim([0 0.02])
-xticks([0.6 0.8])
-yticks([0 0.02])
+xlim([min_l_scale max_l_scale])
+ylim([0 max_s_scale])
+xticks([min_l_scale max_l_scale])
+yticks([0 max_s_scale])
 xlabel('{\itl}_{MB}');
 ylabel('{\its}_{MB}');
 
@@ -352,8 +247,8 @@ cla
 scatter(lsri(1,:)-lsri(1,:),lsri(2,:)-lsri(1,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
 axis('auto')
 
-xticks([0.6 0.8])
-yticks([0 0.02])
+xticks([min_l_scale max_l_scale])
+yticks([0 max_s_scale])
 
 %save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MB.pdf")
 

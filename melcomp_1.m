@@ -183,7 +183,7 @@ dLW=.1;
 % This is unsurprsing as the first principal component daylight is very
 % broad.
 
-plot_corr=   0;
+plot_corr=   1;
 if plot_corr
     plotOrder={'L','M','S','Mel'};
     figure('units','normalized','outerposition',[0 0 1 1])
@@ -260,7 +260,7 @@ end
 % signals against any of the other available signals improves the ability
 % to signal chromaticity as a one dimensional variable.
 
-plot_comb=  0;
+plot_comb=  1;
 if plot_comb
     plotOrder={'L','M','S','Mel'};
     ScalePlot=0;

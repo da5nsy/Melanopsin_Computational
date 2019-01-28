@@ -5,7 +5,7 @@ try
 catch
     %If we're not inside a function, clear everything and make a full-screen figure
     clear, clc, %close all
-    figure('units','normalized','outerposition',[0 0 1 1]), hold on
+    %figure('units','normalized','outerposition',[0 0 1 1]), hold on
     
     %default values
     ss=1;

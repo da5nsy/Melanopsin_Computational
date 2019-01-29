@@ -1,19 +1,21 @@
-function  pc = melcomp_6_looper(offset,norm,plt) 
+function  pc = melcomp_6_looper_branch(offset,norm,plt) 
+
+% Trying to replicate behavoir of melcomp_optimality
 
 if ~exist('offset','var') %do this properly with nargin !!!!!!!!!!!!!
     disp('No offset passed. Setting offset to 0.')
     offset = 0;
     disp('No norm command passed. Setting norm to 1 (positive)')
-    offset = 1;
+    norm = 1;
 end
 
 %% Data
 % Load observer data
 
-load T_cones_ss10.mat; 
-T_SSF = T_cones_ss10; 
-S_SSF = S_cones_ss10;
-clear T_cones_ss10 S_cones_ss10
+load T_cones_sp.mat; 
+T_SSF = T_cones_sp; 
+S_SSF = S_cones_sp;
+clear T_cones_sp S_cones_sp
 
 load T_rods T_rods S_rods
 load T_melanopsin T_melanopsin S_melanopsin
@@ -26,7 +28,8 @@ S_mel(1)=S_mel(1)+offset; % __________THIS IS THE IMPORTANT BIT___________
 % Load reflectance data
 
 load sur_vrhel
-refs=[38, 15, 134, 137, 138, 65, 19, 24, 140, 26];
+%refs=[38, 15, 134, 137, 138, 65, 19, 24, 140, 26]; %new
+refs = [87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141]; %old
 T_SRF = sur_vrhel(:,refs);
 S_SRF = S_vrhel;
 clear sur_vrhel S_vrhel
@@ -75,9 +78,9 @@ t_i   = zeros([2,size(T_SRF,2),size(T_SPD,2)]);
 for i=1:size(T_SPD,2)
     T_rad(:,:,i)  = T_SRF.*T_SPD(:,i);
     LMSRI(:,:,i)  = T_LMSRI'*T_rad(:,:,i);
-    lsri(1:2,:,i) = LMSToMacBoynDG(LMSRI(1:3,:,i),T_SSF',T_lum');
-    t_r(:,:,i)    = LMSToMacBoynDG(LMSRI([1,2,4],:,i),[T_SSF(:,1:2)';T_rods'],T_lum');
-    t_i(:,:,i)    = LMSToMacBoynDG(LMSRI([1,2,5],:,i),[T_SSF(:,1:2)';T_mel'],T_lum');
+    lsri(1:2,:,i) = LMSToMacBoyn(LMSRI(1:3,:,i),T_SSF',T_lum');
+    t_r(:,:,i)    = LMSToMacBoyn(LMSRI([1,2,4],:,i),[T_SSF(:,1:2)';T_rods'],T_lum');
+    t_i(:,:,i)    = LMSToMacBoyn(LMSRI([1,2,5],:,i),[T_SSF(:,1:2)';T_mel'],T_lum');
 end
 lsri(3,:,:) = t_r(2,:,:); clear t_r
 lsri(4,:,:) = t_i(2,:,:); clear t_i
@@ -105,7 +108,7 @@ lsi = lsri([1,2,4],:);
 %%
 
 if plt
-    %figure,
+    figure,
     scatter3(lsri(1,:),lsri(2,:),lsri(4,:),'k','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6);
 end
     

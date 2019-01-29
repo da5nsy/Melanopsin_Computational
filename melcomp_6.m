@@ -29,9 +29,9 @@ S_mel = S_melanopsin - [10, 0, 0];
 
 load sur_vrhel
 refs=[38, 15, 134, 137, 138, 65, 19, 24, 140, 26];
-T_SRF = sur_vrhel(:,refs);
+sur_vrhel_n = sur_vrhel(:,refs);
+T_SRF = sur_vrhel_n;
 S_SRF = S_vrhel;
-clear sur_vrhel S_vrhel
 
 % Load daylight data
 
@@ -205,7 +205,6 @@ for i=1:length(plotOrderNums)
     
     yticks(s(1),[min(ylim),max(ylim)])
     yticks(s(2),[])
-    
     save2pdf(['C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_',plotOrderNames{i},'.pdf'])
 end
 
@@ -270,9 +269,9 @@ save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\O
 
 figure('Position',[plot_where plot_size],'defaultLineLineWidth',4), hold on
 for i=1:length(refs)
-    plot(SToWls(S_sh),T_SRF(:,i),'Color',pltc_alt(:,i,1),'DisplayName',char(labels_vrhel(refs(i)).label));
+    plot(SToWls(S_vrhel),sur_vrhel_n(:,i),'Color',pltc_alt(:,i,1),'DisplayName',char(labels_vrhel(refs(i)).label));
 end
-xlim([S_sh(1), S_sh(1)+S_sh(2)*S_sh(3)])
+xlim([S_vrhel(1), S_vrhel(1)+S_vrhel(2)*S_vrhel(3)])
 
 xticks('auto')
 yticks([min(ylim) max(ylim)])
@@ -343,7 +342,7 @@ clear ex pc %only needed during debugging when rerunning script
 pca_range = -70:1:130;
 
 for i=1:length(pca_range)
-    pc(i) = melcomp_6_looper(pca_range(i),0,0);
+    pc(i) = melcomp_6_looper(pca_range(i),1,0);
     disp(pca_range(i))
 end
 
@@ -379,9 +378,41 @@ save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\O
 
 [~,pks_locs] = findpeaks(ex);
 
-for i = 1:length(pks_locs)
-    melcomp_6_looper(pca_range(pks_locs(i)),1,1)
+% for i = 1:length(pks_locs)
+%     melcomp_6_looper(pca_range(pks_locs(i)),1,1)
+% end
+
+figure('Position',[plot_where plot_size],'defaultLineLineWidth',4), hold on
+xlabel('{\itl}_{MB}');
+ylabel('{\its}_{MB}');
+zlabel('{\iti}_{MB}');
+melcomp_6_looper(pca_range(pks_locs(1)),1,1)
+
+view(3)
+
+xticks([min(xlim),max(xlim)]);
+yticks([min(ylim),max(ylim)]);
+zticks([min(zlim),max(zlim)]);
+
+save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\3D.pdf") %optimality options
+
+
+%%
+d = dir('opt*.mat');
+
+figure(3), hold on
+cla
+for i = 1:length(d)
+    clear out
+    load(d(i).name)
+    plot(out(1,:),out(2,:),'-','DisplayName',d(i).name)  
 end
+
+legend('off')
+ylim('auto')
+
+save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\optopt.pdf") %optimality options
+
 
 %% Add T_SSF to plot
 

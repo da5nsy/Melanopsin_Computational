@@ -12,6 +12,8 @@ max_s_scale = 0.04;
 
 set(0,'defaultAxesFontName', 'Courier')
 
+base = 'C:\Users\cege-user\Dropbox\UCL\Presentations\20190129 Computational Study - Oxford\figs';
+
 %% Data
 % Load observer data
 
@@ -81,10 +83,10 @@ yticks([0 1])
 xlabel('{\itl}_{MB}');
 ylabel('{\its}_{MB}');
 
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MB.pdf")
+save2pdf([base,'\MB.pdf'])
 
 scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBblack.pdf")
+save2pdf([base,'\MBblack.pdf'])
 
 %% Compute colorimetry
 
@@ -111,21 +113,21 @@ rng(7); pltc_alt=pltc_alt(:,randperm(size(T_SRF,2)),:); %best combo for differen
 %plot MB with points, not normalised
 rng(1); n_ill = randi(size(T_SPD,2)); %pick a random spectrum (55th)
 scatter(lsri(1,:,n_ill),lsri(2,:,n_ill),[],pltc_alt(:,:,n_ill)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBsingleset_nn.pdf")
+save2pdf([base,'\MBsingleset_nn.pdf'])
 
 %rescale diagram
 xlim([min_l_scale max_l_scale])
 ylim([0 max_s_scale])
 xticks([min_l_scale max_l_scale])
 yticks([0 max_s_scale])
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBsingleset_n.pdf")
+save2pdf([base,'\MBsingleset_n.pdf'])
 
 %add labels
 labels_vrhel(137).label = 'peach skin -- yellow';
 for i=1:length(refs)
     text(lsri(1,i,n_ill)+0.005,lsri(2,i,n_ill)+0.00015,labels_vrhel(refs(i)).label,'Rotation',10,'FontName','Courier')
 end
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBsingleset_n_text.pdf")
+save2pdf([base,'\MBsingleset_n_text.pdf'])
 
 %scatter(0.699237,0.025841,'rs') EE white
 
@@ -134,18 +136,18 @@ save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\O
 cla
 scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
 scatter(lsri(1,:),lsri(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBall.pdf")
+save2pdf([base,'\MBall.pdf'])
 
 %all points in grey
 cla
 scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
 scatter(lsri(1,:),lsri(2,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBallgrey.pdf")
+save2pdf([base,'\MBallgrey.pdf'])
 
 %means under each illuminant
 lsri_m2 = mean(lsri,2); 
 scatter(squeeze(lsri_m2(1,:,:)),squeeze(lsri_m2(2,:,:)),'r*')
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBmeans.pdf")
+save2pdf([base,'\MBmeans.pdf'])
 
 %% Grey world adaptation
 corrector = lsri_m2-lsri_m2(:,:,1);
@@ -157,7 +159,7 @@ scatter(lsri_c(1,:),lsri_c(2,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'
 scatter(lsri_mc(1,1,1),lsri_mc(2,1,1),'r*')
 xlabel('{\it }_{ }');
 ylabel('{\it }_{ }');
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBc.pdf")
+save2pdf([base,'\MBc.pdf'])
 
 %% Splits
 
@@ -181,7 +183,7 @@ xticks(s(2),[0 max_s_scale])
 xlabel(s(2),'{\its}_{MB}');
 yticks(s(2),[])
 
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_empty.pdf")
+save2pdf([base,'\split_empty.pdf'])
 
 ylabel(s(1),'{\itI}');
 scatter(s(1),lsri(1,:),LMSRI(5,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
@@ -189,7 +191,7 @@ scatter(s(2),lsri(2,:),LMSRI(5,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6
 yticks(s(1),[min(ylim),max(ylim)])
 yticks(s(2),[])
 
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_I_grey.pdf")
+save2pdf([base,'\split_I_grey.pdf'])
 
 %LMSRI
 plotOrderNums = [5,1,2,3];
@@ -205,7 +207,7 @@ for i=1:length(plotOrderNums)
     
     yticks(s(1),[min(ylim),max(ylim)])
     yticks(s(2),[])
-    save2pdf(['C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_',plotOrderNames{i},'.pdf'])
+    save2pdf([base,'/split_',plotOrderNames{i},'.pdf'])
 end
 
 %lsri
@@ -224,7 +226,7 @@ for i=1:length(plotOrderNums)
     yticks(s(1),[min(ylim),max(ylim)])
     yticks(s(2),[])
     
-    save2pdf(['C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\split_',plotOrderSaveNames{i},'.pdf'])
+    save2pdf([base,'/split_',plotOrderSaveNames{i},'.pdf'])
 end
 
 %%
@@ -239,7 +241,7 @@ yticks([])
 xlabel('{\itl}_{MB} - {\itl}_{MB}');
 ylabel('{\its}_{MB} - {\itl}_{MB}');
 
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBminMB1.pdf")
+save2pdf([base,'\MBminMB1.pdf'])
 
 cla
 scatter(lsri(1,:)-lsri(2,:),lsri(2,:)-lsri(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
@@ -250,7 +252,7 @@ yticks([])
 xlabel('{\itl}_{MB} - {\its}_{MB}');
 ylabel('{\its}_{MB} - {\its}_{MB}');
 
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBminMB2.pdf")
+save2pdf([base,'\MBminMB2.pdf'])
 
 
 sf = [-0.5500,+0.2400]; %manually run melcomp_6_calcsf.m to get these values
@@ -263,7 +265,7 @@ yticks([])
 xlabel('{\itl}_{MB} - {\itk_1i}_{MB}');
 ylabel('{\its}_{MB} - {\itk_2i}_{MB}');
 
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBminMB3.pdf")
+save2pdf([base,'\MBminMB3.pdf'])
 
 %% SRF
 
@@ -283,7 +285,7 @@ l = legend;
 l.FontSize = 6;
 l.Location = 'northwest';
 
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\SRF.pdf")
+save2pdf([base,'\SRF.pdf'])
 
 %% SPD pca
 
@@ -303,8 +305,7 @@ l = legend({'PC1','PC2','PC3'});
 l.FontSize = 6;
 l.Location = 'southwest';
 
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\SPD.pdf")
-
+save2pdf([base,'\SPD.pdf'])
 
 %% Ref corr square
 
@@ -331,7 +332,7 @@ colorbar
 xlabel('Wavelength (nm)')
 ylabel('Wavelength (nm)')
 
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\VS.pdf")
+save2pdf([base,'\VS.pdf'])
 
 %% 
 
@@ -367,12 +368,12 @@ legend('off')
 xlabel('Wavelength shift (nm)')
 ylabel('PC3 score')
 
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\opt.pdf")
+save2pdf([base,'\opt.pdf'])
 
 plot(SToWls(S_SSF),T_SSF)
 plot(SToWls(S_melanopsin),T_melanopsin)
 
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\optwithSFF.pdf")
+save2pdf([base,'\optwithSFF.pdf'])
 
 %%
 
@@ -394,7 +395,7 @@ xticks([min(xlim),max(xlim)]);
 yticks([min(ylim),max(ylim)]);
 zticks([min(zlim),max(zlim)]);
 
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\3D.pdf") %optimality options
+save2pdf([base,'\3D.pdf']) %optimality options
 
 
 %%
@@ -411,14 +412,7 @@ end
 legend('off')
 ylim('auto')
 
-save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\optopt.pdf") %optimality options
-
-
-%% Add T_SSF to plot
-
-
-
-
+save2pdf([base,'\optopt.pdf'])
 
 
 

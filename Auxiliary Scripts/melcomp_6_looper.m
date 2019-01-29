@@ -1,8 +1,10 @@
-function  pc = melcomp_6_looper(offset) 
+function  pc = melcomp_6_looper(offset,norm,plt) 
 
-if ~exist('offset','var')
+if ~exist('offset','var') %do this properly with nargin !!!!!!!!!!!!!
     disp('No offset passed. Setting offset to 0.')
     offset = 0;
+    disp('No norm command passed. Setting norm to 1 (positive)')
+    offset = 1;
 end
 
 %% Data
@@ -85,18 +87,27 @@ lsri(4,:,:) = t_i(2,:,:); clear t_i
 % figure,
 % scatter3(lsri(1,:),lsri(2,:),lsri(4,:));
 
-lsri_norm = lsri(:,:); %preallocate
-for i=1:4
-    lsri_norm(i,:) = (lsri(i,:) - mean(lsri(i,:)))./std(lsri(i,:));
+lsri = lsri(:,:);
+
+if norm
+    for i=1:4
+        lsri(i,:) = (lsri(i,:) - mean(lsri(i,:)))./std(lsri(i,:));
+    end
 end
-% 
-% figure,
-% scatter3(lsri_norm(1,:),lsri_norm(2,:),lsri_norm(4,:));
+
 
 %% pca
 
-lsi = lsri_norm([1,2,4],:);
+lsi = lsri([1,2,4],:);
 
 [pc.coeff, pc.score, pc.latent, pc.tsquared, pc.explained, pc.mu] = pca(lsi');
+
+%%
+
+if plt
+    figure,
+    scatter3(lsri(1,:),lsri(2,:),lsri(4,:));
+end
+    
 
 end

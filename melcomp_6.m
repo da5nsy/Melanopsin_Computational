@@ -24,7 +24,6 @@ load T_rods T_rods S_rods
 load T_melanopsin T_melanopsin S_melanopsin
 T_mel = SplineCmf(S_melanopsin, T_melanopsin, S_melanopsin - [10, 0, 0],1); %Increasing the range of this function in case it ends up limiting the range of S_sh, and shorten variable names
 S_mel = S_melanopsin - [10, 0, 0];
-clear S_melanopsin T_melanopsin
 
 % Load reflectance data
 
@@ -212,7 +211,7 @@ end
 
 %lsri
 plotOrderNums = [1,2,4];
-plotOrderNames = {'{\itl}_{MB}','{\itl}_{MB}','{\iti}_{MB}'};
+plotOrderNames = {'{\itl}_{MB}','{\its}_{MB}','{\iti}_{MB}'};
 plotOrderSaveNames = {'lmb','smb','imb'};
 for i=1:length(plotOrderNums)
     cla(s(1))
@@ -291,7 +290,7 @@ save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\O
 
 [pc_p.coeff, pc_p.score, pc_p.latent, pc_p.tsquared, pc_p.explained, pc_p.mu] = pca(T_SPD');
 
-figure('Position',[plot_where plot_size],'defaultLineLineWidth',4), hold on
+figure(3), cla
 plot(SToWls(S_SPD),pc_p.coeff(:,1:3))
 xlim([S_sh(1), S_sh(1)+S_sh(2)*S_sh(3)])
 
@@ -336,29 +335,50 @@ ylabel('Wavelength (nm)')
 save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\VS.pdf")
 
 %% 
-pca_range = -150:5:150;
+
+figure(3)
+cla
+clear ex pc %only needed during debugging when rerunning script
+
+pca_range = -70:1:130;
 
 for i=1:length(pca_range)
-    pc(i) = melcomp_6_looper(pca_range(i));
+    pc(i) = melcomp_6_looper(pca_range(i),1);
     disp(pca_range(i))
 end
 
-%%
-%mel_peak = !!!!!!!!!!!111
+[~, mel_peak_loc] = max(T_melanopsin);
+S_melanopsin_f = SToWls(S_melanopsin);
+mel_peak = S_melanopsin_f(mel_peak_loc);
 
 for i=1:length(pca_range)
     ex(i) = pc(i).explained(3);
 end
 
-figure, hold on
-plot(pca_range,ex)
-plot
+%figure, hold on
+plot(pca_range+mel_peak,ex/max(ex),'k','DisplayName','PC3 score')
+%plot
+
+xlim('auto')
+ylim([0 1])
+yticks([min(ylim),max(ylim)])
+
+legend('off')
+
+xlabel('Wavelength shift (nm)')
+ylabel('PC3 score')
+
+save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\opt.pdf")
 
 
-%%
+plot(SToWls(S_SSF),T_SSF)
+plot(SToWls(S_melanopsin),T_melanopsin)
+
+save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\optwithSFF.pdf")
 
 
-%save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\opt.pdf")
+%% Add T_SSF to plot
+
 
 
 

@@ -29,7 +29,7 @@ clear S_melanopsin T_melanopsin
 % Load reflectance data
 
 load sur_vrhel
-refs=[38, 33, 134, 137, 138, 65, 19, 24, 140, 26];
+refs=[38, 15, 134, 137, 138, 65, 19, 24, 140, 26];
 T_SRF = sur_vrhel(:,refs);
 S_SRF = S_vrhel;
 clear sur_vrhel S_vrhel
@@ -255,7 +255,7 @@ ylabel('{\its}_{MB} - {\its}_{MB}');
 save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\MBminMB2.pdf")
 
 
-sf = [-0.4350,+0.2300];
+sf = [-0.5500,+0.2400]; %manually run melcomp_6_calcsf.m to get these values
 cla
 scatter(lsri(1,:)-sf(1)*lsri(4,:),lsri(2,:)-sf(2)*lsri(4,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
 axis('auto')
@@ -287,14 +287,72 @@ l.Location = 'northwest';
 
 save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\SRF.pdf")
 
+%% SPD pca
 
+[pc_p.coeff, pc_p.score, pc_p.latent, pc_p.tsquared, pc_p.explained, pc_p.mu] = pca(T_SPD');
+
+figure('Position',[plot_where plot_size],'defaultLineLineWidth',4), hold on
+plot(SToWls(S_SPD),pc_p.coeff(:,1:3))
+xlim([S_sh(1), S_sh(1)+S_sh(2)*S_sh(3)])
+
+xticks('auto')
+yticks([min(ylim), 0,  max(ylim)])
+
+xlabel('Wavelength (nm)')
+ylabel('Coefficient value')
+
+l = legend({'PC1','PC2','PC3'});
+l.FontSize = 6;
+l.Location = 'southwest';
+
+save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\SPD.pdf")
+
+
+%% Ref corr square
+
+figure('Position',[plot_where plot_size(1) plot_size(1)])
+hold on
+
+[sur_vrhel_c, S_RF_f] = vrhel_square(refs);
+
+for i=1:length(sur_vrhel_c)
+    for j=1:length(sur_vrhel_c)
+        if i>j
+            sur_vrhel_c(i,j) = 0;
+        end
+    end
+end
+            
+
+imagesc(sur_vrhel_c.^7)
+axis image
+colormap gray
+set(gca,'XTickLabel',S_RF_f(xticks))
+set(gca,'YTickLabel',S_RF_f(yticks))
+colorbar
+xlabel('Wavelength (nm)')
+ylabel('Wavelength (nm)')
+
+save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\VS.pdf")
+
+%% 
+pca_range = -150:5:150;
+
+for i=1:length(pca_range)
+    pc(i) = melcomp_6_looper(pca_range(i));
+    disp(pca_range(i))
+end
 
 %%
+%mel_peak = !!!!!!!!!!!111
 
+for i=1:length(pca_range)
+    ex(i) = pc(i).explained(3);
+end
 
-% figure, hold on
-% 
-% scatter3(lsri(1,:),lsri(2,:),lsri(4,:))
+figure, hold on
+plot(pca_range,ex)
+plot
 
 
 %%

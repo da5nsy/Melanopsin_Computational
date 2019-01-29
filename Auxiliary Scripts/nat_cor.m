@@ -178,7 +178,4 @@ colorbar
 figure,
 imagesc(T_SPD_c_log)
 colorbar
-    
-% looks dodgy AF to me. Something wacky going on around 130
-% wonder if the sweep would even out if plotted in frequency intervals?
 

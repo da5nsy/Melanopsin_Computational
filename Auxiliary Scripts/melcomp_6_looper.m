@@ -106,7 +106,7 @@ lsi = lsri([1,2,4],:);
 
 if plt
     figure,
-    scatter3(lsri(1,:),lsri(2,:),lsri(4,:));
+    scatter3(lsri(1,:),lsri(2,:),lsri(4,:),'k','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6);
 end
     
 

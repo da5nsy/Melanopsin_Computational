@@ -343,7 +343,7 @@ clear ex pc %only needed during debugging when rerunning script
 pca_range = -70:1:130;
 
 for i=1:length(pca_range)
-    pc(i) = melcomp_6_looper(pca_range(i),1);
+    pc(i) = melcomp_6_looper(pca_range(i),0,0);
     disp(pca_range(i))
 end
 
@@ -370,12 +370,18 @@ ylabel('PC3 score')
 
 save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\opt.pdf")
 
-
 plot(SToWls(S_SSF),T_SSF)
 plot(SToWls(S_melanopsin),T_melanopsin)
 
 save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Oxford Presentation\figs\optwithSFF.pdf")
 
+%%
+
+[~,pks_locs] = findpeaks(ex);
+
+for i = 1:length(pks_locs)
+    melcomp_6_looper(pca_range(pks_locs(i)),1,1)
+end
 
 %% Add T_SSF to plot
 

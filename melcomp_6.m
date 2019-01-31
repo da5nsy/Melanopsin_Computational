@@ -1,5 +1,9 @@
 %% Creating visual narrative for melcomp presentation
 
+% I gave a presentation on 2019/01/29 to Hannah Smithson's group in Oxford
+% on the latest progress of my computational work. Here is where I
+% generated the figures for that presentation.
+
 %Pre-flight
 clear, clc, close all
 
@@ -14,7 +18,8 @@ set(0,'defaultAxesFontName', 'Courier')
 
 base = 'C:\Users\cege-user\Dropbox\UCL\Presentations\20190129 Computational Study - Oxford\figs';
 
-%% Data
+%% Load Data
+
 % Load observer data
 
 load T_cones_ss10.mat; 
@@ -47,6 +52,7 @@ T_SPD = T_SPD(:,1:20:end);
 S_SPD=[300,5,161];
 
 %% reduce all data down to the common range/interval
+
 S_sh = [max([S_SPD(1),S_SRF(1),S_SSF(1),S_rods(1),S_mel(1)]),...
     max([S_SPD(2),S_SRF(2),S_SSF(2),S_rods(2),S_mel(2)]),...
     min([S_SPD(3),S_SRF(3),S_SSF(3),S_rods(3),S_mel(3)])]; 
@@ -65,9 +71,12 @@ S_LMSRI=S_sh;
 
 %% Plot MB chromaticity diagram
 
+% compute chromaticities of points on spectral locus
 sf_10 = [0.69283932, 0.34967567, 0.05547858]; %energy 10deg from CIE 170-2:2015
 T_lum = sf_10(1)*T_SSF(:,1)+sf_10(2)*T_SSF(:,2);
 spectral_locus = LMSToMacBoynDG(T_SSF',T_SSF',T_lum');
+
+% compute display colours for points on spectral locus
 load T_xyz1931.mat
 T_xyz1931 = SplineCmf(S_xyz1931,T_xyz1931,S_sh);
 RGB = XYZToSRGBPrimary(T_xyz1931);
@@ -85,16 +94,17 @@ ylabel('{\its}_{MB}');
 
 save2pdf([base,'\MB.pdf'])
 
+%black version
 scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
 save2pdf([base,'\MBblack.pdf'])
 
-%% Compute colorimetry
+%% Compute colorimetry of reflectance samples 
 
 T_rad = zeros([S_sh(3),size(T_SRF,2),size(T_SPD,2)]);
 LMSRI = zeros([size(T_LMSRI,2),size(T_SRF,2),size(T_SPD,2)]);
-lsri  = zeros([4,size(T_SRF,2),size(T_SPD,2)]); %hard coded 4
-t_r   = zeros([2,size(T_SRF,2),size(T_SPD,2)]);
-t_i   = zeros([2,size(T_SRF,2),size(T_SPD,2)]);
+lsri  = zeros([4,size(T_SRF,2),size(T_SPD,2)]);
+t_r   = zeros([2,size(T_SRF,2),size(T_SPD,2)]); %t for temp
+t_i   = zeros([2,size(T_SRF,2),size(T_SPD,2)]); %t for temp
 
 for i=1:size(T_SPD,2)
     T_rad(:,:,i)  = T_SRF.*T_SPD(:,i);
@@ -111,7 +121,7 @@ pltc_alt = repmat(jet(size(T_SRF,2))',1,1,size(T_SPD,2));
 rng(7); pltc_alt=pltc_alt(:,randperm(size(T_SRF,2)),:); %best combo for differentiating close chromaticities
 
 %plot MB with points, not normalised
-rng(1); n_ill = randi(size(T_SPD,2)); %pick a random spectrum (55th)
+rng(1); n_ill = randi(size(T_SPD,2)); %pick a random spectrum (55th under current settings, changes if you downsample the illuminant data, for example)
 scatter(lsri(1,:,n_ill),lsri(2,:,n_ill),[],pltc_alt(:,:,n_ill)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
 save2pdf([base,'\MBsingleset_nn.pdf'])
 
@@ -131,7 +141,8 @@ save2pdf([base,'\MBsingleset_n_text.pdf'])
 
 %scatter(0.699237,0.025841,'rs') EE white
 
-%%
+%% Plot chromaticities of reflectance samples under all illums
+
 % all points, in colour
 cla
 scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
@@ -144,7 +155,7 @@ scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
 scatter(lsri(1,:),lsri(2,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
 save2pdf([base,'\MBallgrey.pdf'])
 
-%means under each illuminant
+%with means under each illuminant
 lsri_m2 = mean(lsri,2); 
 scatter(squeeze(lsri_m2(1,:,:)),squeeze(lsri_m2(2,:,:)),'r*')
 save2pdf([base,'\MBmeans.pdf'])
@@ -163,9 +174,6 @@ save2pdf([base,'\MBc.pdf'])
 
 %% Splits
 
-%would be nice to bring plot on piece by piece
-%and to get all of this to loop instead of being seperate
-
 figure('Name','split','Position',[plot_where plot_size]), hold on
 
 s(1) = subplot(1,2,1);
@@ -183,7 +191,7 @@ xticks(s(2),[0 max_s_scale])
 xlabel(s(2),'{\its}_{MB}');
 yticks(s(2),[])
 
-save2pdf([base,'\split_empty.pdf'])
+save2pdf([base,'\split_empty.pdf']) %blank one for clarity of introduction in presentation
 
 ylabel(s(1),'{\itI}');
 scatter(s(1),lsri(1,:),LMSRI(5,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
@@ -193,7 +201,7 @@ yticks(s(2),[])
 
 save2pdf([base,'\split_I_grey.pdf'])
 
-%LMSRI
+%LMSRI (with category colours)
 plotOrderNums = [5,1,2,3];
 plotOrderNames = {'I','L','M','S'};
 for i=1:length(plotOrderNums)
@@ -229,7 +237,8 @@ for i=1:length(plotOrderNums)
     save2pdf([base,'/split_',plotOrderSaveNames{i},'.pdf'])
 end
 
-%%
+%% Calibartion by l, s or i
+
 figure(1)
 
 cla
@@ -254,10 +263,9 @@ ylabel('{\its}_{MB} - {\its}_{MB}');
 
 save2pdf([base,'\MBminMB2.pdf'])
 
-
-sf = [-0.5500,+0.2400]; %manually run melcomp_6_calcsf.m to get these values
+[sf_l,sf_s] = melcomp_6_calcsf(lsri); %calculates scaling factors
 cla
-scatter(lsri(1,:)-sf(1)*lsri(4,:),lsri(2,:)-sf(2)*lsri(4,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+scatter(lsri(1,:)+sf_l*lsri(4,:),lsri(2,:)+sf_s*lsri(4,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
 axis('auto')
 xticks([])
 yticks([])

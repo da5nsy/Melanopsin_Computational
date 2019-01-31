@@ -1,6 +1,14 @@
 function  pc = melcomp_6_looper_branch(offset,norm,plt) 
 
-% Trying to replicate behavoir of melcomp_optimality
+% Considering the effect of different parameters on the optimality
+% calculations. For example:
+%  1.	LMStoMacBoyn rather than LMStoMacBoynDG
+% 2.	Normalisation
+% 3.	Different reflectances
+% 4.	Different fundamentals
+%
+% Call with melcomp_6_looper_branch_caller
+
 
 if ~exist('offset','var') %do this properly with nargin !!!!!!!!!!!!!
     disp('No offset passed. Setting offset to 0.')

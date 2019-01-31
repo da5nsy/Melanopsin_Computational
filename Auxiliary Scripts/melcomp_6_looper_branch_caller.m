@@ -1,4 +1,11 @@
-%% 
+% Considering the effect of different parameters on the optimality
+% calculations. For example:
+%  1.	LMStoMacBoyn rather than LMStoMacBoynDG
+% 2.	Normalisation
+% 3.	Different reflectances
+% 4.	Different fundamentals
+
+%%
 clear, clc, close all
 
 load T_melanopsin.mat

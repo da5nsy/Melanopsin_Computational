@@ -18,12 +18,14 @@ set(0,'defaultAxesFontName', 'Courier')
 
 base = 'C:\Users\cege-user\Dropbox\UCL\Presentations\20190129 Computational Study - Oxford\figs';
 
+print_figures = 1;
+
 %% Load Data
 
 % Load observer data
 
-load T_cones_ss10.mat; 
-T_SSF = T_cones_ss10; 
+load T_cones_ss10.mat;
+T_SSF = T_cones_ss10;
 S_SSF = S_cones_ss10;
 clear T_cones_ss10 S_cones_ss10
 
@@ -55,7 +57,7 @@ S_SPD=[300,5,161];
 
 S_sh = [max([S_SPD(1),S_SRF(1),S_SSF(1),S_rods(1),S_mel(1)]),...
     max([S_SPD(2),S_SRF(2),S_SSF(2),S_rods(2),S_mel(2)]),...
-    min([S_SPD(3),S_SRF(3),S_SSF(3),S_rods(3),S_mel(3)])]; 
+    min([S_SPD(3),S_SRF(3),S_SSF(3),S_rods(3),S_mel(3)])];
 %S_shared: work out what the lowest common denominator for the range/interval of the data is
 
 T_SPD = SplineSpd(S_SPD,T_SPD,S_sh);
@@ -92,13 +94,17 @@ yticks([0 1])
 xlabel('{\itl}_{MB}');
 ylabel('{\its}_{MB}');
 
-save2pdf([base,'\MB.pdf'])
+if print_figures
+    save2pdf([base,'\MB.pdf'])
+end
 
 %black version
 scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
-save2pdf([base,'\MBblack.pdf'])
+if print_figures
+    save2pdf([base,'\MBblack.pdf'])
+end
 
-%% Compute colorimetry of reflectance samples 
+%% Compute colorimetry of reflectance samples
 
 T_rad = zeros([S_sh(3),size(T_SRF,2),size(T_SPD,2)]);
 LMSRI = zeros([size(T_LMSRI,2),size(T_SRF,2),size(T_SPD,2)]);
@@ -117,27 +123,33 @@ lsri(3,:,:) = t_r(2,:,:); clear t_r
 lsri(4,:,:) = t_i(2,:,:); clear t_i
 
 %compute colours for display
-pltc_alt = repmat(jet(size(T_SRF,2))',1,1,size(T_SPD,2)); 
+pltc_alt = repmat(jet(size(T_SRF,2))',1,1,size(T_SPD,2));
 rng(7); pltc_alt=pltc_alt(:,randperm(size(T_SRF,2)),:); %best combo for differentiating close chromaticities
 
 %plot MB with points, not normalised
 rng(1); n_ill = randi(size(T_SPD,2)); %pick a random spectrum (55th under current settings, changes if you downsample the illuminant data, for example)
 scatter(lsri(1,:,n_ill),lsri(2,:,n_ill),[],pltc_alt(:,:,n_ill)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-save2pdf([base,'\MBsingleset_nn.pdf'])
+if print_figures
+    save2pdf([base,'\MBsingleset_nn.pdf'])
+end
 
 %rescale diagram
 xlim([min_l_scale max_l_scale])
 ylim([0 max_s_scale])
 xticks([min_l_scale max_l_scale])
 yticks([0 max_s_scale])
-save2pdf([base,'\MBsingleset_n.pdf'])
+if print_figures
+    save2pdf([base,'\MBsingleset_n.pdf'])
+end
 
 %add labels
 labels_vrhel(137).label = 'peach skin -- yellow';
 for i=1:length(refs)
     text(lsri(1,i,n_ill)+0.005,lsri(2,i,n_ill)+0.00015,labels_vrhel(refs(i)).label,'Rotation',10,'FontName','Courier')
 end
-save2pdf([base,'\MBsingleset_n_text.pdf'])
+if print_figures
+    save2pdf([base,'\MBsingleset_n_text.pdf'])
+end
 
 %scatter(0.699237,0.025841,'rs') EE white
 
@@ -147,18 +159,24 @@ save2pdf([base,'\MBsingleset_n_text.pdf'])
 cla
 scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
 scatter(lsri(1,:),lsri(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-save2pdf([base,'\MBall.pdf'])
+if print_figures
+    save2pdf([base,'\MBall.pdf'])
+end
 
 %all points in grey
 cla
 scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
 scatter(lsri(1,:),lsri(2,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-save2pdf([base,'\MBallgrey.pdf'])
+if print_figures
+    save2pdf([base,'\MBallgrey.pdf'])
+end
 
 %with means under each illuminant
-lsri_m2 = mean(lsri,2); 
+lsri_m2 = mean(lsri,2);
 scatter(squeeze(lsri_m2(1,:,:)),squeeze(lsri_m2(2,:,:)),'r*')
-save2pdf([base,'\MBmeans.pdf'])
+if print_figures
+    save2pdf([base,'\MBmeans.pdf'])
+end
 
 %% Grey world adaptation
 corrector = lsri_m2-lsri_m2(:,:,1);
@@ -170,7 +188,9 @@ scatter(lsri_c(1,:),lsri_c(2,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'
 scatter(lsri_mc(1,1,1),lsri_mc(2,1,1),'r*')
 xlabel('{\it }_{ }');
 ylabel('{\it }_{ }');
-save2pdf([base,'\MBc.pdf'])
+if print_figures
+    save2pdf([base,'\MBc.pdf'])
+end
 
 %% Splits
 
@@ -191,7 +211,9 @@ xticks(s(2),[0 max_s_scale])
 xlabel(s(2),'{\its}_{MB}');
 yticks(s(2),[])
 
-save2pdf([base,'\split_empty.pdf']) %blank one for clarity of introduction in presentation
+if print_figures
+    save2pdf([base,'\split_empty.pdf']) %blank one for clarity of introduction in presentation
+end
 
 ylabel(s(1),'{\itI}');
 scatter(s(1),lsri(1,:),LMSRI(5,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
@@ -208,14 +230,16 @@ for i=1:length(plotOrderNums)
     cla(s(1))
     cla(s(2))
     
-    ylabel(s(1),['{\it',plotOrderNames{i},'}']);    
+    ylabel(s(1),['{\it',plotOrderNames{i},'}']);
     
     scatter(s(1),lsri(1,:),LMSRI(plotOrderNums(i),:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
     scatter(s(2),lsri(2,:),LMSRI(plotOrderNums(i),:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
     
     yticks(s(1),[min(ylim),max(ylim)])
     yticks(s(2),[])
-    save2pdf([base,'/split_',plotOrderNames{i},'.pdf'])
+    if print_figures
+        save2pdf([base,'/split_',plotOrderNames{i},'.pdf'])
+    end
 end
 
 %lsri
@@ -226,7 +250,7 @@ for i=1:length(plotOrderNums)
     cla(s(1))
     cla(s(2))
     
-    ylabel(s(1),plotOrderNames{i});    
+    ylabel(s(1),plotOrderNames{i});
     
     scatter(s(1),lsri(1,:),lsri(plotOrderNums(i),:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
     scatter(s(2),lsri(2,:),lsri(plotOrderNums(i),:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
@@ -234,7 +258,9 @@ for i=1:length(plotOrderNums)
     yticks(s(1),[min(ylim),max(ylim)])
     yticks(s(2),[])
     
-    save2pdf([base,'/split_',plotOrderSaveNames{i},'.pdf'])
+    if print_figures
+        save2pdf([base,'/split_',plotOrderSaveNames{i},'.pdf'])
+    end
 end
 
 %% Calibartion by l, s or i
@@ -250,7 +276,9 @@ yticks([])
 xlabel('{\itl}_{MB} - {\itl}_{MB}');
 ylabel('{\its}_{MB} - {\itl}_{MB}');
 
-save2pdf([base,'\MBminMB1.pdf'])
+if print_figures
+    save2pdf([base,'\MBminMB1.pdf'])
+end
 
 cla
 scatter(lsri(1,:)-lsri(2,:),lsri(2,:)-lsri(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
@@ -261,7 +289,9 @@ yticks([])
 xlabel('{\itl}_{MB} - {\its}_{MB}');
 ylabel('{\its}_{MB} - {\its}_{MB}');
 
-save2pdf([base,'\MBminMB2.pdf'])
+if print_figures
+    save2pdf([base,'\MBminMB2.pdf'])
+end
 
 [sf_l,sf_s] = melcomp_6_calcsf(lsri); %calculates scaling factors
 cla
@@ -273,9 +303,11 @@ yticks([])
 xlabel('{\itl}_{MB} - {\itk_1i}_{MB}');
 ylabel('{\its}_{MB} - {\itk_2i}_{MB}');
 
-save2pdf([base,'\MBminMB3.pdf'])
+if print_figures
+    save2pdf([base,'\MBminMB3.pdf'])
+end
 
-%% SRF
+%% Plot spectral reflectance functions
 
 figure('Position',[plot_where plot_size],'defaultLineLineWidth',4), hold on
 for i=1:length(refs)
@@ -293,9 +325,11 @@ l = legend;
 l.FontSize = 6;
 l.Location = 'northwest';
 
-save2pdf([base,'\SRF.pdf'])
+if print_figures
+    save2pdf([base,'\SRF.pdf'])
+end
 
-%% SPD pca
+%% Plot SPD pca
 
 [pc_p.coeff, pc_p.score, pc_p.latent, pc_p.tsquared, pc_p.explained, pc_p.mu] = pca(T_SPD');
 
@@ -313,25 +347,28 @@ l = legend({'PC1','PC2','PC3'});
 l.FontSize = 6;
 l.Location = 'southwest';
 
-save2pdf([base,'\SPD.pdf'])
+if print_figures
+    save2pdf([base,'\SPD.pdf'])
+end
 
 %% Ref corr square
 
 figure('Position',[plot_where plot_size(1) plot_size(1)])
 hold on
 
-[sur_vrhel_c, S_RF_f] = vrhel_square(refs);
+vrhel_square = corr(T_SRF');
+S_RF_f = SToWls(S_vrhel);
 
-for i=1:length(sur_vrhel_c)
-    for j=1:length(sur_vrhel_c)
+%black out top triangle
+for i=1:length(vrhel_square)
+    for j=1:length(vrhel_square)
         if i>j
-            sur_vrhel_c(i,j) = 0;
+            vrhel_square(i,j) = 0;
         end
     end
 end
-            
 
-imagesc(sur_vrhel_c.^7)
+imagesc(vrhel_square.^7) %power increases visual contrast
 axis image
 colormap gray
 set(gca,'XTickLabel',S_RF_f(xticks))
@@ -340,9 +377,11 @@ colorbar
 xlabel('Wavelength (nm)')
 ylabel('Wavelength (nm)')
 
-save2pdf([base,'\VS.pdf'])
+if print_figures
+    save2pdf([base,'\VS.pdf'])
+end
 
-%% 
+%% Optimality
 
 figure(3)
 cla
@@ -370,20 +409,23 @@ plot(pca_range+mel_peak,ex/max(ex),'k','DisplayName','PC3 score')
 xlim('auto')
 ylim([0 1])
 yticks([min(ylim),max(ylim)])
-
-legend('off')
-
 xlabel('Wavelength shift (nm)')
 ylabel('PC3 score')
+legend('off')
 
-save2pdf([base,'\opt.pdf'])
+if print_figures
+    save2pdf([base,'\opt.pdf'])
+end
 
+% add spectral sensitivity functions
 plot(SToWls(S_SSF),T_SSF)
 plot(SToWls(S_melanopsin),T_melanopsin)
 
-save2pdf([base,'\optwithSFF.pdf'])
+if print_figures
+    save2pdf([base,'\optwithSFF.pdf'])
+end
 
-%%
+%% Plot 3D at first peak
 
 [~,pks_locs] = findpeaks(ex);
 
@@ -403,24 +445,26 @@ xticks([min(xlim),max(xlim)]);
 yticks([min(ylim),max(ylim)]);
 zticks([min(zlim),max(zlim)]);
 
-save2pdf([base,'\3D.pdf']) %optimality options
+if print_figures
+    save2pdf([base,'\3D.pdf'])
+end
 
+%% Show impact of varying parameters
 
-%%
-d = dir('opt*.mat');
+d = dir('Auxiliary Scripts\Optimality variation\opt*.mat');
 
 figure(3), hold on
 cla
 for i = 1:length(d)
     clear out
-    load(d(i).name)
-    plot(out(1,:),out(2,:),'-','DisplayName',d(i).name)  
+    load([d(i).folder,'\', d(i).name]);
+    plot(out(1,:),out(2,:),'-','DisplayName',d(i).name);
 end
 
 legend('off')
 ylim('auto')
 
-save2pdf([base,'\optopt.pdf'])
-
-
+if print_figures
+    save2pdf([base,'\optopt.pdf'])
+end
 

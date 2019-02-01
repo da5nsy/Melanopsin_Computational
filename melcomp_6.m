@@ -17,7 +17,6 @@ max_s_scale = 0.04;
 set(0,'defaultAxesFontName', 'Courier')
 
 base = 'C:\Users\cege-user\Dropbox\UCL\Presentations\20190129 Computational Study - Oxford\figs';
-
 print_figures = 1;
 
 %% Load Data

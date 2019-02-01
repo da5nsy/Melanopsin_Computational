@@ -136,7 +136,7 @@ try
 catch
 end
 
-% Pull all observer elements together
+% Pull all elements together
 
 %reduce all data down to the common range/interval
 S_sh = [max([S_SPD(1),S_refs(1),S_obs(1)]),max([S_SPD(2),S_refs(2),S_obs(2)]),min([S_SPD(3),S_refs(3),S_obs(3)])]; %S_shared: work out what the lowest common denominator for the range/interval of the data is

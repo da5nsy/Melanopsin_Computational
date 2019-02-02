@@ -21,7 +21,6 @@ print_figures = 0;
 
 %% Load Data
 
-
 [T_SPD, T_SRF, T_SSF, S_sh] = melcomp_loader('SPD','Granada','SRF','Vrhel_nat_2','SSF','SS10','mel_offset',0);
 T_SPD = T_SPD(:,1:20:end);
 refs=[38, 15, 134, 137, 138, 65, 19, 24, 140, 26];

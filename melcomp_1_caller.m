@@ -15,7 +15,7 @@ catch
     end
     toc
     
-    save('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\melcomp_1_results2.mat')
+    save('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\melcomp_1_results.mat')
 end
 
 melpeak = 488+range;

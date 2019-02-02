@@ -6,7 +6,7 @@ function [T_SPD, T_SRF, T_SSF, S_sh] = melcomp_loader(varargin)
 % varargin = {'SPD','Granada','SRF','Vrhel_nat_1','SSF','SS10','mel_offset',0}; %just for testing
 
 %% Parse inputs
-expectedSPD = {'Granada','D-series'};
+expectedSPD = {'Granada','D-series','Granada_sub'};
 expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_full','Foster'};
 expectedSSF = {'SS10','SP'};
 
@@ -25,10 +25,14 @@ parse(p,varargin{:});
 
 %% T_SPD
 
-if strcmp(p.Results.SPD,'Granada')
+if strcmp(p.Results.SPD,'Granada') || strcmp(p.Results.SPD,'Granada_sub')
     load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_daylight_2600_161.mat');
     T_SPD = final; clear final
     S_SPD = [300,5,161];
+    
+    if strcmp(p.Results.SPD,'Granada_sub')
+        T_SPD = T_SPD(:,1:20:end);
+    end
     
     % http://colorimaginglab.ugr.es/pages/Data#__doku_granada_daylight_spectral_database
     % From: J. Hernández-Andrés, J. Romero& R.L. Lee, Jr., "Colorimetric and
@@ -129,13 +133,11 @@ S_sh = [max([S_SPD(1),S_SRF(1),S_SSF(1),S_rods(1),S_melanopsin_big(1)]),...
     min([S_SPD(3),S_SRF(3),S_SSF(3),S_rods(3),S_melanopsin_big(3)])];
 %S_shared: work out what the lowest common denominator for the range/interval of the data is
 
-T_SPD  = SplineSpd(S_SPD,T_SPD,S_sh,1);
+T_SPD  = SplineSpd(S_SPD,T_SPD,S_sh);
 T_SRF  = SplineSrf(S_SRF,T_SRF,S_sh,1); %ended with same value
 T_SSF  = SplineCmf(S_SSF,T_SSF,S_sh,0)';
 T_rods = SplineCmf(S_rods,T_rods,S_sh,0)';
 T_mel  = SplineCmf(S_melanopsin_big,T_melanopsin_big,S_sh,0)';
-
-[S_SPD, S_SRF, S_SSF, S_rods, S_mel] = deal(S_sh);
 
 % combine sensitivity vectors
 T_SSF=[T_SSF,T_rods,T_mel];

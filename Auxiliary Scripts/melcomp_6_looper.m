@@ -1,16 +1,36 @@
-function  pc = melcomp_6_looper(offset,norm,plt) 
+function  pc = melcomp_6_looper(varargin) 
 
-if ~exist('offset','var') %do this properly with nargin !!!!!!!!!!!!!
-    disp('No offset passed. Setting offset to 0.')
-    offset = 0;
-    disp('No norm command passed. Setting norm to 1 (positive)')
-    norm = 1;
-end
+% clear, clc, close all
+% varargin = {'mel_offset',0,'norm',1,'plt',0}; %just for testing
+
+default_mel_offset = 0;
+default_norm      = 1;
+default_plt       = 0;
+
+expectedSPD = {'Granada_sub','Granada','D-series'};
+expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_full','Foster'};
+expectedSSF = {'SS10'};
+default_SPD = expectedSPD{1};
+default_SRF = expectedSRF{2}; %Note - this is different behaviour to melcomp_loader since melcomp_6 uses Vrhel_nat_2 by default
+default_SSF = expectedSSF{1};
+
+p = inputParser;
+addParameter(p,'mel_offset',default_mel_offset);
+addParameter(p,'norm',default_norm);
+addParameter(p,'plt',default_plt);
+addParameter(p,'SPD',default_SPD, @(x) any(validatestring(x,expectedSPD)));
+addParameter(p,'SRF',default_SRF, @(x) any(validatestring(x,expectedSRF)));
+addParameter(p,'SSF',default_SSF, @(x) any(validatestring(x,expectedSSF)));
+
+parse(p,varargin{:});
 
 %% Data
 
-[T_SPD, T_SRF, T_SSF, S_sh] = melcomp_loader('SPD','Granada','SRF','Vrhel_nat_2','SSF','SS10','mel_offset',offset);
-T_SPD = T_SPD(:,1:20:end);
+[T_SPD, T_SRF, T_SSF, S_sh] = melcomp_loader(...
+    'SPD',p.Results.SPD,...
+    'SRF',p.Results.SRF,...
+    'SSF',p.Results.SSF,...
+    'mel_offset',p.Results.mel_offset);
 
 %
 
@@ -42,7 +62,7 @@ lsri(4,:,:) = t_i(2,:,:); clear t_i
 
 lsri = lsri(:,:);
 
-if norm
+if p.Results.norm
     for i=1:4
         lsri(i,:) = (lsri(i,:) - mean(lsri(i,:)))./std(lsri(i,:));
     end
@@ -57,7 +77,7 @@ lsi = lsri([1,2,4],:);
 
 %%
 
-if plt
+if p.Results.plt
     %figure,
     scatter3(lsri(1,:),lsri(2,:),lsri(4,:),'k','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6);
 end

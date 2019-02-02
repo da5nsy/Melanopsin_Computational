@@ -21,8 +21,7 @@ print_figures = 0;
 
 %% Load Data
 
-[T_SPD, T_SRF, T_SSF, S_sh] = melcomp_loader('SPD','Granada','SRF','Vrhel_nat_2','SSF','SS10','mel_offset',0);
-T_SPD = T_SPD(:,1:20:end);
+[T_SPD, T_SRF, T_SSF, S_sh] = melcomp_loader('SPD','Granada_sub','SRF','Vrhel_nat_2','SSF','SS10','mel_offset',0);
 refs=[38, 15, 134, 137, 138, 65, 19, 24, 140, 26];
 
 %% Plot MB chromaticity diagram
@@ -98,7 +97,7 @@ end
 
 %add labels
 load sur_vrhel.mat
-labels_vrhel(137).label = 'peach skin -- yellow';
+labels_vrhel(137).label = 'peach skin -- yellow'; %correct typo
 for i=1:length(refs)
     text(lsri(1,i,n_ill)+0.005,lsri(2,i,n_ill)+0.00015,labels_vrhel(refs(i)).label,'Rotation',10,'FontName','Courier')
 end
@@ -346,7 +345,7 @@ clear ex pc %only needed during debugging when rerunning script
 pca_range = -70:1:130;
 
 for i=1:length(pca_range)
-    pc(i) = melcomp_6_looper(pca_range(i),1,0);
+    pc(i) = melcomp_6_looper('mel_offset',pca_range(i));
     disp(pca_range(i))
 end
 
@@ -361,7 +360,6 @@ end
 
 %figure, hold on
 plot(pca_range+mel_peak,ex/max(ex),'k','DisplayName','PC3 score')
-%plot
 
 xlim('auto')
 ylim([0 1])
@@ -393,7 +391,7 @@ figure('Position',[plot_where plot_size],'defaultLineLineWidth',4), hold on
 xlabel('{\itl}_{MB}');
 ylabel('{\its}_{MB}');
 zlabel('{\iti}_{MB}');
-melcomp_6_looper(pca_range(pks_locs(1)),1,1)
+melcomp_6_looper('mel_offset',pca_range(pks_locs(1)),'plt',1)
 
 view(3)
 

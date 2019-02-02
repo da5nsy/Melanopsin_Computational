@@ -1,22 +1,24 @@
-clear, clc, close all;
+clear, clc, close all
 
 try load('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\melcomp_1_results.mat')
 catch
     
     %figure, hold on %to get figure to plot, also turn on 'plot_it' in melcomp
     
-    range= [-230:10:-60,-59:135,140:10:390]; %94 seconds
+    range= [-150:10:-60,-59:135,140:10:390]; %94 seconds. Now taking 283 seconds, reason unknown
     
     tic
     for i= 1:length(range)
-        [MB1_minSD(i),MB2_minSD(i),melpeak(i),MB1_zeroSD(i),MB2_zeroSD(i),spread(:,i),MBx_m(:,:,i)]=melcomp_1(range(i));
-        disp(melpeak(i))
+        [MB1_minSD(i),MB2_minSD(i),MB1_zeroSD(i),MB2_zeroSD(i),spread(:,i),MBx_m(:,:,i)]=melcomp_1(range(i));
+        disp(range(i))
         drawnow
     end
     toc
     
-    save('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\results.mat')
+    save('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\melcomp_1_results2.mat')
 end
+
+melpeak = 488+range;
 
 %%
 
@@ -79,7 +81,9 @@ end
 
 %% - %% Visualiser
 
-clear, clc, %close all;
+%turn on plot_hc before use
+
+clear, clc, close all;
 
 for i=-100:10:100
     melcomp_1(i)

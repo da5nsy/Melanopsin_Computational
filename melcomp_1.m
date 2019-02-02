@@ -1,4 +1,4 @@
-function [MB1_minSD,MB2_minSD,melpeak,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melcomp_1(offset)
+function [MB1_minSD,MB2_minSD,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melcomp_1(offset)
 
 %% Research questions:
 %
@@ -100,7 +100,7 @@ MB(:,:,1)=LMSToMacBoyn(LMSRI(1:3,:,1));
 % This is unsurprsing considering the first principal component of this
 % daylight dataset.
 
-plot_corr=   1;
+plot_corr=   0;
 if plot_corr
     plotOrderNames = {'L','M','S','R','I'};
     plotOrderNums = [1,2,3,5];    
@@ -135,7 +135,7 @@ end
 % They all flatline as chromaticity changes, and then shoot up and slightly
 % back on themselves in that boomerang shape.
 
-plot_predict=   1;
+plot_predict=   0;
 if plot_predict
     plotOrderNames = {'L','M','S','R','I'};
     plotOrderNums = [1,2,3,5]; 
@@ -176,7 +176,7 @@ end
 % signals against any of the other available signals improves the ability
 % to signal chromaticity as a one dimensional variable.
 
-plot_comb=  1;
+plot_comb=  0;
 if plot_comb
     plotOrderNames={'L','M','S','R','I'};
     plotOrderNums1 = [1,2,3,5,1,2,3,5,1,2,3,5,1,2,3,5]; 
@@ -214,7 +214,7 @@ if plot_comb
     set(sp(16),'Color',[.8,.8,.8])
     %
     
-    auto_rotate=    1;
+    auto_rotate=    0;
     saveGif=        0; %save a 360 gif? %Not currently working !!!!!!!!!!!!!!!!!!!!!!!1
     
     if auto_rotate
@@ -242,7 +242,7 @@ end
 
 %% MB axes
 
-plot_MBa=   1;
+plot_MBa=   0;
 if plot_MBa
     clear sp
     
@@ -312,7 +312,7 @@ end
 
 %% L vs L+M
 
-plot_LvsLM= 1;
+plot_LvsLM= 0;
 if plot_LvsLM
     plotOrderNames={'L','M','S','Mel'};
     
@@ -347,7 +347,7 @@ end
 
 %% Basic MB plot
 
-plot_MBbas= 1;
+plot_MBbas= 0;
 
 if plot_MBbas
     figure, hold on
@@ -377,7 +377,7 @@ if plot_MBbas
     % scatter3(...
     %     MB(1,:,i),...
     %     MB(2,:,i),...
-    %     LMSRI(4,:,i)./(LMSRI(1,:,i)+LMSRI(2,:,i)),...
+    %     LMSRI(5,:,i)./(LMSRI(1,:,i)+LMSRI(2,:,i)),...
     %     'filled')
     % end
     % axis equal
@@ -412,29 +412,23 @@ end
 
 %% Iterations
 
-plot_it=    1;
+plot_it=    0;
 
 if ~exist('offset','var') && plot_it; figure, hold on; end
 
 MBx=MB;
-MBx1std=[0;0]; %Initialise variables so that they can be added to
-MBx2std=[0;0];
+MBx1std=[]; %Initialise variables so that they can be added to
+MBx2std=[];
 
 for S1= -10:0.05:10%-1:0.01:1.5
-    MBx(1,:,:)=MB(1,:,:)+S1*(LMSRI(4,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
+    MBx(1,:,:)=MB(1,:,:)+S1*(LMSRI(5,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
     MBx1std=[MBx1std,[S1;mean(std(MBx(1,:,2:end)))]];
 end
-MBx1std=MBx1std(:,2:end);
 
 for S2= -10:0.05:10%0:0.04:2.5
-    MBx(2,:,:)=MB(2,:,:)+S2*(LMSRI(4,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
+    MBx(2,:,:)=MB(2,:,:)+S2*(LMSRI(5,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
     MBx2std=[MBx2std,[S2;mean(std(MBx(2,:,2:end)))]];
 end
-MBx2std=MBx2std(:,2:end);
-
-[~,melpeakloc]=max(T_melanopsin);
-melwavelength=SToWls(S_melanopsin);
-melpeak=melwavelength(melpeakloc);
 
 if plot_it
     %figure, hold on
@@ -442,7 +436,7 @@ if plot_it
     plot(MBx2std(1,:),MBx2std(2,:),'r')
     xlabel('weight of factor')
     ylabel('standard deviation')
-    title(sprintf('Mel peak-%d nm',melpeak))
+    title(sprintf('Mel peak-%d nm',488+offset))
     legend({'MBx1','MBx2'})
 end
 
@@ -472,23 +466,23 @@ MB2_zeroSD = MBx2std(2,MBx2std(1,:)==0);
 % title(sprintf('Mel peak-%d nm',melpeak))
 
 %% Hard code factors
-plot_hc=    1;
+plot_hc=    0;
 
 if plot_hc
     fac1=   MBx1std(1,MB1_minSD_loc); %0.25;
     fac2=   MBx2std(1,MB2_minSD_loc); %-1.4;
     
     MB2=MB;
-    MB2(1,:,:)=MB(1,:,:)+fac1*(LMSRI(4,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
-    MB2(2,:,:)=MB(2,:,:)+fac2*(LMSRI(4,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
+    MB2(1,:,:)=MB(1,:,:)+fac1*(LMSRI(5,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
+    MB2(2,:,:)=MB(2,:,:)+fac2*(LMSRI(5,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
     
     %     % multiplicative version
     %     fac1=   -0.23;
     %     fac2=   1.7;
     %
     %     MB2=MB;
-    %     MB2(1,:,:)=MB(1,:,:).*(1-fac1*(LMSRI(4,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:))));
-    %     MB2(2,:,:)=MB(2,:,:).*(1-fac2*(LMSRI(4,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:))));
+    %     MB2(1,:,:)=MB(1,:,:).*(1-fac1*(LMSRI(5,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:))));
+    %     MB2(2,:,:)=MB(2,:,:).*(1-fac2*(LMSRI(5,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:))));
     
     figure, hold on
     for i = 2:size(T_rad,3)
@@ -524,8 +518,8 @@ end
 
 S_vals=[MBx1std(1,MB1_minSD_loc),MBx2std(1,MB2_minSD_loc)];
 
-MBx(1,:,:)=MB(1,:,:)+S_vals(1)*(LMSRI(4,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
-MBx(2,:,:)=MB(2,:,:)+S_vals(2)*(LMSRI(4,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
+MBx(1,:,:)=MB(1,:,:)+S_vals(1)*(LMSRI(5,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
+MBx(2,:,:)=MB(2,:,:)+S_vals(2)*(LMSRI(5,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
 
 % for i=2:12
 %     scatter(squeeze(MBx(1,:,i)),squeeze(MBx(2,:,i)));

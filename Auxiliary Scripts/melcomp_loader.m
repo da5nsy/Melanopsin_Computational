@@ -1,7 +1,7 @@
 function [T_SPD, T_SRF, T_SSF, S_sh] = melcomp_loader(varargin)
 
 %%
-
+ 
 % clear, clc, close all
 % varargin = {'SPD','Granada','SRF','Vrhel_nat_1','SSF','SS10','mel_offset',0}; %just for testing
 
@@ -106,7 +106,11 @@ T_melanopsin_big = SplineCmf(S_melanopsin,T_melanopsin,S_melanopsin_big);
 
 %% Mel offset
 if p.Results.mel_offset
-    S_melanopsin_big(1) = S_melanopsin_big(1)+ p.Results.mel_offset;
+    if p.Results.mel_offset < -S_melanopsin_big(1)-1
+        error('You have gone too low on the melanopsin')
+    else
+        S_melanopsin_big(1) = S_melanopsin_big(1)+ p.Results.mel_offset;
+    end
 end
 
 %% Reduce all data down to the common range/interval

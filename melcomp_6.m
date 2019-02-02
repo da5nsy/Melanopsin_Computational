@@ -17,65 +17,21 @@ max_s_scale = 0.04;
 set(0,'defaultAxesFontName', 'Courier')
 
 base = 'C:\Users\cege-user\Dropbox\UCL\Presentations\20190129 Computational Study - Oxford\figs';
-print_figures = 1;
+print_figures = 0;
 
 %% Load Data
 
-% Load observer data
 
-load T_cones_ss10.mat;
-T_SSF = T_cones_ss10;
-S_SSF = S_cones_ss10;
-clear T_cones_ss10 S_cones_ss10
-
-load T_rods T_rods S_rods
-load T_melanopsin T_melanopsin S_melanopsin
-T_mel = SplineCmf(S_melanopsin, T_melanopsin, S_melanopsin - [10, 0, 0],1); %Increasing the range of this function in case it ends up limiting the range of S_sh, and shorten variable names
-S_mel = S_melanopsin - [10, 0, 0];
-
-% Load reflectance data
-
-load sur_vrhel
-refs=[38, 15, 134, 137, 138, 65, 19, 24, 140, 26];
-sur_vrhel_n = sur_vrhel(:,refs);
-T_SRF = sur_vrhel_n;
-S_SRF = S_vrhel;
-
-% Load daylight data
-
-load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_daylight_2600_161.mat');
-% http://colorimaginglab.ugr.es/pages/Data#__doku_granada_daylight_spectral_database
-% From: J. Hernández-Andrés, J. Romero& R.L. Lee, Jr., "Colorimetric and
-%       spectroradiometric characteristics of narrow-field-of-view
-%       clear skylight in Granada, Spain" (2001)
-T_SPD=final; clear final
+[T_SPD, T_SRF, T_SSF, S_sh] = melcomp_loader('SPD','Granada','SRF','Vrhel_nat_2','SSF','SS10','mel_offset',0);
 T_SPD = T_SPD(:,1:20:end);
-S_SPD=[300,5,161];
-
-%% reduce all data down to the common range/interval
-
-S_sh = [max([S_SPD(1),S_SRF(1),S_SSF(1),S_rods(1),S_mel(1)]),...
-    max([S_SPD(2),S_SRF(2),S_SSF(2),S_rods(2),S_mel(2)]),...
-    min([S_SPD(3),S_SRF(3),S_SSF(3),S_rods(3),S_mel(3)])];
-%S_shared: work out what the lowest common denominator for the range/interval of the data is
-
-T_SPD = SplineSpd(S_SPD,T_SPD,S_sh);
-T_SRF = SplineSrf(S_SRF,T_SRF,S_sh,1); %ended with same value
-T_SSF  = SplineCmf(S_SSF,T_SSF,S_sh)';
-T_rods = SplineCmf(S_rods,T_rods,S_sh)';
-T_mel  = SplineCmf(S_mel,T_mel,S_sh)';
-[S_SPD, S_SRF, S_SSF, S_rods, S_mel] = deal(S_sh);
-
-% combine sensitivity vectors
-T_LMSRI=[T_SSF,T_rods,T_mel];
-S_LMSRI=S_sh;
+refs=[38, 15, 134, 137, 138, 65, 19, 24, 140, 26];
 
 %% Plot MB chromaticity diagram
 
 % compute chromaticities of points on spectral locus
 sf_10 = [0.69283932, 0.34967567, 0.05547858]; %energy 10deg from CIE 170-2:2015
 T_lum = sf_10(1)*T_SSF(:,1)+sf_10(2)*T_SSF(:,2);
-spectral_locus = LMSToMacBoynDG(T_SSF',T_SSF',T_lum');
+spectral_locus = LMSToMacBoynDG(T_SSF(:,1:3)',T_SSF(:,1:3)',T_lum');
 
 % compute display colours for points on spectral locus
 load T_xyz1931.mat
@@ -106,17 +62,17 @@ end
 %% Compute colorimetry of reflectance samples
 
 T_rad = zeros([S_sh(3),size(T_SRF,2),size(T_SPD,2)]);
-LMSRI = zeros([size(T_LMSRI,2),size(T_SRF,2),size(T_SPD,2)]);
+LMSRI = zeros([size(T_SSF,2),size(T_SRF,2),size(T_SPD,2)]);
 lsri  = zeros([4,size(T_SRF,2),size(T_SPD,2)]);
 t_r   = zeros([2,size(T_SRF,2),size(T_SPD,2)]); %t for temp
 t_i   = zeros([2,size(T_SRF,2),size(T_SPD,2)]); %t for temp
 
 for i=1:size(T_SPD,2)
     T_rad(:,:,i)  = T_SRF.*T_SPD(:,i);
-    LMSRI(:,:,i)  = T_LMSRI'*T_rad(:,:,i);
-    lsri(1:2,:,i) = LMSToMacBoynDG(LMSRI(1:3,:,i),T_SSF',T_lum');
-    t_r(:,:,i)    = LMSToMacBoynDG(LMSRI([1,2,4],:,i),[T_SSF(:,1:2)';T_rods'],T_lum');
-    t_i(:,:,i)    = LMSToMacBoynDG(LMSRI([1,2,5],:,i),[T_SSF(:,1:2)';T_mel'],T_lum');
+    LMSRI(:,:,i)  = T_SSF'*T_rad(:,:,i);
+    lsri(1:2,:,i) = LMSToMacBoynDG(LMSRI(1:3,:,i),T_SSF(:,1:3)',T_lum');
+    t_r(:,:,i)    = LMSToMacBoynDG(LMSRI([1,2,4],:,i),[T_SSF(:,1:2)';T_SSF(:,4)'],T_lum');
+    t_i(:,:,i)    = LMSToMacBoynDG(LMSRI([1,2,5],:,i),[T_SSF(:,1:2)';T_SSF(:,5)'],T_lum');
 end
 lsri(3,:,:) = t_r(2,:,:); clear t_r
 lsri(4,:,:) = t_i(2,:,:); clear t_i
@@ -142,6 +98,7 @@ if print_figures
 end
 
 %add labels
+load sur_vrhel.mat
 labels_vrhel(137).label = 'peach skin -- yellow';
 for i=1:length(refs)
     text(lsri(1,i,n_ill)+0.005,lsri(2,i,n_ill)+0.00015,labels_vrhel(refs(i)).label,'Rotation',10,'FontName','Courier')
@@ -309,6 +266,7 @@ end
 %% Plot spectral reflectance functions
 
 figure('Position',[plot_where plot_size],'defaultLineLineWidth',4), hold on
+sur_vrhel_n = sur_vrhel(:,refs);
 for i=1:length(refs)
     plot(SToWls(S_vrhel),sur_vrhel_n(:,i),'Color',pltc_alt(:,i,1),'DisplayName',char(labels_vrhel(refs(i)).label));
 end
@@ -333,7 +291,7 @@ end
 [pc_p.coeff, pc_p.score, pc_p.latent, pc_p.tsquared, pc_p.explained, pc_p.mu] = pca(T_SPD');
 
 figure(3), cla
-plot(SToWls(S_SPD),pc_p.coeff(:,1:3))
+plot(SToWls(S_sh),pc_p.coeff(:,1:3))
 xlim([S_sh(1), S_sh(1)+S_sh(2)*S_sh(3)])
 
 xticks('auto')
@@ -393,6 +351,7 @@ for i=1:length(pca_range)
     disp(pca_range(i))
 end
 
+load T_melanopsin.mat
 [~, mel_peak_loc] = max(T_melanopsin);
 S_melanopsin_f = SToWls(S_melanopsin);
 mel_peak = S_melanopsin_f(mel_peak_loc);
@@ -417,8 +376,7 @@ if print_figures
 end
 
 % add spectral sensitivity functions
-plot(SToWls(S_SSF),T_SSF)
-plot(SToWls(S_melanopsin),T_melanopsin)
+plot(SToWls(S_sh),T_SSF);
 
 if print_figures
     save2pdf([base,'\optwithSFF.pdf'])

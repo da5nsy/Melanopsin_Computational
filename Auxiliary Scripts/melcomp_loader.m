@@ -7,7 +7,7 @@ function [T_SPD, T_SRF, T_SSF, S_sh] = melcomp_loader(varargin)
 
 %% Parse inputs
 expectedSPD = {'Granada','D-series'};
-expectedSRF = {'Vrhel_nat_1','Vrhel_full','Foster'};
+expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_full','Foster'};
 expectedSSF = {'SS10','SP'};
 
 default_SPD = expectedSPD{1};
@@ -52,6 +52,15 @@ if strcmp(p.Results.SRF,'Vrhel_nat_1')
     T_SRF=sur_vrhel(:,refs);
     S_SRF = S_vrhel;
 end
+
+if strcmp(p.Results.SRF,'Vrhel_nat_2')
+    load sur_vrhel.mat sur_vrhel S_vrhel   
+    refs=[38, 15, 134, 137, 138, 65, 19, 24, 140, 26];
+    T_SRF=sur_vrhel(:,refs);
+    S_SRF = S_vrhel;
+end
+
+
 
 if strcmp(p.Results.SRF,'Vrhel_full')
     load sur_vrhel.mat sur_vrhel S_vrhel   

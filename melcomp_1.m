@@ -17,10 +17,11 @@ function [MB1_minSD,MB2_minSD,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melcomp_1(off
 
 % TO-DO
 % Fix gif saving issue
-% Debug from iterations onwards
+% Debug melomp_caller (try to reproduce original performance / work out why
+%   it has changed.
 % Make label axes italics where appropriate
 % Add save commands
-% Set scaling for MB axes in line with other scripts
+% Set limits for MB axes in line with other scripts
 
 %% Pre-flight
 

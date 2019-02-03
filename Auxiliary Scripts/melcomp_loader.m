@@ -9,7 +9,7 @@ function [T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(varargin)
 expectedSPD = {'Granada','D-series','Granada_sub'};
 expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_full','Foster'};
 expectedSSF = {'SS10','SP'};
-expectedlum = {'CIE_10'};
+expectedlum = {'CIE_10','SP'};
 
 default_SPD = expectedSPD{1};
 default_SRF = expectedSRF{1};
@@ -73,7 +73,7 @@ if strcmp(p.Results.SRF,'Vrhel_full')
     S_SRF = S_vrhel;
 end
 
-if strcmp(p.Results.SRF,'Foster') %this is a little messy. Need to check whether this refers to uncropped/cropped images
+if strcmp(p.Results.SRF,'Foster') %this is a little messy. Need to check whether this refers to uncropped/cropped images !!!!!!!!!!
     base = 'C:\Users\cege-user\Documents\Large data\Foster Images\';
     %     for i=1:4 %2002 images
     %         ims(i)=load([base, '2002\scene',num2str(i),'.mat']); %imageS
@@ -87,16 +87,22 @@ if strcmp(p.Results.SRF,'Foster') %this is a little messy. Need to check whether
     
     ims(6).reflectances = ims(6).reflectances(:,1:end-100,:);
     [r, c, w] = size(ims(6).reflectances);
-    T_refs = reshape(ims(6).reflectances, r*c, w);
+    T_SRF = reshape(ims(6).reflectances, r*c, w);
     %     for i=6%length(ims) %add this loop to append multiple images
     %         [r, c, w] = size(ims(i).reflectances);
     %         T_refs = [T_refs; reshape(ims(i).reflectances, r*c, w)];
     %     end
     %S_refs=[410,10,31]; %for 2002 data
-    S_refs=[400,10,33];%for 2004 data (except #9)
+    S_SRF=[400,10,33];%for 2004 data (except #9)
 end
 
 %% T_SSF
+
+if or(...
+        and(strcmp(p.Results.SSF,'SS10'),strcmp(p.Results.lum,'SP')),...
+        and(strcmp(p.Results.SSF,'SP'),  strcmp(p.Results.lum,'CIE10')))
+    error('Mismatch between SSF and lum')
+end
 
 if strcmp(p.Results.SSF,'SS10')
     % Stockman & Sharpe 10deg, for use with MacLeod Boynton diagram, 
@@ -106,6 +112,12 @@ if strcmp(p.Results.SSF,'SS10')
     S_SSF = S_cones_ss10;
 end
 
+if strcmp(p.Results.lum,'CIE_10')
+    load T_CIE_Y10.mat T_CIE_Y10 S_CIE_Y10
+    T_lum = T_CIE_Y10;
+    S_lum = S_CIE_Y10;
+end
+
 if strcmp(p.Results.SSF,'SP')
     % Smith-Pokorny, for use with original type MacLeod Boynton diagram
     load T_cones_sp.mat T_cones_sp S_cones_sp
@@ -113,10 +125,9 @@ if strcmp(p.Results.SSF,'SP')
     S_SSF = S_cones_sp;
 end
 
-if strcmp(p.Results.lum,'CIE_10')
-    load T_CIE_Y10.mat T_CIE_Y10 S_CIE_Y10
-    T_lum = T_CIE_Y10;
-    S_lum = S_CIE_Y10;
+if strcmp(p.Results.lum,'SP')
+    T_lum = [0.6373 0.3924 0]*T_cones_sp; %figures from PTB LMSToMacBoyn.m
+    S_lum = S_cones_sp;
 end
 
 load T_rods T_rods S_rods

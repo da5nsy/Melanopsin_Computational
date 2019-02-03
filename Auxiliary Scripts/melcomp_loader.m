@@ -1,25 +1,28 @@
-function [T_SPD, T_SRF, T_SSF, S_sh] = melcomp_loader(varargin)
+function [T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(varargin)
 
 %%
  
 % clear, clc, close all
-% varargin = {'SPD','Granada','SRF','Vrhel_nat_1','SSF','SS10','mel_offset',0}; %just for testing
+% varargin = {'SPD','Granada','SRF','Vrhel_nat_1','SSF','SS10','mel_offset',0,'lum','CIE_10'}; %just for testing
 
 %% Parse inputs
 expectedSPD = {'Granada','D-series','Granada_sub'};
 expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_full','Foster'};
 expectedSSF = {'SS10','SP'};
+expectedlum = {'CIE_10'};
 
 default_SPD = expectedSPD{1};
 default_SRF = expectedSRF{1};
 default_SSF = expectedSSF{1};
 default_mel_offset = 0;
+default_lum = expectedlum{1};
 
 p = inputParser;
 addParameter(p,'SPD',default_SPD, @(x) any(validatestring(x,expectedSPD)));
 addParameter(p,'SRF',default_SRF, @(x) any(validatestring(x,expectedSRF)));
 addParameter(p,'SSF',default_SSF, @(x) any(validatestring(x,expectedSSF)));
 addParameter(p,'mel_offset',default_mel_offset);
+addParameter(p,'lum',default_lum, @(x) any(validatestring(x,expectedlum)));
 
 parse(p,varargin{:});
 
@@ -63,8 +66,6 @@ if strcmp(p.Results.SRF,'Vrhel_nat_2')
     T_SRF=sur_vrhel(:,refs);
     S_SRF = S_vrhel;
 end
-
-
 
 if strcmp(p.Results.SRF,'Vrhel_full')
     load sur_vrhel.mat sur_vrhel S_vrhel   
@@ -112,6 +113,13 @@ if strcmp(p.Results.SSF,'SP')
     S_SSF = S_cones_sp;
 end
 
+if strcmp(p.Results.lum,'CIE_10')
+    % Smith-Pokorny, for use with original type MacLeod Boynton diagram
+    load T_CIE_Y10.mat T_CIE_Y10 S_CIE_Y10
+    T_lum = T_CIE_Y10;
+    S_lum = S_CIE_Y10;
+end
+
 load T_rods T_rods S_rods
 load T_melanopsin T_melanopsin S_melanopsin
 S_melanopsin_big = [200,1,800]; %Increasing the range of S_melanopsin to allow for shifting without affecting S_sh
@@ -138,6 +146,7 @@ T_SRF  = SplineSrf(S_SRF,T_SRF,S_sh,1); %ended with same value
 T_SSF  = SplineCmf(S_SSF,T_SSF,S_sh,0)';
 T_rods = SplineCmf(S_rods,T_rods,S_sh,0)';
 T_mel  = SplineCmf(S_melanopsin_big,T_melanopsin_big,S_sh,0)';
+T_lum  = SplineCmf(S_lum,T_lum,S_sh,0)';
 
 % combine sensitivity vectors
 T_SSF=[T_SSF,T_rods,T_mel];

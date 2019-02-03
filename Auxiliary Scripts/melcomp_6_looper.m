@@ -6,6 +6,7 @@ function  pc = melcomp_6_looper(varargin)
 default_mel_offset = 0;
 default_norm      = 1;
 default_plt       = 0;
+expectedlum = {'CIE_10'};
 
 expectedSPD = {'Granada_sub','Granada','D-series'};
 expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_full','Foster'};
@@ -13,6 +14,7 @@ expectedSSF = {'SS10'};
 default_SPD = expectedSPD{1};
 default_SRF = expectedSRF{2}; %Note - this is different behaviour to melcomp_loader since melcomp_6 uses Vrhel_nat_2 by default
 default_SSF = expectedSSF{1};
+default_lum = expectedlum{1};
 
 p = inputParser;
 addParameter(p,'mel_offset',default_mel_offset);
@@ -21,16 +23,18 @@ addParameter(p,'plt',default_plt);
 addParameter(p,'SPD',default_SPD, @(x) any(validatestring(x,expectedSPD)));
 addParameter(p,'SRF',default_SRF, @(x) any(validatestring(x,expectedSRF)));
 addParameter(p,'SSF',default_SSF, @(x) any(validatestring(x,expectedSSF)));
+addParameter(p,'lum',default_lum, @(x) any(validatestring(x,expectedlum)));
 
 parse(p,varargin{:});
 
 %% Data
 
-[T_SPD, T_SRF, T_SSF, S_sh] = melcomp_loader(...
+[T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(...
     'SPD',p.Results.SPD,...
     'SRF',p.Results.SRF,...
     'SSF',p.Results.SSF,...
-    'mel_offset',p.Results.mel_offset);
+    'mel_offset',p.Results.mel_offset,...
+    'lum',p.Results.lum);
 
 %
 
@@ -48,9 +52,9 @@ t_i   = zeros([2,size(T_SRF,2),size(T_SPD,2)]); %t for temp
 for i=1:size(T_SPD,2)
     T_rad(:,:,i)  = T_SRF.*T_SPD(:,i);
     LMSRI(:,:,i)  = T_SSF'*T_rad(:,:,i);
-    lsri(1:2,:,i) = LMSToMacBoynDG(LMSRI(1:3,:,i),T_SSF(:,1:3)',T_lum');
-    t_r(:,:,i)    = LMSToMacBoynDG(LMSRI([1,2,4],:,i),[T_SSF(:,1:2)';T_SSF(:,4)'],T_lum');
-    t_i(:,:,i)    = LMSToMacBoynDG(LMSRI([1,2,5],:,i),[T_SSF(:,1:2)';T_SSF(:,5)'],T_lum');
+    lsri(1:2,:,i) = LMSToMacBoyn(LMSRI(1:3,:,i),T_SSF(:,1:3)',T_lum');
+    t_r(:,:,i)    = LMSToMacBoyn(LMSRI([1,2,4],:,i),[T_SSF(:,1:2)';T_SSF(:,4)'],T_lum');
+    t_i(:,:,i)    = LMSToMacBoyn(LMSRI([1,2,5],:,i),[T_SSF(:,1:2)';T_SSF(:,5)'],T_lum');
 end
 lsri(3,:,:) = t_r(2,:,:); clear t_r
 lsri(4,:,:) = t_i(2,:,:); clear t_i

@@ -21,15 +21,18 @@ print_figures = 0;
 
 %% Load Data
 
-[T_SPD, T_SRF, T_SSF, S_sh] = melcomp_loader('SPD','Granada_sub','SRF','Vrhel_nat_2','SSF','SS10','mel_offset',0);
+[T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(...
+    'SPD','Granada_sub',...
+    'SRF','Vrhel_nat_2',...
+    'SSF','SS10',...
+    'mel_offset',0,...
+    'lum','CIE_10');
 refs=[38, 15, 134, 137, 138, 65, 19, 24, 140, 26];
 
 %% Plot MB chromaticity diagram
 
 % compute chromaticities of points on spectral locus
-sf_10 = [0.69283932, 0.34967567, 0.05547858]; %energy 10deg from CIE 170-2:2015
-T_lum = sf_10(1)*T_SSF(:,1)+sf_10(2)*T_SSF(:,2);
-spectral_locus = LMSToMacBoynDG(T_SSF(:,1:3)',T_SSF(:,1:3)',T_lum');
+spectral_locus = LMSToMacBoyn(T_SSF(:,1:3)',T_SSF(:,1:3)',T_lum');
 
 % compute display colours for points on spectral locus
 load T_xyz1931.mat
@@ -68,9 +71,9 @@ t_i   = zeros([2,size(T_SRF,2),size(T_SPD,2)]); %t for temp
 for i=1:size(T_SPD,2)
     T_rad(:,:,i)  = T_SRF.*T_SPD(:,i);
     LMSRI(:,:,i)  = T_SSF'*T_rad(:,:,i);
-    lsri(1:2,:,i) = LMSToMacBoynDG(LMSRI(1:3,:,i),T_SSF(:,1:3)',T_lum');
-    t_r(:,:,i)    = LMSToMacBoynDG(LMSRI([1,2,4],:,i),[T_SSF(:,1:2)';T_SSF(:,4)'],T_lum');
-    t_i(:,:,i)    = LMSToMacBoynDG(LMSRI([1,2,5],:,i),[T_SSF(:,1:2)';T_SSF(:,5)'],T_lum');
+    lsri(1:2,:,i) = LMSToMacBoyn(LMSRI(1:3,:,i),T_SSF(:,1:3)',T_lum');
+    t_r(:,:,i)    = LMSToMacBoyn(LMSRI([1,2,4],:,i),[T_SSF(:,1:2)';T_SSF(:,4)'],T_lum');
+    t_i(:,:,i)    = LMSToMacBoyn(LMSRI([1,2,5],:,i),[T_SSF(:,1:2)';T_SSF(:,5)'],T_lum');
 end
 lsri(3,:,:) = t_r(2,:,:); clear t_r
 lsri(4,:,:) = t_i(2,:,:); clear t_i

@@ -16,11 +16,11 @@ function [MB1_minSD,MB2_minSD,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melcomp_1(off
 %       ineffective at performing the above task
 
 % TO-DO
-% Correct MB calcs to use correct T_lum
-% Fix git saving issue
+% Fix gif saving issue
 % Debug from iterations onwards
 % Make label axes italics where appropriate
 % Add save commands
+% Set scaling for MB axes in line with other scripts
 
 %% Pre-flight
 
@@ -51,7 +51,11 @@ plot_size  = [800,400];
 set(0,'defaultAxesFontName', 'Courier')
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_1';
-print_figures = 1;
+print_figures = 0;
+
+min_l_scale = 0.62;
+max_l_scale = 0.82;
+max_s_scale = 0.04;
 
 %% LOAD
 
@@ -61,10 +65,11 @@ else
     refs = 'Vrhel_full';
 end
 
-[T_SPD, T_SRF, T_SSF, S_sh] = melcomp_loader(...
+[T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(...
     'SPD','Granada',...
     'SRF',refs,...
     'SSF','SS10',...
+    'lum','CIE_10',...
     'mel_offset',offset);
 
 
@@ -82,7 +87,7 @@ if InclReflectances
         LMSRI(:,:,i+1)=T_SSF'*T_rad(:,:,i+1);
         
         % Calculate MacLeod - Boynton chromaticities of daylight samples
-        MB(:,:,i+1)=LMSToMacBoyn(LMSRI(1:3,:,i+1));
+        MB(:,:,i+1)=LMSToMacBoyn(LMSRI(1:3,:,i+1),T_SSF(:,1:3)',T_lum');
         %figure,scatter(daylight_MB(1,:),daylight_MB(2,:),'k.')
     end
 end
@@ -96,7 +101,7 @@ if RandomData
 end
 
 % Calculate MacLeod - Boynton chromaticities of daylight samples
-MB(:,:,1)=LMSToMacBoyn(LMSRI(1:3,:,1));
+MB(:,:,1)=LMSToMacBoyn(LMSRI(1:3,:,1),T_SSF(:,1:3)',T_lum');
 
 %% What is the correlation between I and L/M/S?
 
@@ -157,8 +162,8 @@ if plot_predict
             'LineWidth',dLW...
             )
         
-        xlim([0 1]);
-        ylim([0 1]);
+        xlim([min_l_scale max_l_scale]);
+        ylim([0 max_s_scale]);
         xlabel('{\itl}_{MB}');
         ylabel('{\its}_{MB}');
         zlabel(sp(i),['{\it',plotOrderNames{plotOrderNums(i)},'}']);
@@ -180,12 +185,12 @@ end
 % signals against any of the other available signals improves the ability
 % to signal chromaticity as a one dimensional variable.
 
-plot_comb=  0;
+plot_comb=  1;
 if plot_comb
     plotOrderNames={'L','M','S','R','I'};
     plotOrderNums1 = [1,2,3,5,1,2,3,5,1,2,3,5,1,2,3,5]; 
     plotOrderNums2 = [1,1,1,1,2,2,2,2,3,3,3,3,5,5,5,5]; 
-    ScalePlot=0;
+    ScalePlot=1;
     
     figure('units','normalized','outerposition',[0 0 1 1])
     
@@ -202,7 +207,7 @@ if plot_comb
             'LineWidth',dLW...
             )
         % xlabel(sp(i),'MB1');ylabel(sp(i),'MB2');
-        zlabel(sprintf('%s/%s',plotOrderNames{plotOrderNums1(i)},plotOrderNames{plotOrderNums1(i)}));
+        zlabel(sprintf('%s/%s',plotOrderNames{plotOrderNums1(i)},plotOrderNames{plotOrderNums2(i)}));
         %axis fill; grid off
         view(sp(i),[0,0]);
         if ~ScalePlot
@@ -218,7 +223,7 @@ if plot_comb
     set(sp(16),'Color',[.8,.8,.8])
     %
     
-    auto_rotate=    0;
+    auto_rotate=    1;
     saveGif=        0; %save a 360 gif? %Not currently working !!!!!!!!!!!!!!!!!!!!!!!1
     
     if auto_rotate
@@ -351,13 +356,13 @@ end
 
 %% Basic MB plot
 
-plot_MBbas= 0;
+plot_MBbas= 1;
 
 if plot_MBbas
     figure, hold on
     % Plot spectral locus in MB space
     
-    MB_locus=LMSToMacBoyn(T_SSF(:,1:3)');
+    MB_locus=LMSToMacBoyn(T_SSF(:,1:3)',T_SSF(:,1:3)',T_lum');
     fill([MB_locus(1,3:end),MB_locus(1,3)],[MB_locus(2,3:end),MB_locus(2,3)],'k','LineStyle','none','FaceAlpha','0.1')
     text_nm=string(SToWls(S_sh))';
     text(MB_locus(1,[3:26,27,30,36,41:4:52]),MB_locus(2,[3:26,27,30,36,41:4:52]),text_nm([3:26,27,30,36,41:4:52]))

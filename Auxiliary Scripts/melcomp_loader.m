@@ -114,7 +114,6 @@ if strcmp(p.Results.SSF,'SP')
 end
 
 if strcmp(p.Results.lum,'CIE_10')
-    % Smith-Pokorny, for use with original type MacLeod Boynton diagram
     load T_CIE_Y10.mat T_CIE_Y10 S_CIE_Y10
     T_lum = T_CIE_Y10;
     S_lum = S_CIE_Y10;

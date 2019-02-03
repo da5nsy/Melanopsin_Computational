@@ -9,7 +9,7 @@ default_plt       = 0;
 
 expectedSPD = {'Granada_sub','Granada','D-series'};
 expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_full','Foster'};
-expectedSSF = {'SS10'};
+expectedSSF = {'SS10','SP'};
 expectedlum = {'CIE_10'};
 default_SPD = expectedSPD{1};
 default_SRF = expectedSRF{2}; %Note - this is different behaviour to melcomp_loader since melcomp_6 uses Vrhel_nat_2 by default

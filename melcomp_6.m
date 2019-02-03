@@ -433,11 +433,16 @@ end
 %Duplicate melcomp_optimality.m (based on melcomp_2) and
 %melcomp_looper_branch/caller without going outside script.
 
+% To-do
+% Add sp option to melcomp_6_looper and melcomp_loader
+% See if I can actually reproduce melcomp_optimality (or if that result
+% depended on the scaling). Perhaps consider different scaling.
+
 figure, hold on
     
-% default
 pca_range = -70:5:130;
 
+% default
 for i=1:length(pca_range)
     pc(i) = melcomp_6_looper('mel_offset',pca_range(i));
     disp(pca_range(i))
@@ -466,6 +471,16 @@ for i=1:length(pca_range)
     ex(i) = pc(i).explained(3);
 end
 plot(pca_range,ex)
+
+% % different SSFs
+% for i=1:length(pca_range)
+%     pc(i) = melcomp_6_looper('mel_offset',pca_range(i),'SSF','SP');
+%     disp(pca_range(i))
+% end
+% for i=1:length(pca_range)
+%     ex(i) = pc(i).explained(3);
+% end
+% plot(pca_range,ex)
 
 
 

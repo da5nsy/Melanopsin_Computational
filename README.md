@@ -1,5 +1,8 @@
 # Melanopsin_Computational
 
-## Top level read me
+This is a set of functions which broadly hope to answer the question of whether it might be sensible for a melanopic signal to be used for colour constancy.
+Work in progress.
+
+## Top level to-do list
 
 - Sort out how to handle sp SSF

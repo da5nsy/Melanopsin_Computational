@@ -4,13 +4,13 @@ function  pc = melcomp_6_looper(varargin)
 % varargin = {'mel_offset',0,'norm',1,'plt',0}; %just for testing
 
 default_mel_offset = 0;
-default_norm      = 1;
-default_plt       = 0;
+default_norm       = 1;
+default_plt        = 0;
 
 expectedSPD = {'Granada_sub','Granada','D-series'};
 expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_full','Foster'};
 expectedSSF = {'SS10','SP'};
-expectedlum = {'CIE_10'};
+expectedlum = {'CIE_10','SP'};
 default_SPD = expectedSPD{1};
 default_SRF = expectedSRF{2}; %Note - this is different behaviour to melcomp_loader since melcomp_6 uses Vrhel_nat_2 by default
 default_SSF = expectedSSF{1};
@@ -35,11 +35,6 @@ parse(p,varargin{:});
     'SSF',p.Results.SSF,...
     'mel_offset',p.Results.mel_offset,...
     'lum',p.Results.lum);
-
-%
-
-sf_10 = [0.69283932, 0.34967567, 0.05547858]; %energy 10deg from CIE 170-2:2015
-T_lum = sf_10(1)*T_SSF(:,1)+sf_10(2)*T_SSF(:,2);
 
 %
 

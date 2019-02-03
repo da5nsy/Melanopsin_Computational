@@ -408,39 +408,12 @@ end
 
 %% Show impact of varying parameters
 
-d = dir('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\Auxiliary Scripts\Optimality variation\opt*.mat');
-
 figure(3), hold on
-legend('off')
-ylim('auto')
 cla
-for i = 1:length(d)
-    clear out
-    load([d(i).folder,'\', d(i).name]);
-    plot(out(1,:),out(2,:),'-','DisplayName',d(i).name);
-    %waitforbuttonpress
-end
-
-if print_figures
-    save2pdf([base,'\optopt.pdf'])
-end
-
-%% Show impact of varying parameters
-% 2.	Normalisation
-% 3.	Different reflectances
-% 4.	Different fundamentals
-
-%Duplicate melcomp_optimality.m (based on melcomp_2) and
-%melcomp_looper_branch/caller without going outside script.
-
-% To-do
-% Add sp option to melcomp_6_looper and melcomp_loader
-% See if I can actually reproduce melcomp_optimality (or if that result
-% depended on the scaling). Perhaps consider different scaling.
-
-figure, hold on
+legend('on')
+ylim('auto')
     
-pca_range = -70:5:130;
+pca_range = -70:10:130;
 
 % default
 for i=1:length(pca_range)
@@ -450,7 +423,7 @@ end
 for i=1:length(pca_range)
     ex(i) = pc(i).explained(3);
 end
-plot(pca_range,ex)
+plot(pca_range,ex,'DisplayName','Standard')
 
 % norm off
 for i=1:length(pca_range)
@@ -460,7 +433,7 @@ end
 for i=1:length(pca_range)
     ex(i) = pc(i).explained(3);
 end
-plot(pca_range,ex)
+plot(pca_range,ex,'DisplayName','diff MB scaling')
 
 % different refs
 for i=1:length(pca_range)
@@ -470,18 +443,20 @@ end
 for i=1:length(pca_range)
     ex(i) = pc(i).explained(3);
 end
-plot(pca_range,ex)
+plot(pca_range,ex,'DisplayName','diff SRF')
 
-% % different SSFs
-% for i=1:length(pca_range)
-%     pc(i) = melcomp_6_looper('mel_offset',pca_range(i),'SSF','SP');
-%     disp(pca_range(i))
-% end
-% for i=1:length(pca_range)
-%     ex(i) = pc(i).explained(3);
-% end
-% plot(pca_range,ex)
+% different SSFs
+for i=1:length(pca_range)
+    pc(i) = melcomp_6_looper('mel_offset',pca_range(i),'SSF','SP','lum','SP');
+    disp(pca_range(i))
+end
+for i=1:length(pca_range)
+    ex(i) = pc(i).explained(3);
+end
+plot(pca_range,ex,'DisplayName','diff SSF')
 
-
+if print_figures
+    save2pdf([base,'\optopt.pdf'])
+end
 
 

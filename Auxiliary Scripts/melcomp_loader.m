@@ -153,7 +153,7 @@ S_sh = [max([S_SPD(1),S_SRF(1),S_SSF(1),S_rods(1),S_melanopsin_big(1)]),...
 
 T_SPD  = SplineSpd(S_SPD,T_SPD,S_sh);
 T_SRF  = SplineSrf(S_SRF,T_SRF,S_sh,1); %ended with same value
-T_SSF  = SplineCmf(S_SSF,T_SSF,S_sh,0)';
+T_SSF  = SplineCmf(S_SSF,T_SSF,S_sh,1)';
 T_rods = SplineCmf(S_rods,T_rods,S_sh,0)';
 T_mel  = SplineCmf(S_melanopsin_big,T_melanopsin_big,S_sh,0)';
 T_lum  = SplineCmf(S_lum,T_lum,S_sh,0)';

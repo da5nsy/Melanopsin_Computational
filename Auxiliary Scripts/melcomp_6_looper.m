@@ -6,11 +6,11 @@ function  pc = melcomp_6_looper(varargin)
 default_mel_offset = 0;
 default_norm      = 1;
 default_plt       = 0;
-expectedlum = {'CIE_10'};
 
 expectedSPD = {'Granada_sub','Granada','D-series'};
 expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_full','Foster'};
 expectedSSF = {'SS10'};
+expectedlum = {'CIE_10'};
 default_SPD = expectedSPD{1};
 default_SRF = expectedSRF{2}; %Note - this is different behaviour to melcomp_loader since melcomp_6 uses Vrhel_nat_2 by default
 default_SSF = expectedSSF{1};

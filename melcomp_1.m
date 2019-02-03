@@ -185,7 +185,7 @@ end
 % signals against any of the other available signals improves the ability
 % to signal chromaticity as a one dimensional variable.
 
-plot_comb=  1;
+plot_comb=  0;
 if plot_comb
     plotOrderNames={'L','M','S','R','I'};
     plotOrderNums1 = [1,2,3,5,1,2,3,5,1,2,3,5,1,2,3,5]; 
@@ -356,7 +356,7 @@ end
 
 %% Basic MB plot
 
-plot_MBbas= 1;
+plot_MBbas= 0;
 
 if plot_MBbas
     figure, hold on

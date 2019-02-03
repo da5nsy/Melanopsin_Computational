@@ -4,8 +4,8 @@ try
     nargin;
 catch
     %If we're not inside a function, clear everything and make a full-screen figure
-    clear, clc, %close all
-    %figure('units','normalized','outerposition',[0 0 1 1]), hold on
+    clear, clc, close all
+    figure('units','normalized','outerposition',[0 0 1 1]), hold on
     
     %default values
     ss=1;
@@ -36,7 +36,7 @@ X_ax = Ip+t_range(1):t_range(2):Ip+t_range(3);
 AoI = X_ax(locs); %Areas of interest
 
 %Plot principal components
-plt_firstAndSecondPC = 0;
+plt_firstAndSecondPC = 1;
 if plt_firstAndSecondPC
     plot(Ip+t_range_ex,ex(1:t_range(2):end,1)/max(ex(1:t_range(2):end,1)),...
         'r','LineWidth',3,'DisplayName',['1st PC weight /' num2str(max(ex(1:t_range(2):end,1)))])
@@ -46,13 +46,13 @@ end
 plot(Ip+t_range_ex,ex(1:t_range(2):end,3)/max(ex(1:t_range(2):end,3)),...
     'b','LineWidth',3,'DisplayName',['3rd PC weight /' num2str(max(ex(1:t_range(2):end,3)))])
 
-plt_melPeakLine = 0;
+plt_melPeakLine = 1;
 if plt_melPeakLine
     y=ylim; %Seems to jump around for some reason if I don't lock it down
     plot([Ip,Ip],[min(y),max(y)],'k--','DisplayName','Nominal melanopic peak sensitivity')
 end
 
-plt_thirdPCPeak = 0;
+plt_thirdPCPeak = 1;
 if plt_thirdPCPeak
     [~,m3] = max(ex(:,3)); %max third principal component
     plot([m3+Ip+t_range(1)-1,m3+Ip+t_range(1)-1],[min(y),max(y)],'DisplayName','3rd PC max')

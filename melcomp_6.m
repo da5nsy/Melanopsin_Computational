@@ -408,20 +408,65 @@ end
 
 %% Show impact of varying parameters
 
-d = dir('Auxiliary Scripts\Optimality variation\opt*.mat');
+d = dir('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\Auxiliary Scripts\Optimality variation\opt*.mat');
 
 figure(3), hold on
+legend('off')
+ylim('auto')
 cla
 for i = 1:length(d)
     clear out
     load([d(i).folder,'\', d(i).name]);
     plot(out(1,:),out(2,:),'-','DisplayName',d(i).name);
+    %waitforbuttonpress
 end
-
-legend('off')
-ylim('auto')
 
 if print_figures
     save2pdf([base,'\optopt.pdf'])
 end
+
+%% Show impact of varying parameters
+% 2.	Normalisation
+% 3.	Different reflectances
+% 4.	Different fundamentals
+
+%Duplicate melcomp_optimality.m (based on melcomp_2) and
+%melcomp_looper_branch/caller without going outside script.
+
+figure, hold on
+    
+% default
+pca_range = -70:5:130;
+
+for i=1:length(pca_range)
+    pc(i) = melcomp_6_looper('mel_offset',pca_range(i));
+    disp(pca_range(i))
+end
+for i=1:length(pca_range)
+    ex(i) = pc(i).explained(3);
+end
+plot(pca_range,ex)
+
+% norm off
+for i=1:length(pca_range)
+    pc(i) = melcomp_6_looper('mel_offset',pca_range(i),'norm',0);
+    disp(pca_range(i))
+end
+for i=1:length(pca_range)
+    ex(i) = pc(i).explained(3);
+end
+plot(pca_range,ex)
+
+% different refs
+for i=1:length(pca_range)
+    pc(i) = melcomp_6_looper('mel_offset',pca_range(i),'SRF','Vrhel_nat_1');
+    disp(pca_range(i))
+end
+for i=1:length(pca_range)
+    ex(i) = pc(i).explained(3);
+end
+plot(pca_range,ex)
+
+
+
 

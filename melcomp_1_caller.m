@@ -70,8 +70,8 @@ ylabel('SD of set / Min SD for each object')
 
 %% Plot the averages over wavelength
 figure, hold on
-xlim([0 2])
-ylim([-4 4])
+xlim([-0.2 1.6])
+ylim([-0.5 0.5])
 for i=1:size(MBx_m,3)-40
     scatter(MBx_m(1,:,i),MBx_m(2,:,i),'filled')
     %pause(0.1)

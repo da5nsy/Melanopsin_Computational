@@ -5,7 +5,7 @@ catch
     
     %figure, hold on %to get figure to plot, also turn on 'plot_it' in melcomp
     
-    range= [-150:10:-60,-59:135,140:10:390]; %94 seconds. Now taking 283 seconds, reason unknown
+    range= [-150:10:-60,-58:2:138,140:10:200];
     
     tic
     for i= 1:length(range)
@@ -20,21 +20,32 @@ end
 
 melpeak = 488+range;
 
-%%
+plot_where = [500,200];
+plot_size  = [800,400];
 
-norm = 1;
+set(0,'defaultAxesFontName', 'Courier')
 
-figure, hold on
+base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_1_looper';
 
+print_figures = 1;
 
-plot([melpeak(range==0),melpeak(range==0)],[0,max([MB1_zeroSD,MB2_zeroSD])],'k','LineWidth',4,'DisplayName','Mel Peak')
+%% Minimals SD
+
+norm = 0;
+
+figure('Position',[plot_where plot_size]), hold on
+
 if norm
+    plot([melpeak(range==0),melpeak(range==0)],[0,1],...
+        'k','LineWidth',4,'DisplayName','Mel Peak')
     plot(melpeak,ones(length(melpeak),1),'Color',[0.5,0.5,0.5],'LineWidth',4,'DisplayName','Baseline SD')
     scatter(melpeak,MB1_minSD/max(MB1_minSD),'r','filled','DisplayName','MB1')
     scatter(melpeak,MB2_minSD/max(MB2_minSD),'b','filled','DisplayName','MB2')
     
     
 else
+    plot([melpeak(range==0),melpeak(range==0)],[0,max([MB1_zeroSD,MB2_zeroSD])],...
+        'k','LineWidth',4,'DisplayName','Mel Peak')
     plot(melpeak,MB1_zeroSD,'r','LineWidth',4,'DisplayName','MB1: Baseline SD')
     plot(melpeak,MB2_zeroSD,'b','LineWidth',4,'DisplayName','MB2: Baseline SD')
     scatter(melpeak,MB1_minSD,'r','filled','DisplayName','MB1: Min SD')
@@ -44,40 +55,40 @@ else
 end
 
 legend('Location','best')
-
 xlabel('Nominal Melanopic Peak (nm)')
-ylabel('Minimum standard deviation of whole set (normalised)')
+ylabel({'Minimum standard deviation',' of whole set (normalised)'})
+axis tight
 
-%save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Thesis\Melanopsin Computational\figs\opt.pdf")
+if print_figures
+    save2pdf([base,'\opt.pdf'])
+end
 
-%% Plot one over the other
+%% Spread
 
-figure, hold on
-scatter(melpeak,spread(1,:)/max(spread(1,:)),'r','filled','DisplayName','MB1')
-scatter(melpeak,spread(2,:)/max(spread(2,:)),'b','filled','DisplayName','MB2')
-legend('Location','best')
+figure('Position',[plot_where plot_size]), hold on
+scatter(melpeak,spread/max(spread),'k','filled')
 xlabel('Nominal Melanopic Peak (nm)')
-ylabel('SD of the set of means of objects (normalised)')
-%save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Thesis\Melanopsin Computational\figs\sdmeans.pdf")
-
-figure, hold on
-scatter(melpeak,(spread(1,:)/max(spread(1,:)))./(MB1_minSD/max(MB1_minSD)),'r','filled','DisplayName','MB1')
-scatter(melpeak,(spread(2,:)/max(spread(2,:)))./(MB2_minSD/max(MB2_minSD)),'b','filled','DisplayName','MB2')
-legend('Location','best')
-xlabel('Nominal Melanopic Peak (nm)')
-ylabel('SD of set / Min SD for each object')
-%save2pdf("C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Thesis\Melanopsin Computational\figs\setoverobj.pdf")
+ylabel('Mean of inter-object distances')
+axis tight
+if print_figures
+    save2pdf([base,'\sdmeans.pdf'])
+end
 
 %% Plot the averages over wavelength
-figure, hold on
-xlim([-0.2 1.6])
-ylim([-0.5 0.5])
-for i=1:size(MBx_m,3)-40
-    scatter(MBx_m(1,:,i),MBx_m(2,:,i),'filled')
-    %pause(0.1)
-    drawnow
-    title(melpeak(i))
+
+figure('Position',[plot_where plot_size]), hold on
+xlim([0.3 1.1])
+ylim([-0.05 0.15])
+col2 = parula(size(MBx_m,3));
+
+for i = 1:size(MBx_m,3)
+   chull = convhull(MBx_m(1,:,i),MBx_m(2,:,i));
+   fill(MBx_m(1,chull,i),MBx_m(2,chull,i),col2(i,:),'FaceAlpha',0.6,'LineStyle','none')
 end
+
+colormap('parula')
+colorbar
+caxis([min(melpeak) max(melpeak)])
 
 %% - %% Visualiser
 
@@ -93,6 +104,17 @@ for i=-100:10:100
     drawnow
     %pause(0.5)
 end
+
+
+
+
+
+
+
+
+
+
+
 
 
 

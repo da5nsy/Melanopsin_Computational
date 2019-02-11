@@ -1,4 +1,4 @@
-function [MB1_minSD,MB2_minSD,MB1_zeroSD,MB2_zeroSD,spread,MBx_m]= melcomp_1(offset)
+function [MB1_minSD,MB2_minSD,MB1_baselineSD,MB2_baslineSD,spread,MB_star_m]= melcomp_1(offset)
 
 %% Research questions:
 %
@@ -50,7 +50,7 @@ plot_size  = [800,400];
 set(0,'defaultAxesFontName', 'Courier')
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_1';
-disp_figures = 1;
+disp_figures  = 0;
 print_figures = 0;
 
 min_l_scale = 0.62;
@@ -77,7 +77,7 @@ end
 
 [LMSRI, lsri] = melcomp_colorimetry(T_SPD, T_SRF, T_SSF, T_lum, S_sh);
 
-[LMSRI_neutral, lsri_neutral] = melcomp_colorimetry(T_SPD, ones(S_sh(3),1), T_SSF, T_lum, S_sh);
+%[LMSRI_neutral, lsri_neutral] = melcomp_colorimetry(T_SPD, ones(S_sh(3),1), T_SSF, T_lum, S_sh);
 
 if RandomData
     LMSRI = rand(size(LMSRI))*20;
@@ -117,7 +117,7 @@ if plot_corr && disp_figures
 end
 
 if print_figures
-    save2pdf([base,'\correlation.pdf'])
+    save2pdf([base,'\correlationBetweenLevel1Sigs.pdf'])
 end
 
 %% Do any signals predict MB chromaticity?
@@ -157,7 +157,7 @@ if plot_predict && disp_figures
 end
 
 if print_figures
-    save2pdf([base,'\predict.pdf'])
+    save2pdf([base,'\level1sigspredictingColorimetry.pdf'])
 end
 
 
@@ -205,7 +205,7 @@ if plot_comb && disp_figures
     set(sp(16),'Color',[.8,.8,.8])
     %
     
-    auto_rotate=    1;
+    auto_rotate=    0;
     saveGif=        0; %save a 360 gif? %Not currently working !!!!!!!!!!!!!!!!!!!!!!!1
     
     if auto_rotate
@@ -231,6 +231,10 @@ if plot_comb && disp_figures
     end
 end
 
+if print_figures
+    save2pdf([base,'\allComboSignals.pdf'])
+end
+
 %% Basic MB plot
 
 plot_MBbas = 1;
@@ -250,6 +254,11 @@ if plot_MBbas && disp_figures
     xlabel('{\itl}_{MB}');
     ylabel('{\its}_{MB}');
 end
+
+if print_figures
+    save2pdf([base,'\BasicMB.pdf'])
+end
+
 
 %% Iterations
 
@@ -273,62 +282,55 @@ for S2= -3:0.01:3
     MBx2std=[MBx2std,[S2;mean(std(MBx(2,:,:)))]];
 end
 
-if plot_it
+if plot_it && disp_figures
     plot(MBx1std(1,:),MBx1std(2,:),'b')
     plot(MBx2std(1,:),MBx2std(2,:),'r')
     xlabel('weight of factor')
     ylabel('standard deviation')
-    title(sprintf('Mel peak-%d nm',488+offset))
+    %title(sprintf('Mel peak-%d nm',488+offset))
     legend({'MBx1','MBx2'})
 end
 
 [MB1_minSD, MB1_minSD_loc] = min(MBx1std(2,:));
 [MB2_minSD, MB2_minSD_loc] = min(MBx2std(2,:));
-MB1_zeroSD = MBx1std(2,MBx1std(1,:)==0);
-MB2_zeroSD = MBx2std(2,MBx2std(1,:)==0);
+MB1_baselineSD = MBx1std(2,MBx1std(1,:)==0);
+MB2_baslineSD = MBx2std(2,MBx2std(1,:)==0);
 
-%% Hard code factors
-plot_hc = 1;
+if print_figures
+    save2pdf([base,'\minimiseSD.pdf'])
+end
 
-if plot_hc && disp_figures
-    fac1=   MBx1std(1,MB1_minSD_loc);
-    fac2=   MBx2std(1,MB2_minSD_loc);
-    
-    MB_star=lsri(1:2,:,:);
-    MB_star(1,:,:)=lsri(1,:,:) + fac1 * lsri(4,:,:);
-    MB_star(2,:,:)=lsri(2,:,:) + fac2 * lsri(4,:,:);
-    
+
+%% Apply factors
+plot_appf = 1;
+
+fac1=   MBx1std(1,MB1_minSD_loc);
+fac2=   MBx2std(1,MB2_minSD_loc);
+
+MB_star=lsri(1:2,:,:);
+MB_star(1,:,:)=lsri(1,:,:) + fac1 * lsri(4,:,:);
+MB_star(2,:,:)=lsri(2,:,:) + fac2 * lsri(4,:,:);
+
+if plot_appf && disp_figures
+
     figure('Position',[plot_where plot_size]), hold on
-    scatter(MB_star(1,:),MB_star(2,:),'filled')   
+    scatter(MB_star(1,:),MB_star(2,:),'filled')
     
-    xticks([])
-    yticks([])
-    xlabel('MBx1');ylabel('MBx2')
-    grid on
+    %xticks([])
+    %yticks([])
+    xlabel('{\itl}_{MB} + {\itk_1i}_{MB}');
+    ylabel('{\its}_{MB} + {\itk_2i}_{MB}');
     
+    grid on    
+end
+
+if print_figures
+    save2pdf([base,'\correctedChromaticities.pdf'])
 end
 
 %% What is the inter-object distance?
 
-S_vals=[MBx1std(1,MB1_minSD_loc),MBx2std(1,MB2_minSD_loc)];
+MB_star_m=squeeze(mean(MB_star,3));
+spread = mean(pdist(MB_star_m'));
 
-MBx(1,:,:)=MB(1,:,:)+S_vals(1)*(LMSRI(5,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
-MBx(2,:,:)=MB(2,:,:)+S_vals(2)*(LMSRI(5,:,:)./(LMSRI(1,:,:)+LMSRI(2,:,:)));
 
-% for i=2:12
-%     scatter(squeeze(MBx(1,:,i)),squeeze(MBx(2,:,i)));
-%     xlim([-10 10])
-%     ylim([-10 10])
-%     hold on
-%     axis equal
-% end
-% hold off
-
-MBx_m=squeeze(mean(MBx(:,:,2:end),2));
-% scatter(MBx_m(1,2:end),MBx_m(2,2:end),'k','filled');
-% axis equal
-% xlim([0 1])
-% ylim([-1 2])
-
-spread=[std(MBx_m(1,:)),std(MBx_m(2,:))];
-%disp(melpeak)

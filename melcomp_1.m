@@ -1,4 +1,4 @@
-function [MB1_minSD,MB2_minSD,MB1_baselineSD,MB2_baslineSD,spread,MB_star_m]= melcomp_1(offset)
+function [MB1_minSD,MB2_minSD,MB1_baselineSD,MB2_baslineSD,spread,MB_star_m]= melcomp_1(offset,varargin)
 
 %% Research questions:
 %
@@ -17,11 +17,11 @@ function [MB1_minSD,MB2_minSD,MB1_baselineSD,MB2_baslineSD,spread,MB_star_m]= me
 
 % TO-DO
 % Fix gif saving issue
-% Debug melomp_caller (try to reproduce original performance / work out why
-%   it has changed.
-% Make label axes italics where appropriate
-% Add save commands
-% Set limits for MB axes in line with other scripts
+
+default_plt_appf_overide = 0;
+p = inputParser;
+addParameter(p,'plt_appf_overide',default_plt_appf_overide);
+parse(p,varargin{:});
 
 %% Pre-flight
 
@@ -77,12 +77,18 @@ end
 
 [LMSRI, lsri] = melcomp_colorimetry(T_SPD, T_SRF, T_SSF, T_lum, S_sh);
 
-%[LMSRI_neutral, lsri_neutral] = melcomp_colorimetry(T_SPD, ones(S_sh(3),1), T_SSF, T_lum, S_sh);
+% generate colorimetry for the light source itself
+[LMSRI_neutral, lsri_neutral] = melcomp_colorimetry(T_SPD, ones(S_sh(3),1), T_SSF, T_lum, S_sh);
 
-if RandomData
-    LMSRI = rand(size(LMSRI))*20;
-    lsri  = rand(size(lsri)) *20;
+%generate random data to examine inherent relationships due to col calcs
+LMSRI_rand = rand(size(LMSRI));
+for i=1:size(T_SPD,2)
+    lsri_rand(1:2,:,i) = LMSToMacBoyn(LMSRI_rand(1:3,:,i),T_SSF(:,1:3)',T_lum');
+    t_r(:,:,i)    = LMSToMacBoyn(LMSRI_rand([1,2,4],:,i),[T_SSF(:,1:2)';T_SSF(:,4)'],T_lum');
+    t_i(:,:,i)    = LMSToMacBoyn(LMSRI_rand([1,2,5],:,i),[T_SSF(:,1:2)';T_SSF(:,5)'],T_lum');
 end
+lsri_rand(3,:,:) = t_r(2,:,:); clear t_r
+lsri_rand(4,:,:) = t_i(2,:,:); clear t_i
 
 
 %% What is the correlation between I and L/M/S?
@@ -94,10 +100,10 @@ end
 plot_corr = 1;
 if plot_corr && disp_figures
     plotOrderNames = {'L','M','S','R','I'};
-    plotOrderNums = [1,2,3,5];
-    figure('Position',[plot_where plot_size])
+    plotOrderNums = [1,2,3];
+    figure('Position',[plot_where plot_size]), hold on
     for i=1:length(plotOrderNums)
-        sp(i)=subplot(2,2,i);
+        sp(i)=subplot(1,3,i); hold on
         scatter(...
             sp(i),...
             LMSRI(plotOrderNums(i),:),...
@@ -108,12 +114,22 @@ if plot_corr && disp_figures
             'LineWidth',dLW...
             )
         
+        scatter(...
+            sp(i),...
+            LMSRI_neutral(plotOrderNums(i),:),...
+            LMSRI_neutral(5,:),...
+            dS,...
+            'MarkerEdgeColor',dMEC,...
+            'MarkerFaceColor','r',...
+            'LineWidth',dLW...
+            )
+        
         xlabel(sp(i),['{\it',plotOrderNames{plotOrderNums(i)},'}']);
-        ylabel('{\itI}');
         xticks([min(xlim),max(xlim)])
-        yticks([min(ylim),max(ylim)])
+        yticks([])
     end
-    set(subplot(2,2,4),'Color',[.8,.8,.8])
+    ylabel(sp(1),'{\itI}');
+    yticks(sp(1),[min(ylim),max(ylim)])
 end
 
 if print_figures
@@ -135,17 +151,17 @@ if plot_predict && disp_figures
         sp(i)=subplot(2,2,i);
         scatter3(...
             sp(i),...
-            lsri(1,:),...
-            lsri(2,:),...
-            LMSRI(plotOrderNums(i),:),...
+            lsri_neutral(1,:),...
+            lsri_neutral(2,:),...
+            LMSRI_neutral(plotOrderNums(i),:),...
             dS,...
             'MarkerEdgeColor',dMEC,...
-            'MarkerFaceColor',dMFC,...
+            'MarkerFaceColor','r',...
             'LineWidth',dLW...
             )
         
         xlim([min_l_scale max_l_scale]);
-        ylim([0 max_s_scale]);
+        ylim([0 0.05]);
         xlabel('{\itl}_{MB}');
         ylabel('{\its}_{MB}');
         zlabel(sp(i),['{\it',plotOrderNames{plotOrderNums(i)},'}']);
@@ -311,7 +327,7 @@ MB_star=lsri(1:2,:,:);
 MB_star(1,:,:)=lsri(1,:,:) + fac1 * lsri(4,:,:);
 MB_star(2,:,:)=lsri(2,:,:) + fac2 * lsri(4,:,:);
 
-if plot_appf && disp_figures
+if or(plot_appf && disp_figures,p.Results.plt_appf_overide)
 
     figure('Position',[plot_where plot_size]), hold on
     scatter(MB_star(1,:),MB_star(2,:),'filled')
@@ -331,6 +347,10 @@ end
 %% What is the inter-object distance?
 
 MB_star_m=squeeze(mean(MB_star,3));
-spread = mean(pdist(MB_star_m'));
+
+spread_l = pdist(MB_star_m(1,:)');
+spread_s = pdist(MB_star_m(2,:)');
+
+spread = [mean(spread_l), mean(spread_s)];
 
 

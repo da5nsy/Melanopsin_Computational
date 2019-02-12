@@ -7,9 +7,14 @@ catch
     
     range= [-150:10:-60,-58:2:138,140:10:200];
     
+    MB1_minSD = zeros(1,length(range));
+    MB2_minSD = zeros(1,length(range));
+    spread =    zeros(2,length(range));
+    MBx_m  =    zeros(2,11,length(range));
+    
     tic
     for i= 1:length(range)
-        [MB1_minSD(i),MB2_minSD(i),MB1_zeroSD(i),MB2_zeroSD(i),spread(:,i),MBx_m(:,:,i)]=melcomp_1(range(i));
+        [MB1_minSD(i),MB2_minSD(i),MB1_zeroSD,MB2_zeroSD,spread(:,i),MBx_m(:,:,i)]=melcomp_1(range(i));
         disp(range(i))
         drawnow
     end
@@ -25,13 +30,13 @@ plot_size  = [800,400];
 
 set(0,'defaultAxesFontName', 'Courier')
 
-base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_1_looper';
+base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_1_caller';
 
 print_figures = 1;
 
 %% Minimals SD
 
-norm = 0;
+norm = 1;
 
 figure('Position',[plot_where plot_size]), hold on
 
@@ -46,8 +51,8 @@ if norm
 else
     plot([melpeak(range==0),melpeak(range==0)],[0,max([MB1_zeroSD,MB2_zeroSD])],...
         'k','LineWidth',4,'DisplayName','Mel Peak')
-    plot(melpeak,MB1_zeroSD,'r','LineWidth',4,'DisplayName','MB1: Baseline SD')
-    plot(melpeak,MB2_zeroSD,'b','LineWidth',4,'DisplayName','MB2: Baseline SD')
+    plot([melpeak(1),melpeak(end)],[MB1_zeroSD,MB1_zeroSD],'r','LineWidth',4,'DisplayName','MB1: Baseline SD')
+    plot([melpeak(1),melpeak(end)],[MB2_zeroSD,MB2_zeroSD],'b','LineWidth',4,'DisplayName','MB2: Baseline SD')
     scatter(melpeak,MB1_minSD,'r','filled','DisplayName','MB1: Min SD')
     scatter(melpeak,MB2_minSD,'b','filled','DisplayName','MB2: Min SD')
     %scatter(melpeak,spread(1,:),'r')
@@ -66,7 +71,8 @@ end
 %% Spread
 
 figure('Position',[plot_where plot_size]), hold on
-scatter(melpeak,spread/max(spread),'k','filled')
+scatter(melpeak,spread(1,:)/max(spread(1,:)),'r','filled')
+scatter(melpeak,spread(2,:)/max(spread(2,:)),'b','filled')
 xlabel('Nominal Melanopic Peak (nm)')
 ylabel('Mean of inter-object distances')
 axis tight
@@ -90,20 +96,29 @@ colormap('parula')
 colorbar
 caxis([min(melpeak) max(melpeak)])
 
-%% - %% Visualiser
+if print_figures
+    save2pdf([base,'\space.pdf'])
+end
 
-%turn on plot_hc before use
+%% - %% Visualiser
 
 clear, clc, close all;
 
 for i=-100:10:100
-    melcomp_1(i)
+    melcomp_1(i,'plt_appf_overide',1);
     axis auto
     axis equal
     title(i)
     drawnow
     %pause(0.5)
 end
+
+
+
+
+
+
+
 
 
 

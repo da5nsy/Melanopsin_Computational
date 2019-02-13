@@ -1,9 +1,20 @@
 clear, clc, close all
 
+plot_where = [500,200];
+plot_size  = [800,400];
+
+set(0,'defaultAxesFontName', 'Courier')
+
+base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_1_caller';
+
+print_figures = 1;
+
+%%
+
 try load('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\melcomp_1_results.mat')
 catch
     
-    %figure, hold on %to get figure to plot, also turn on 'plot_it' in melcomp
+    figure('Position',[plot_where plot_size]), hold on
     
     range= [-150:10:-60,-58:2:138,140:10:200];
     
@@ -14,25 +25,26 @@ catch
     
     tic
     for i= 1:length(range)
-        [MB1_minSD(i),MB2_minSD(i),MB1_zeroSD,MB2_zeroSD,spread(:,i),MBx_m(:,:,i)]=melcomp_1(range(i));
+        [MB1_minSD(i),MB2_minSD(i),MB1_zeroSD,MB2_zeroSD,spread(:,i),MBx_m(:,:,i)]=melcomp_1(range(i),'plt_it_overide',1);
         disp(range(i))
         drawnow
     end
     toc
     
     save('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\melcomp_1_results.mat')
+    
+    title([]);
+    ylim([0 max([MB1_zeroSD,MB2_zeroSD])])
+    xticks([min(xlim),0,max(xlim)])
+    yticks([0, max(ylim)])
+    
+    if print_figures
+        save2pdf([base,'\it.pdf'])
+        savefig([base,'\it.fig'])
+    end
 end
 
 melpeak = 488+range;
-
-plot_where = [500,200];
-plot_size  = [800,400];
-
-set(0,'defaultAxesFontName', 'Courier')
-
-base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_1_caller';
-
-print_figures = 1;
 
 %% Minimals SD
 

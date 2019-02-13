@@ -18,11 +18,6 @@ function [MB1_minSD,MB2_minSD,MB1_baselineSD,MB2_baslineSD,spread,MB_star_m]= me
 % TO-DO
 % Fix gif saving issue
 
-default_plt_appf_overide = 0;
-p = inputParser;
-addParameter(p,'plt_appf_overide',default_plt_appf_overide);
-parse(p,varargin{:});
-
 %% Pre-flight
 
 try
@@ -30,7 +25,15 @@ try
 catch
     clear, clc, close all;
     offset = 0;
+    varargin = {};
 end
+
+default_plt_appf_overide = 0;
+default_plt_it_overide = 0;
+p = inputParser;
+addParameter(p,'plt_appf_overide',default_plt_appf_overide);
+addParameter(p,'plt_it_overide',default_plt_it_overide);
+parse(p,varargin{:});
 
 % Only the natural reflectances?
 NatOnly = 1;
@@ -288,23 +291,25 @@ MBx=lsri;
 MBx1std=[]; %Initialise variables so that they can be added to
 MBx2std=[];
 
-for S1= -3:0.01:3
+for S1= -2:0.01:2
     MBx(1,:,:)=lsri(1,:,:)+S1*lsri(4,:,:);
     MBx1std=[MBx1std,[S1;mean(std(MBx(1,:,:)))]];
 end
 
-for S2= -3:0.01:3
+for S2= -2:0.01:2
     MBx(2,:,:)=lsri(2,:,:)+S2*lsri(4,:,:);
     MBx2std=[MBx2std,[S2;mean(std(MBx(2,:,:)))]];
 end
 
-if plot_it && disp_figures
-    plot(MBx1std(1,:),MBx1std(2,:),'b')
-    plot(MBx2std(1,:),MBx2std(2,:),'r')
+if or(plot_it && disp_figures,p.Results.plt_it_overide)
+    plot3(MBx1std(1,:),MBx1std(2,:),ones(length(MBx1std),1)*offset,'r')
+    plot3(MBx2std(1,:),MBx2std(2,:),ones(length(MBx1std),1)*offset,'b')
     xlabel('weight of factor')
-    ylabel('standard deviation')
-    %title(sprintf('Mel peak-%d nm',488+offset))
+    ylabel('standard deviation')    
     legend({'MBx1','MBx2'})
+    if p.Results.plt_it_overide
+        title(sprintf('Mel peak-%d nm',488+offset))
+    end
 end
 
 [MB1_minSD, MB1_minSD_loc] = min(MBx1std(2,:));

@@ -1,34 +1,18 @@
 function [pc, LMSRI] = melcomp_2(varargin)
 
-% TO DO
-% - check that lm work out the same when I calculate them without the PTB
-%   function, just for lolz (seriously - to be careful)
-% - what about log signals?
-% - Can the 'correction through shift' be done by division rather than subtraction?
-% - Should I include Foster+'s "Levada scene"
-%   (https://personalpages.manchester.ac.uk/staff/d.h.foster/Time-Lapse_HSIs/Time-Lapse_HSIs_2015.html)
-%   I'd want to crop the houses out, and then we just have foliage, is this
-%   neccessarily a 'salient object'?
-% - Include the Foster+ 2004 images (slightly difficult because of
-%   different sampling ranges/intervals)
-% - S_sh doesn't currently consider T_mel or T_rods - should it?
 
 %% Pre-flight checks
-% Setting things here controls what data is used and in what way
-% If we're inside a function, it is assumed that all are set, otherwise it
-%   looks for them to be set manually
 
 try
     nargin;
 catch
-    clear, clc, close all;
-    offset = 0;
+    clear, clc, close all
     varargin = {};
 end
 
 default_mel_offset = 0;
-default_Z_ax       = 1;
-default_plt        = 0;
+default_Z_ax       = 9;
+default_plt        = '';
 
 expectedSPD = {'Granada_sub','Granada','D-series'};
 expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_full','Foster'};
@@ -41,14 +25,24 @@ default_lum = expectedlum{2};
 
 p = inputParser;
 addParameter(p,'mel_offset',default_mel_offset);
-addParameter(p,'Z_ax',default_Z_ax);
-addParameter(p,'plt',default_plt);
 addParameter(p,'SPD',default_SPD, @(x) any(validatestring(x,expectedSPD)));
 addParameter(p,'SRF',default_SRF, @(x) any(validatestring(x,expectedSRF)));
 addParameter(p,'SSF',default_SSF, @(x) any(validatestring(x,expectedSSF)));
 addParameter(p,'lum',default_lum, @(x) any(validatestring(x,expectedlum)));
 
+addParameter(p,'Z_ax',default_Z_ax);
+addParameter(p,'plt',default_plt);
+
 parse(p,varargin{:});
+
+%% Load Data
+
+[T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(...
+    'SPD',p.Results.SPD,...
+    'SRF',p.Results.SRF,...
+    'SSF',p.Results.SSF,...
+    'mel_offset',p.Results.mel_offset,...
+    'lum',p.Results.lum);
 
 %% Compute colorimetry
 
@@ -60,7 +54,7 @@ rng(7); pltc_alt=pltc_alt(:,randperm(size(T_SRF,2)),:); %best combo for differen
 
 %% Plot third dimension
 
-plt_3D = 0; % hard-code, 0 = off, 1 = on
+plt_3D = 1; % hard-code, 0 = off, 1 = on
 try strcmp(plt,'3D'); % allow overwrite from function call
     if strcmp(plt,'3D')
         plt_3D = 1;
@@ -108,20 +102,13 @@ if plt_3D
         t_Z = lsri(3,:,:)+lsri(4,:,:);
     end
     
-    if plt_real_cols == 1
-        scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_RGB(:,:)','v','filled','MarkerFaceAlpha',.4,'MarkerEdgeAlpha',.4) %with colours of objects
-        hold on
-    else
-        scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_alt(:,:)','v','filled','MarkerFaceAlpha',.4,'MarkerEdgeAlpha',.4) %with arbitrary colours
-        hold on
-    end
-    if plt_lines
-        plot3(lsri(1,:),lsri(2,:),t_Z(1,:),'Color',[0,0,0,0.2]) %transulent lines
-    end
+    
+    scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_alt(:,:)','v','filled','MarkerFaceAlpha',.4,'MarkerEdgeAlpha',.4) %with arbitrary colours
+    hold on
     zlabel(plt_lbls{Z_ax})
 
     if plt_locus
-        MB_locus = LMSToMacBoyn(T_obs');
+        MB_locus = LMSToMacBoyn(T_SSF(:,1:3)',T_SSF(:,1:3)',T_lum');
         %plot(MB_locus(1,:),MB_locus(2,:))
         fill([MB_locus(1,5:65),MB_locus(1,5)],[MB_locus(2,5:65),MB_locus(2,5)],'k','LineStyle','none','FaceAlpha','0.1')
     end
@@ -136,7 +123,7 @@ end
 
 %% Correction through rotation
 
-plt_CTR = 0;
+plt_CTR = 1;
 try strcmp(plt,'CTR');
     if strcmp(plt,'CTR')
         plt_CTR = 1;
@@ -180,7 +167,7 @@ end
 
 %% Correction through subtractive shift
 
-plt_CTSS= 0;
+plt_CTSS= 1;
 
 lsri_ss = lsri; %shifted
 

@@ -14,6 +14,7 @@ catch
     disp('Using default values');
     spd = 1;
 end
+spd = 1;
 
 %Compute melanopic peak sensitivity
 load T_melanopsin T_melanopsin S_melanopsin; 

@@ -10,14 +10,12 @@ try %if within a function, do nothing
 catch %else, use default values
     clear, clc, close all
     
-    plot_where = [20,60];
-    plot_size  = [900,400];
+    plot_where = [500,200];
+    plot_size  = [800,400];
     
     base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Writing\figs';
-    %base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\VNS18 Poster';
-    
-    ff = '-depsc'; %file format
-    %ff = '-dpdf';
+
+    ff = '-dpdf';
     
     p = 1; % 0 = figures display but don't save. 1 = figures display and save.
     
@@ -59,7 +57,7 @@ Mel_Phot_Corr
 set(gcf,'Position',[plot_where plot_size],'color','w');
 
 if p
-    print([base,'\','Mel_Phot'],ff)
+    save2pdf([base,'\Mel_Phot.pdf'])
 end
 
 %% Fig: Monotonicity_concept
@@ -93,7 +91,7 @@ xlabel('Input'),ylabel('Output')
 xticks(0:0.2:1); yticks(0:0.2:1);
 
 if p
-    print([base,'\','Monotonicity_concept'],ff)
+    save2pdf([base,'\Monotonicity_concept.pdf'])
 end
 
 %% Fig: True3D
@@ -117,7 +115,7 @@ xticks(0:0.2:1); yticks(0:0.2:1);
 xlabel('x'); ylabel('y/y');
 
 if p
-    print([base,'\','True3D'],ff)
+    save2pdf([base,'\True3D.pdf'])
 end
 
 %% Fig: chromaticities
@@ -128,7 +126,7 @@ view(0,90)
 xlim([0.5 1])
 
 if p
-    print([base,'\','chromaticities'],ff)
+    save2pdf([base,'\chromaticities.pdf'])
 end
 
 %% Fig: ZL
@@ -142,7 +140,7 @@ view(340,40)
 set(gcf,'color','w');
 
 if p
-    print([base,'\','ZL'],ff)
+    save2pdf([base,'\ZL.pdf'])
 end
 
 %% Fig: res_LMSRI
@@ -173,8 +171,8 @@ end
 
 set(gcf,'color','w');
 
-if p
-    print([base,'\','res_LMSRI'],ff)
+if p    
+    save2pdf([base,'\res_LMSRI.pdf'])
 end
 
 %% Fig: res_lsri
@@ -206,8 +204,8 @@ end
 
 set(gcf,'color','w');
 
-if p
-    print([base,'\','res_lsri'],ff)
+if p        
+    save2pdf([base,'\res_lsri.pdf'])
 end
 
 %% Fig: CTR
@@ -229,8 +227,8 @@ view(90,0)
 legend('off')
 text(0.02,0.98,'C','Units', 'Normalized', 'VerticalAlignment', 'Top')
 
-if p
-    print([base,'\','CTR'],ff)
+if p        
+    save2pdf([base,'\CTR.pdf'])
 end
 
 %% Fig: why_correl
@@ -240,7 +238,7 @@ melcomp_why('correl')
 set(gcf,'Position',[plot_where plot_size]);
 
 if p
-    print([base,'\','why_correl'],ff)
+    save2pdf([base,'\why_correl.pdf'])
 end
 
 %% Fig: why_PCA
@@ -249,8 +247,8 @@ melcomp_why('PCA')
 
 set(gcf,'Position',[plot_where plot_size]);
 
-if p
-    print([base,'\','why_PCA'],ff)
+if p    
+    save2pdf([base,'\why_PCA.pdf'])
 end
 
 %% Fig: inputs
@@ -296,8 +294,8 @@ ylabel({'11 natural surfaces'; 'Normalised Spectral Reflectance'});
 
 xlabel('Wavelength (nm)')
 
-if p
-    print([base,'\','inputs'],ff)
+if p    
+    save2pdf([base,'\inputs.pdf'])
 end
 
 %% Fig: optimality

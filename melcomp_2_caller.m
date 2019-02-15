@@ -1,25 +1,21 @@
 clear, clc, close all
 
 for i=1:12%[6:9,12]
-    melcomp_2(i)
+    melcomp_2('Z_ax',i,'plt','3D');
 end
 
 %%
 
-melcomp_2(1,1,1,1)
-view(75,20)
+melcomp_2('SPD','D-series',...
+    'SRF','Vrhel_nat_1',...
+    'SSF','SP',...
+    'plt','3D');
+view(201,34)
 
-% PF_SPD = 1;
-% % 1 = CIE D series
-% % 2 = Hernández-Andrés+
-% 
-% PF_refs = 1;
-% % 1 = Vhrel+ (natural only)
-% % 2 = Vhrel+ (all)
-% % 3 = Foster+
-% 
-% PF_obs = 1;
-% % 1 = PTB Smith-Pokorny
+% expectedSPD = {'Granada_sub','Granada','D-series'};
+% expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_full','Foster'};
+% expectedSSF = {'SS10','SP'};
+% expectedlum = {'CIE_10','SP'};
 
 %%
 clc, clear, close all
@@ -28,7 +24,12 @@ clc, clear, close all
 
 for i = -10:10
     offset = i*10;
-    [pc(i+11), LMSRI(:,:,:,+11)] = melcomp_2(2,1,1,9,0,offset);
+    [pc(i+11), LMSRI(:,:,:,i+11)] = melcomp_2(...
+        'SPD','Granada',...
+        'SRF','Vrhel_nat_1',...
+        'SSF','SP',...
+        'Z_ax',9,...
+        'mel_offset',offset);
 end
 
 %%

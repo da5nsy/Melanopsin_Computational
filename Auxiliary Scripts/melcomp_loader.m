@@ -2,8 +2,8 @@ function [T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(varargin)
 
 %%
  
-% clear, clc, close all
-% varargin = {'SPD','Granada','SRF','Vrhel_nat_1','SSF','SS10','mel_offset',0,'lum','CIE_10'}; %just for testing
+%clear, clc, close all
+%varargin = {'SPD','Granada','SRF','Vrhel_nat_1','SSF','SP','mel_offset',0}; %just for testing
 
 %% Parse inputs
 expectedSPD = {'Granada','D-series','Granada_sub'};
@@ -100,7 +100,7 @@ end
 
 if or(...
         and(strcmp(p.Results.SSF,'SS10'),strcmp(p.Results.lum,'SP')),...
-        and(strcmp(p.Results.SSF,'SP'),  strcmp(p.Results.lum,'CIE10')))
+        and(strcmp(p.Results.SSF,'SP'),  strcmp(p.Results.lum,'CIE_10')))
     error('Mismatch between SSF and lum')
 end
 

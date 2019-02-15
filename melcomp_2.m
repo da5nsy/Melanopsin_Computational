@@ -72,6 +72,8 @@ plt_lbls{11} = '(0.6373*L)+(0.3924*M)';
 plt_lbls{12} = 'r + i';
 
 if plt_3D || strcmp(p.Results.plt,'3D')
+    
+    figure,
    
     if ismember(p.Results.Z_ax,1:5)
         t_Z = LMSRI(p.Results.Z_ax,:,:); %temp Z
@@ -106,8 +108,6 @@ end
 
 %% Correction through rotation
 
-figure,
-
 plt_CTR = 0;
 
 %rotation matrix
@@ -131,6 +131,7 @@ rm=...
 lsri_rs=lsri(:,:)'*rm;
 
 if plt_CTR || strcmp(p.Results.plt,'CTR')
+    figure,
     scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
     hold on
     grid on
@@ -146,7 +147,7 @@ end
 
 %% Correction through subtractive shift
 
-plt_CTSS= 1;
+plt_CTSS= 0;
 
 lsri_ss = lsri; %shifted
 
@@ -164,9 +165,8 @@ if plt_CTSS
     xlabel('l'),ylabel('s2'),zlabel('i2');
     
     %view(90,0)
+    ylim([-0.02 0.04])
 end
-
-ylim([-0.02 0.04])
 
 %% Correction through multiplicative shift
 
@@ -175,7 +175,7 @@ ylim([-0.02 0.04])
 % Colour Constancy.
 % I suspect that this is not a feasible method.
 
-plt_CTMS = 1;
+plt_CTMS = 0;
 
 lsri_ms = lsri; %shifted
 

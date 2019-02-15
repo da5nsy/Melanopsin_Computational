@@ -19,7 +19,7 @@ recon_p2 = repmat(median(pc_p.score(:,1)),2600,1) * pc_p.coeff(:,1)' + pc_p.scor
 
 recon_p3 = repmat(median(pc_p.score(:,1)),2600,1) * pc_p.coeff(:,1)' + pc_p.score(:,3) * pc_p.coeff(:,3)';
 
-%recon_p3 = pc_p.score(:,1) * pc_p.coeff(:,1)' + pc_p.score(:,2:end) * pc_p.coeff(:,2:end)' + pc_p.mu;
+recon_p3 = pc_p.score(:,1) * pc_p.coeff(:,1)' + pc_p.score(:,2:end) * pc_p.coeff(:,2:end)' + pc_p.mu;
 %create set of illuminants with median pc1 + linspace(min(pc2,max(pc2),100(?))
 
 %create signals for made-up cone types

@@ -7,7 +7,7 @@ try
     nargin;
 catch
     clear, clc, close all
-    varargin = {};
+    varargin = {'SPD','Granada_sub','SRF','Vrhel_nat_2'};
 end
 
 default_mel_offset = 0;
@@ -54,26 +54,9 @@ rng(7); pltc_alt=pltc_alt(:,randperm(size(T_SRF,2)),:); %best combo for differen
 
 %% Plot third dimension
 
-plt_3D = 1; % hard-code, 0 = off, 1 = on
-try strcmp(plt,'3D'); % allow overwrite from function call
-    if strcmp(plt,'3D')
-        plt_3D = 1;
-    end
-catch
-end
-plt_locus = 1; % plot spectral locus in the MB diagram, 0 = off, 1 = on
+plt_3D = 0; % hard-code, 0 = off, 1 = on
 
-try
-    nargin; %are we inside a function?
-    if nargin < 4 %has this been specified in the call?
-        Z_ax = 9; % if not, provide default
-        disp('default: Z-axis is ''i''')
-    end    
-catch
-    % we're not inside a function, hard-code your choice below
-    Z_ax = 9;
-    disp('default: Z-axis is ''i''')
-end
+plt_locus = 0; % plot spectral locus in the MB diagram, 0 = off, 1 = on
 
 plt_lbls{1}  = 'L'; %writing out this way so that there's a quick reference as to which value of Z_ax does what
 plt_lbls{2}  = 'M';
@@ -88,24 +71,23 @@ plt_lbls{10} = 'L+M';
 plt_lbls{11} = '(0.6373*L)+(0.3924*M)';
 plt_lbls{12} = 'r + i';
 
-if plt_3D
+if plt_3D || strcmp(p.Results.plt,'3D')
    
-    if ismember(Z_ax,1:5)
-        t_Z = LMSRI(Z_ax,:,:); %temp Z
-    elseif ismember(Z_ax,6:9)
-        t_Z = lsri(Z_ax-5,:,:);
-    elseif Z_ax == 10
+    if ismember(p.Results.Z_ax,1:5)
+        t_Z = LMSRI(p.Results.Z_ax,:,:); %temp Z
+    elseif ismember(p.Results.Z_ax,6:9)
+        t_Z = lsri(p.Results.Z_ax-5,:,:);
+    elseif p.Results.Z_ax == 10
         t_Z = LMSRI(1,:,:)+LMSRI(2,:,:);
-    elseif Z_ax == 11
+    elseif p.Results.Z_ax == 11
         t_Z = 0.6373*LMSRI(1,:,:)+0.3924*LMSRI(2,:,:);
-    elseif Z_ax == 12
+    elseif p.Results.Z_ax == 12
         t_Z = lsri(3,:,:)+lsri(4,:,:);
-    end
+    end    
     
-    
-    scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_alt(:,:)','v','filled','MarkerFaceAlpha',.4,'MarkerEdgeAlpha',.4) %with arbitrary colours
+    scatter3(lsri(1,:),lsri(2,:),t_Z(1,:),[],pltc_alt(:,:)','v','filled','MarkerFaceAlpha',.4,'MarkerEdgeAlpha',.4)
     hold on
-    zlabel(plt_lbls{Z_ax})
+    zlabel(plt_lbls{p.Results.Z_ax})
 
     if plt_locus
         MB_locus = LMSToMacBoyn(T_SSF(:,1:3)',T_SSF(:,1:3)',T_lum');
@@ -115,25 +97,22 @@ if plt_3D
     
     grid on
     %axis equal
-    xlim([0 1]), ylim([0 1])
+    %xlim([0 1]), ylim([0 1])
     xlabel('l'),ylabel('s'), 
-    %title(plt_lbls{Z_ax})
-    %view(3) %view(188,46)
+    %title(plt_lbls{p.Results.Z_ax})
+    %view(3) 
+    view(188,46)
 end
 
 %% Correction through rotation
 
-plt_CTR = 1;
-try strcmp(plt,'CTR');
-    if strcmp(plt,'CTR')
-        plt_CTR = 1;
-    end
-catch
-end
+figure,
+
+plt_CTR = 0;
 
 %rotation matrix
-ang1  = 0.7; %angle in radians, just eyeballed (for Granada data)
-ang2 = -0.1;
+ang1  = 0.27; %angle in radians, just eyeballed (for Granada data)
+ang2  = -0.90;
 
 rm=...
     [cos(ang2),0,0,sin(ang2);...
@@ -149,14 +128,14 @@ rm=...
 %     0,-sin(ang1),0,cos(ang1)]; 
 
 %apply rotation
-lsri_r=lsri(:,:)'*rm;
+lsri_rs=lsri(:,:)'*rm;
 
-if plt_CTR
+if plt_CTR || strcmp(p.Results.plt,'CTR')
     scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
     hold on
     grid on
     % %xlim([0 1]), ylim([-1 1]), zlim([0,2])
-    scatter3(lsri_r(:,1),lsri_r(:,2),lsri_r(:,4),[],pltc_alt(:,:)','^','filled')
+    scatter3(lsri_rs(:,1),lsri_rs(:,2),lsri_rs(:,4),[],pltc_alt(:,:)','^','filled')
     
     legend({'Original','Rotated'},'Location','best')
     xlabel('l'),ylabel('s'),zlabel('i');
@@ -171,39 +150,51 @@ plt_CTSS= 1;
 
 lsri_ss = lsri; %shifted
 
-lsri_ss(2,:) = lsri(2,:)-(lsri(4,:)-0.27);
+lsri_ss(1,:) = lsri(1,:)-(lsri(4,:)*-1.2);
+lsri_ss(2,:) = lsri(2,:)-(lsri(4,:)*0.27);
 
 if plt_CTSS
-    figure, hold on, axis equal, grid on
+    figure, hold on, 
+    %axis equal, 
+    grid on
     scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
     scatter3(lsri_ss(1,:),lsri_ss(2,:),lsri_ss(4,:),[],pltc_alt(:,:)','^','filled')
     
     legend({'Original','Shifted'},'Location','best')
     xlabel('l'),ylabel('s2'),zlabel('i2');
     
-    view(90,0)
+    %view(90,0)
 end
+
+ylim([-0.02 0.04])
 
 %% Correction through multiplicative shift
 
 % WORK IN PROGRESS %
+% This runs the risk of just making the values really tiny, aka Ford Model
+% Colour Constancy.
+% I suspect that this is not a feasible method.
 
-plt_CTMS = 0;
+plt_CTMS = 1;
 
 lsri_ms = lsri; %shifted
 
 %lsri_ms(2,:) = lsri(2,:).*(1./(lsri(4,:)/max(lsri(4,:))));
-lsri_ms(2,:) = lsri(2,:).*((max(lsri(4,:))-lsri(4,:)));
+%lsri_ms(2,:) = lsri(2,:).*((max(lsri(4,:))-lsri(4,:)));
+
+lsri_ms(2,:) = lsri(2,:).*lsri(4,:)*10;
 
 if plt_CTMS
-    figure, hold on, axis equal, grid on
+    figure, hold on, 
+    %axis equal, 
+    grid on
     scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
     scatter3(lsri_ms(1,:),lsri_ms(2,:),lsri_ms(4,:),[],pltc_alt(:,:)','^','filled')
     
     legend({'Original','Shifted'},'Location','best')
-    xlabel('l'),ylabel('s2'),zlabel('i2');
+    xlabel('l'),ylabel('s2'),zlabel('i');
     
-    view(90,0)
+    %view(90,0)
 end
 
 %% PCA of signals

@@ -269,7 +269,7 @@ end
 
 %% Correction through rotation
 
-plt_CTR = 0;
+plt_CTR = 1;
 try strcmp(plt,'CTR');
     if strcmp(plt,'CTR')
         plt_CTR = 1;

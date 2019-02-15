@@ -12,9 +12,7 @@ catch
     prog=1;
     t_range = [-100,5,250];
     disp('Using default values');
-    spd = 1;
 end
-spd = 1;
 
 %Compute melanopic peak sensitivity
 load T_melanopsin T_melanopsin S_melanopsin; 
@@ -25,7 +23,7 @@ Ip = S_mel(mloc); %Mel peak
 t_range_ex=t_range(1):t_range(2):t_range(3);
 
 for i=t_range_ex
-    pc(i-t_range(1)+1) = melcomp_2(spd,1,1,9,NaN,i); %principal components    
+    pc(i-t_range(1)+1) = melcomp_2('SPD','D-series','SRF','Vrhel_nat_1','SSF','SP','Z_ax',9,'mel_offset',i); %principal components    
     ex(i-t_range(1)+1,:) = pc(i-t_range(1)+1).explained; %explained
     if prog %progress
         disp(i)
@@ -87,15 +85,16 @@ axis tight
 plt_viz = 1;
 
 if plt_viz
-    for i = 1:length(locs)
-        figure,
-        melcomp_2(spd,1,1,9,'3D',t_range_ex(locs(i)));
+    for i = 1:length(locs)       
+        melcomp_2('SPD','D-series','SRF','Vrhel_nat_1','SSF','SP','Z_ax',9,'plt','3D','mel_offset',t_range_ex(locs(i)));
         title(Ip+t_range_ex(locs(i)))
     end
 end
 
 %%
 %Old way which plots the changing shape 
+%need to turn 'figure' command in melcomp_2 plt_3D off to get this to
+%display as planned
 
 t_range = [-100,2,200];
 
@@ -103,7 +102,7 @@ figure('units','normalized','outerposition',[0.3 0.3 0.5 0.5]), hold on
 
 for i=t_range(1):t_range(2):t_range(3)
     subplot(1,2,1)
-    melcomp_2(1,1,1,9,'3D',i);
+    melcomp_2('SPD','D-series','SRF','Vrhel_nat_1','SSF','SP','Z_ax',9,'plt','3D','mel_offset',i);
     view(20,10)
     camproj('perspective')
     zlim([0 3])
@@ -111,7 +110,7 @@ for i=t_range(1):t_range(2):t_range(3)
     rmv_lbls
     
     subplot(1,2,2)
-    melcomp_2(1,1,1,9,'3D',i);
+    melcomp_2('SPD','D-series','SRF','Vrhel_nat_1','SSF','SP','Z_ax',9,'plt','3D','mel_offset',i);
     view(22,10)
     camproj('perspective')
     zlim([0 3])
@@ -138,7 +137,7 @@ figure('units','normalized','outerposition',[0.3 0.3 0.5 0.5]), hold on
 
 for i=t_range(1):t_range(2):t_range(3)
     subplot(ceil(sqrt(lt)),ceil(sqrt(lt)),counter)
-    melcomp_2(1,1,1,9,'3D',i);
+    melcomp_2('SPD','D-series','SRF','Vrhel_nat_1','SSF','SP','Z_ax',9,'plt','3D','mel_offset',i);
     view(-170,45)
     xlim([0.5 1])
     zlim([0 1])
@@ -149,18 +148,5 @@ for i=t_range(1):t_range(2):t_range(3)
     counter = counter +1;
     
 end
-
-%%
-% 
-% clear, clc, close all
-% 
-% figure,
-% melcomp_2(1,1,2,9,'3D',-50);
-% 
-figure,
-melcomp_2(2,1,2,9,'3D');
-% 
-% figure,
-% melcomp_2(1,1,2,9,'3D',75);
 
 end

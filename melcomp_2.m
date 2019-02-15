@@ -73,7 +73,7 @@ plt_lbls{12} = 'r + i';
 
 if plt_3D || strcmp(p.Results.plt,'3D')
     
-    figure,
+    %figure,
    
     if ismember(p.Results.Z_ax,1:5)
         t_Z = LMSRI(p.Results.Z_ax,:,:); %temp Z

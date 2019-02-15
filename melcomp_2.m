@@ -111,7 +111,7 @@ end
 plt_CTR = 0;
 
 %rotation matrix
-ang1  = 0.27; %angle in radians, just eyeballed (for Granada data)
+ang1  = 0.30; %angle in radians, just eyeballed (for Granada data)
 ang2  = -0.90;
 
 rm=...
@@ -131,7 +131,7 @@ rm=...
 lsri_rs=lsri(:,:)'*rm;
 
 if plt_CTR || strcmp(p.Results.plt,'CTR')
-    figure,
+    %figure,
     scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
     hold on
     grid on

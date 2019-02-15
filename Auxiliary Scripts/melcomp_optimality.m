@@ -80,73 +80,73 @@ end
 legend('Location','best')
 axis tight
 
-%% See what the data looks like in 3 dimensions at the peaks pulled out by the previous calcs
-
-plt_viz = 1;
-
-if plt_viz
-    for i = 1:length(locs)       
-        melcomp_2('SPD','D-series','SRF','Vrhel_nat_1','SSF','SP','Z_ax',9,'plt','3D','mel_offset',t_range_ex(locs(i)));
-        title(Ip+t_range_ex(locs(i)))
-    end
-end
-
-%%
-%Old way which plots the changing shape 
-%need to turn 'figure' command in melcomp_2 plt_3D off to get this to
-%display as planned
-
-t_range = [-100,2,200];
-
-figure('units','normalized','outerposition',[0.3 0.3 0.5 0.5]), hold on
-
-for i=t_range(1):t_range(2):t_range(3)
-    subplot(1,2,1)
-    melcomp_2('SPD','D-series','SRF','Vrhel_nat_1','SSF','SP','Z_ax',9,'plt','3D','mel_offset',i);
-    view(20,10)
-    camproj('perspective')
-    zlim([0 3])
-    text(0.1,0.1,num2str(i))
-    rmv_lbls
-    
-    subplot(1,2,2)
-    melcomp_2('SPD','D-series','SRF','Vrhel_nat_1','SSF','SP','Z_ax',9,'plt','3D','mel_offset',i);
-    view(22,10)
-    camproj('perspective')
-    zlim([0 3])
-    text(0.1,0.1,num2str(i))
-    rmv_lbls
-   
-    drawnow
-    if i == t_range(1)
-        waitforbuttonpress
-    end
-    if i ~= t_range(3)
-        clf
-    end
-    
-end
-
-%%
-
-t_range = [-100,20,200];
-lt = length(t_range(1):t_range(2):t_range(3));
-counter = 1;
-
-figure('units','normalized','outerposition',[0.3 0.3 0.5 0.5]), hold on
-
-for i=t_range(1):t_range(2):t_range(3)
-    subplot(ceil(sqrt(lt)),ceil(sqrt(lt)),counter)
-    melcomp_2('SPD','D-series','SRF','Vrhel_nat_1','SSF','SP','Z_ax',9,'plt','3D','mel_offset',i);
-    view(-170,45)
-    xlim([0.5 1])
-    zlim([0 1])
-    text(0.6,0.1,num2str(i))
-    rmv_lbls
-   
-    drawnow  
-    counter = counter +1;
-    
-end
+% %% See what the data looks like in 3 dimensions at the peaks pulled out by the previous calcs
+% 
+% plt_viz = 1;
+% 
+% if plt_viz
+%     for i = 1:length(locs)       
+%         melcomp_2('SPD','D-series','SRF','Vrhel_nat_1','SSF','SP','Z_ax',9,'plt','3D','mel_offset',t_range_ex(locs(i)));
+%         title(Ip+t_range_ex(locs(i)))
+%     end
+% end
+% 
+% %%
+% %Old way which plots the changing shape 
+% %need to turn 'figure' command in melcomp_2 plt_3D off to get this to
+% %display as planned
+% 
+% t_range = [-100,2,200];
+% 
+% figure('units','normalized','outerposition',[0.3 0.3 0.5 0.5]), hold on
+% 
+% for i=t_range(1):t_range(2):t_range(3)
+%     subplot(1,2,1)
+%     melcomp_2('SPD','D-series','SRF','Vrhel_nat_1','SSF','SP','Z_ax',9,'plt','3D','mel_offset',i);
+%     view(20,10)
+%     camproj('perspective')
+%     zlim([0 3])
+%     text(0.1,0.1,num2str(i))
+%     rmv_lbls
+%     
+%     subplot(1,2,2)
+%     melcomp_2('SPD','D-series','SRF','Vrhel_nat_1','SSF','SP','Z_ax',9,'plt','3D','mel_offset',i);
+%     view(22,10)
+%     camproj('perspective')
+%     zlim([0 3])
+%     text(0.1,0.1,num2str(i))
+%     rmv_lbls
+%    
+%     drawnow
+%     if i == t_range(1)
+%         waitforbuttonpress
+%     end
+%     if i ~= t_range(3)
+%         clf
+%     end
+%     
+% end
+% 
+% %%
+% 
+% t_range = [-100,20,200];
+% lt = length(t_range(1):t_range(2):t_range(3));
+% counter = 1;
+% 
+% figure('units','normalized','outerposition',[0.3 0.3 0.5 0.5]), hold on
+% 
+% for i=t_range(1):t_range(2):t_range(3)
+%     subplot(ceil(sqrt(lt)),ceil(sqrt(lt)),counter)
+%     melcomp_2('SPD','D-series','SRF','Vrhel_nat_1','SSF','SP','Z_ax',9,'plt','3D','mel_offset',i);
+%     view(-170,45)
+%     xlim([0.5 1])
+%     zlim([0 1])
+%     text(0.6,0.1,num2str(i))
+%     rmv_lbls
+%    
+%     drawnow  
+%     counter = counter +1;
+%     
+% end
 
 end

@@ -2,6 +2,8 @@ function melcomp_guess(offset)
 
 % Function for trying to guess the illuminant from the S:I ratio
 
+% Needs updating to call melcomp_2 correctly
+
 try
     nargin;
 catch

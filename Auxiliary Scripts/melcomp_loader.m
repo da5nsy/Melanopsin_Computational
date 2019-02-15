@@ -47,7 +47,7 @@ if strcmp(p.Results.SPD,'D-series')
     D_CCT=1./linspace(1/3600,1/25000,20); %non-linear range, aiming to better reproduce observed variation
     load B_cieday.mat B_cieday S_cieday
     T_SPD = GenerateCIEDay(D_CCT,[B_cieday]); %these appear to be linearly upsampled from 10nm intervals (see 'cieday investigation.m' https://github.com/da5nsy/General-Purpose-Functions/blob/3ee587429e9c4f3dd52d64acd95acf82d7e05f47/cieday%20investigation.m)
-    T_SPD_n2 = T_SPD./max(T_SPD); %normalise
+    T_SPD = T_SPD./max(T_SPD); %normalise
     S_SPD = S_cieday;
 end
 

@@ -1,8 +1,16 @@
 % Correlation matrices of natural reflectances
 
-%% Load data
-
 clear, clc, close all
+
+plot_where = [500,200];
+plot_size  = [800,400];
+
+base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\nat_corr';
+
+p = 1; % 0 = figures display but don't save. 1 = figures display and save.
+set(0,'defaultAxesFontName', 'Courier')
+
+%% Load data
 
 base = 'C:\Users\cege-user\Documents\Large data\Foster Images\';
 for i=1:4 %2002 images

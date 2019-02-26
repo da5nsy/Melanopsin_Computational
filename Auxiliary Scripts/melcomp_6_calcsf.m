@@ -38,7 +38,7 @@ for s_cal_val = s_cal_range
     if plot_iterations
         cla reset
         scatter(lsri(1,:),lsri(2,:)+s_cal_val*lsri(4,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-        title(l_cal_val)
+        title(s_cal_val)
         drawnow
     end
     s_cal_val_std = [s_cal_val_std, std(lsri(2,:)+s_cal_val*lsri(4,:))];

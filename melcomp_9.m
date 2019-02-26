@@ -44,7 +44,7 @@ yticks([0 max_s_scale])
 
 lsri_c = lsri(:,:); %would be nice to not do this transformation, for easier access later, but I'd need to be very careful to check that it didn't change the function of the calculation below
 
-for i=1:4
+for i=1:size(lsri,1)
     lsri_c(i,:) = (lsri_c(i,:) - mean(lsri_c(i,:)))./std(lsri_c(i,:));
 end
 
@@ -55,33 +55,38 @@ axis equal
 
 lsri_c = reshape(lsri_c,size(lsri));
 
-%% Calculate corrections
-
-% Grey world
+%% Grey world
 
 lsri_m2 = mean(lsri_c,2);
 % hold on
 % scatter(lsri_m2(1,:),lsri_m2(2,:),'k.')
 
-lsri_gw = lsri_c - repmat(lsri_m2,1,10,1);
-% figure, hold on
-% scatter(lsri_gw(1,:),lsri_gw(2,:),...
-%     [],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-% scatter(0,0,'k.')
-
-% Bright is white
-
-whites =  max(lsri_c,[],2);
-lsri_bw = lsri_c - repmat(whites,1,10,1);
+lsri_gw = lsri_c - repmat(lsri_m2,1,size(lsri,2),1);
 figure, hold on
-scatter(lsri_bw(1,:),lsri_bw(2,:),...
+scatter(lsri_gw(1,:),lsri_gw(2,:),...
     [],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
 scatter(0,0,'k.')
 
+axis equal
+xlim([-3 3])
+ylim([-3 3])
+cleanTicks
 
-% Melanopsin
+%% Melanopsin
 
-%% Compute 'success'
+[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,0:0.01:1,-2:0.01:-0.5,0,pltc_alt); %calculates scaling factors
 
+lsri_mel = [lsri_c(1,:,:)+sf_l*lsri_c(4,:,:);lsri_c(2,:,:)+sf_s*lsri_c(4,:,:)];
 
+figure
+scatter(lsri_mel(1,:),lsri_mel(2,:),...
+    [],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
 
+axis equal
+xlim([-3 3])
+ylim([-3 3])
+cleanTicks
+
+%%
+ForsythMeasurementOfSuccess(lsri_gw,pltc_alt)
+ForsythMeasurementOfSuccess(lsri_mel,pltc_alt)

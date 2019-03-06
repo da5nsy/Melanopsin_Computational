@@ -8,6 +8,12 @@
 % in Mausfeld, R. & Heyer, D. Colour Perception: Mind and the Physical World. 
 % (Oxford University Press, USA, 2004).
 
+% This essentially shows that from knowing the matrix g (which bundles 
+% together sensor spectral sensitivy, and bases for illuminant and 
+% surfaces) and the weights e (illuminant basis weights), it is possible 
+% to reconstruct the spectral reflectance bases s (and thus the full
+% spectral reflectance S)
+
 clear, clc, close all
 
 %% For illuminant and reflectance, load basis functions and define:
@@ -15,7 +21,7 @@ clear, clc, close all
 % 2. Basis weights
 % 3. Full spectra
 
-plt_lin = 0; %want to plot?
+plt_lin = 1; %want to plot?
 
 load B_vrhel %basis functions of reflectance measurements
 B_vrhel = B_vrhel(:,1:3); %Let's pretend it only has 3 basis functions
@@ -31,6 +37,7 @@ e(1) = 1; %GenerateCIEDay sets e(1) = 1
 
 if plt_lin %visualise the basis functions and the full spectra
     figure, hold on
+    axis tight
     plot(SToWls(S_cieday),E/max(E),'b','LineWidth',4)
     for i =1:3
         plot(SToWls(S_cieday),B_cieday(:,i)*e(i)/max(E),'b--','LineWidth',4-i)
@@ -127,8 +134,12 @@ p_alt7 = eg*s;
 eg_inv = inv(eg); 
 s_recovered = eg_inv*p;
 
+% alternative formulation:
+%s_recovered = eg\p;
+
 s
 s_recovered
+
 %s-s_recovered
 % Essentially the same. Presumably just precision errors
 

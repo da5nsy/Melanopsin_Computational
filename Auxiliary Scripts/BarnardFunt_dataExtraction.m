@@ -46,6 +46,22 @@ D = cell2mat(D');
 %(end 1995)
 
 %%
+close all
+
+figure,
+plot(D(:,1:57)) %trying to work out what they've imaged, but I can't see the split between their own data and the macbeth
+figure,
+plot(D(:,58:82))
+
+figure,
+plot(D(:,1:24))
+figure,
+plot(D(:,25:82))
+
+% I think it's the second version of the split, because otherwise a grey
+% scale gets split in two (though I would've expected the grey scale to be
+% in the macbeth section...)
+%%
 
 %I've got the data just about in shape, but I'd be cautious about using
 %them since I don't know particularly well what the sampling range/interval

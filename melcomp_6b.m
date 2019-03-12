@@ -22,7 +22,7 @@ max_s_scale = 0.04;
 set(0,'defaultAxesFontName', 'Courier')
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_6b_figs';
-print_figures = 1;
+print_figures = 0;
 
 %% Load Data
 
@@ -75,7 +75,7 @@ rng(7); pltc_alt=pltc_alt(:,randperm(size(T_SRF,2)),:); %best combo for differen
 
 %plot MB with points, not normalised
 rng(1); n_ill = randi(size(T_SPD,2)); %pick a random spectrum (55th under current settings, changes if you downsample the illuminant data, for example)
-scatter(lsri(1,:,n_ill),lsri(2,:,n_ill),[],pltc_alt(:,:,n_ill)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+scatter(lsri(1,:,n_ill),lsri(2,:,n_ill),'k','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
 if print_figures
     save2pdf([base,'\MBsingleset_nn.pdf'])
 end

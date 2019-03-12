@@ -7,7 +7,7 @@ function [T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(varargin)
 
 %% Parse inputs
 expectedSPD = {'Granada','D-series','Granada_sub'};
-expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_nat_extended','Vrhel_full','Foster'};
+expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_nat_extended','Vrhel_full','Foster','bananas'};
 expectedSSF = {'SS10','SP'};
 expectedlum = {'CIE_10','SP'};
 
@@ -101,6 +101,11 @@ if strcmp(p.Results.SRF,'Foster') %this is a little messy. Need to check whether
     %     end
     %S_refs=[410,10,31]; %for 2002 data
     S_SRF=[400,10,33];%for 2004 data (except #9)
+end
+
+if strcmp(p.Results.SRF,'bananas')  
+    T_SRF = xlsread('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\UCDavis_Banana_Peel_ReflectanceData.xlsx','Sheet1','C2:AG11')';
+    S_SRF = WlsToS([450:10:750]');
 end
 
 %% T_SSF

@@ -94,7 +94,7 @@ if print_figures
     save2pdf([base,'\MBsingleset_n_text.pdf'])
 end
 
-%scatter(0.699237,0.025841,'rs') EE white
+%scatter(0.699237,0.025841,'rs') %EE white
 
 %% Plot chromaticities of reflectance samples under all illums
 
@@ -237,8 +237,12 @@ if print_figures
 end
 
 [sf_l,sf_s] = melcomp_6_calcsf(lsri); %calculates scaling factors
+lsri_melcorr = lsri;
+lsri_melcorr(1,:) = lsri_melcorr(1,:)+sf_l*lsri_melcorr(4,:);
+lsri_melcorr(2,:) = lsri_melcorr(2,:)+sf_s*lsri_melcorr(4,:);
+
 cla
-scatter(lsri(1,:)+sf_l*lsri(4,:),lsri(2,:)+sf_s*lsri(4,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+scatter(lsri_melcorr(1,:),lsri_melcorr(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
 axis('auto')
 xticks([])
 yticks([])
@@ -249,6 +253,8 @@ ylabel('{\its}_{MB} - {\itk_2i}_{MB}');
 if print_figures
     save2pdf([base,'\MBminMB3.pdf'])
 end
+
+save('lsri_melcorr.mat','lsri_melcorr');
 
 %% Plot spectral reflectance functions
 

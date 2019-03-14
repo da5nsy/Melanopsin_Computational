@@ -1,5 +1,10 @@
 function [FMS] = ForsythMeasurementOfSuccess(lsri,pltc_alt)
 
+% Forsyth, D.A., 1990. A novel algorithm for color constancy. 
+% International Journal of Computer Vision, 5(1), pp.5–35.
+% https://doi.org/10.1007/BF00056770
+
+
 %%  median distance of the outputs from the average 
 
 %average

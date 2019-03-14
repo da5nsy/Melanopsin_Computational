@@ -42,6 +42,16 @@ yticks([0 max_s_scale])
 
 %% Normalise data for std and set mean to 0
 
+% % Testing standardness of distributions
+% hk=10;
+% figure,hist(lsri_c(1,:),hk)
+% figure,hist(lsri_c(2,:),hk)
+% 
+% figure,hist(log(lsri_c(1,:)),hk)
+% figure,hist(log(lsri_c(2,:)),hk)
+
+lsri = log(lsri);
+
 lsri_c = lsri(:,:); %would be nice to not do this transformation, for easier access later, but I'd need to be very careful to check that it didn't change the function of the calculation below
 
 for i=1:size(lsri,1)
@@ -54,6 +64,8 @@ scatter(lsri_c(1,:),lsri_c(2,:),...
 axis equal
 
 lsri_c = reshape(lsri_c,size(lsri));
+
+
 
 %% Grey world
 
@@ -87,7 +99,8 @@ xlim([-3 3])
 ylim([-3 3])
 cleanTicks
 
-%%
+%% Forsyth measure
+
 ForsythMeasurementOfSuccess(lsri_gw,pltc_alt)
 ForsythMeasurementOfSuccess(lsri_mel,pltc_alt)
 

@@ -129,16 +129,18 @@ end
 %% Grey world adaptation
 corrector = lsri_m2-lsri_m2(:,:,1);
 lsri_mc = lsri_m2 - corrector;
-lsri_c = lsri - corrector;
+lsri_GW = lsri - corrector;
 cla
 scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
-scatter(lsri_c(1,:),lsri_c(2,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+scatter(lsri_GW(1,:),lsri_GW(2,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
 scatter(lsri_mc(1,1,1),lsri_mc(2,1,1),'r*')
 xlabel('{\it }_{ }');
 ylabel('{\it }_{ }');
 if print_figures
     save2pdf([base,'\MBc.pdf'])
 end
+
+save('lsri_GW.mat','lsri_GW');
 
 %% Splits
 

@@ -106,6 +106,18 @@ ForsythMeasurementOfSuccess(lsri_mel,pltc_alt)
 
 %% kmeans
 
+km_idx = kmeans(lsri_mel([1,2],:)',size(lsri,2),'Replicates',50);
+
+pltc_alt2 = pltc_alt(:,:,1);
+
+figure
+scatter(lsri_mel(1,:),lsri_mel(2,:),...
+    [],pltc_alt2(:,km_idx)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+
+axis equal
+
+
 % % Silloutte
 
 % % Entropy / sum-non-mode
+

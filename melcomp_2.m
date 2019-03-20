@@ -48,13 +48,15 @@ parse(p,varargin{:});
 
 [LMSRI, lsri] = melcomp_colorimetry(T_SPD, T_SRF, T_SSF, T_lum, S_sh);
 
+%lsri = log(lsri);
+
 %compute colours for display
 pltc_alt = repmat(jet(size(T_SRF,2))',1,1,size(T_SPD,2));
 rng(7); pltc_alt=pltc_alt(:,randperm(size(T_SRF,2)),:); %best combo for differentiating close chromaticities
 
 %% Plot third dimension
 
-plt_3D = 0; % hard-code, 0 = off, 1 = on
+plt_3D = 1; % hard-code, 0 = off, 1 = on
 
 plt_locus = 0; % plot spectral locus in the MB diagram, 0 = off, 1 = on
 
@@ -108,7 +110,7 @@ end
 
 %% Correction through rotation
 
-plt_CTR = 0;
+plt_CTR = 1;
 
 %rotation matrix
 ang1  = 0.30; %angle in radians, just eyeballed (for Granada data)
@@ -147,7 +149,7 @@ end
 
 %% Correction through subtractive shift
 
-plt_CTSS= 0;
+plt_CTSS= 1;
 
 lsri_ss = lsri; %shifted
 
@@ -175,23 +177,24 @@ end
 % Colour Constancy.
 % I suspect that this is not a feasible method.
 
-plt_CTMS = 0;
+plt_CTMS = 1;
 
 lsri_ms = lsri; %shifted
 
 %lsri_ms(2,:) = lsri(2,:).*(1./(lsri(4,:)/max(lsri(4,:))));
 %lsri_ms(2,:) = lsri(2,:).*((max(lsri(4,:))-lsri(4,:)));
 
-lsri_ms(2,:) = lsri(2,:).*lsri(4,:)*10;
+lsri_ms(1,:) = lsri(1,:)./lsri(4,:);
+lsri_ms(2,:) = lsri(2,:)./lsri(4,:);
 
 if plt_CTMS
     figure, hold on, 
     %axis equal, 
     grid on
-    scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
+    %scatter3(lsri(1,:),lsri(2,:),lsri(4,:),[],pltc_alt(:,:)','v','filled')
     scatter3(lsri_ms(1,:),lsri_ms(2,:),lsri_ms(4,:),[],pltc_alt(:,:)','^','filled')
     
-    legend({'Original','Shifted'},'Location','best')
+    %legend({'Original','Shifted'},'Location','best')
     xlabel('l'),ylabel('s2'),zlabel('i');
     
     %view(90,0)

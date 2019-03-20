@@ -86,7 +86,7 @@ cleanTicks
 
 %% Melanopsin
 
-[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,0:0.01:1,-2:0.01:-0.5,0,pltc_alt); %calculates scaling factors
+[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,0:0.01:1,-2:0.01:-0.5,1,pltc_alt); %calculates scaling factors
 
 lsri_mel = [lsri_c(1,:,:)+sf_l*lsri_c(4,:,:);lsri_c(2,:,:)+sf_s*lsri_c(4,:,:)];
 
@@ -117,7 +117,13 @@ scatter(lsri_mel(1,:),lsri_mel(2,:),...
 axis equal
 
 
+
 % % Silloutte
+
+% %not sure if this is right:
+% figure,
+% silhouette(lsri_mel([1,2],:)',km_idx)
+
 
 % % Entropy / sum-non-mode
 

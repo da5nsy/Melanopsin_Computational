@@ -22,7 +22,7 @@ max_s_scale = 0.04;
 set(0,'defaultAxesFontName', 'Courier')
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_6b_figs';
-print_figures = 0;
+print_figures = 1;
 
 %% Load Data
 
@@ -52,8 +52,8 @@ xlim([0.5 1])
 ylim([0 1])
 xticks([0.5 1])
 yticks([0 1])
-xlabel('{\itl}_{MB}');
-ylabel('{\its}_{MB}');
+xlabel('{\itl}_{MB,10}');
+ylabel('{\its}_{MB,10}');
 
 if print_figures
     save2pdf([base,'\MB.pdf'])
@@ -93,7 +93,7 @@ end
 load sur_vrhel.mat
 labels_vrhel(137).label = 'peach skin -- yellow'; %correct typo
 for i=1:length(refs)
-    text(lsri(1,i,n_ill)+0.005,lsri(2,i,n_ill)+0.00015,labels_vrhel(refs(i)).label,'Rotation',10,'FontName','Courier')
+    text(lsri(1,i,n_ill)+0.005,lsri(2,i,n_ill)+0.00015,labels_vrhel(refs(i)).label,'Rotation',5,'FontName','Courier')
 end
 if print_figures
     save2pdf([base,'\MBsingleset_n_text.pdf'])
@@ -103,166 +103,35 @@ end
 
 %% Plot chromaticities of reflectance samples under all illums
 
-% all points, in colour
-cla
-scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
-scatter(lsri(1,:),lsri(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-if print_figures
-    save2pdf([base,'\MBall.pdf'])
-end
-
 %all points in grey
 cla
 scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
 scatter(lsri(1,:),lsri(2,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+scatter(lsri(1,:,n_ill),lsri(2,:,n_ill),'k','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+for i=1:length(refs)
+    text(lsri(1,i,n_ill)+0.005,lsri(2,i,n_ill)+0.00015,labels_vrhel(refs(i)).label,'Rotation',5,'FontName','Courier')
+end
 if print_figures
     save2pdf([base,'\MBallgrey.pdf'])
 end
 
-%with means under each illuminant
-lsri_m2 = mean(lsri,2);
-scatter(squeeze(lsri_m2(1,:,:)),squeeze(lsri_m2(2,:,:)),'r*')
-if print_figures
-    save2pdf([base,'\MBmeans.pdf'])
-end
 
-%% Grey world adaptation
-corrector = lsri_m2-lsri_m2(:,:,1);
-lsri_mc = lsri_m2 - corrector;
-lsri_GW = lsri - corrector;
-cla
-scatter(spectral_locus(1,:),spectral_locus(2,:),'k','filled')
-scatter(lsri_GW(1,:),lsri_GW(2,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-scatter(lsri_mc(1,1,1),lsri_mc(2,1,1),'r*')
-xlabel('{\it }_{ }');
-ylabel('{\it }_{ }');
-if print_figures
-    save2pdf([base,'\MBc.pdf'])
-end
 
-save('lsri_GW.mat','lsri_GW');
 
-%% Splits
 
-figure('Name','split','Position',[plot_where plot_size]), hold on
 
-s(1) = subplot(1,2,1);
-hold on
-s(2) = subplot(1,2,2);
-hold on
 
-xlim(s(1),[min_l_scale max_l_scale])
-xticks(s(1),[min_l_scale max_l_scale])
-xlabel(s(1),'{\itl}_{MB}');
-yticks(s(1),[])
 
-xlim(s(2),[0 max_s_scale])
-xticks(s(2),[0 max_s_scale])
-xlabel(s(2),'{\its}_{MB}');
-yticks(s(2),[])
 
-if print_figures
-    save2pdf([base,'\split_empty.pdf']) %blank one for clarity of introduction in presentation
-end
 
-ylabel(s(1),'{\itI}');
-scatter(s(1),lsri(1,:),LMSRI(5,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-scatter(s(2),lsri(2,:),LMSRI(5,:),[],[0.5,0.5,0.5],'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-yticks(s(1),[min(ylim),max(ylim)])
-yticks(s(2),[])
 
-save2pdf([base,'\split_I_grey.pdf'])
 
-%LMSRI (with category colours)
-plotOrderNums = [5,1,2,3];
-plotOrderNames = {'I','L','M','S'};
-for i=1:length(plotOrderNums)
-    cla(s(1))
-    cla(s(2))
-    
-    ylabel(s(1),['{\it',plotOrderNames{i},'}']);
-    
-    scatter(s(1),lsri(1,:),LMSRI(plotOrderNums(i),:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-    scatter(s(2),lsri(2,:),LMSRI(plotOrderNums(i),:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-    
-    yticks(s(1),[min(ylim),max(ylim)])
-    yticks(s(2),[])
-    if print_figures
-        save2pdf([base,'/split_',plotOrderNames{i},'.pdf'])
-    end
-end
 
-%lsri
-plotOrderNums = [1,2,4];
-plotOrderNames = {'{\itl}_{MB}','{\its}_{MB}','{\iti}_{MB}'};
-plotOrderSaveNames = {'lmb','smb','imb'};
-for i=1:length(plotOrderNums)
-    cla(s(1))
-    cla(s(2))
-    
-    ylabel(s(1),plotOrderNames{i});
-    
-    scatter(s(1),lsri(1,:),lsri(plotOrderNums(i),:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-    scatter(s(2),lsri(2,:),lsri(plotOrderNums(i),:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-    
-    yticks(s(1),[min(ylim),max(ylim)])
-    yticks(s(2),[])
-    
-    if print_figures
-        save2pdf([base,'/split_',plotOrderSaveNames{i},'.pdf'])
-    end
-end
 
-%% Calibartion by l, s or i
 
-figure(1)
 
-cla
-scatter(lsri(1,:)-lsri(1,:),lsri(2,:)-lsri(1,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-axis('auto')
-xticks([])
-yticks([])
 
-xlabel('{\itl}_{MB} - {\itl}_{MB}');
-ylabel('{\its}_{MB} - {\itl}_{MB}');
-
-if print_figures
-    save2pdf([base,'\MBminMB1.pdf'])
-end
-
-cla
-scatter(lsri(1,:)-lsri(2,:),lsri(2,:)-lsri(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-axis('auto')
-xticks([])
-yticks([])
-
-xlabel('{\itl}_{MB} - {\its}_{MB}');
-ylabel('{\its}_{MB} - {\its}_{MB}');
-
-if print_figures
-    save2pdf([base,'\MBminMB2.pdf'])
-end
-
-[sf_l,sf_s] = melcomp_6_calcsf(lsri); %calculates scaling factors
-lsri_melcorr = lsri;
-lsri_melcorr(1,:) = lsri_melcorr(1,:)+sf_l*lsri_melcorr(4,:);
-lsri_melcorr(2,:) = lsri_melcorr(2,:)+sf_s*lsri_melcorr(4,:);
-
-cla
-scatter(lsri_melcorr(1,:),lsri_melcorr(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-axis('auto')
-xticks([])
-yticks([])
-
-xlabel('{\itl}_{MB} - {\itk_1i}_{MB}');
-ylabel('{\its}_{MB} - {\itk_2i}_{MB}');
-
-if print_figures
-    save2pdf([base,'\MBminMB3.pdf'])
-end
-
-save('lsri_melcorr.mat','lsri_melcorr');
-
+%% % - %
 %% Plot spectral reflectance functions
 
 figure('Position',[plot_where plot_size],'defaultLineLineWidth',4), hold on
@@ -390,9 +259,9 @@ end
 % end
 
 figure('Position',[plot_where plot_size],'defaultLineLineWidth',4), hold on
-xlabel('{\itl}_{MB}');
-ylabel('{\its}_{MB}');
-zlabel('{\iti}_{MB}');
+xlabel('{\itl}_{MB,10}');
+ylabel('{\its}_{MB,10}');
+zlabel('{\iti}_{MB,10}');
 melcomp_6_looper('mel_offset',pca_range(pks_locs(1)),'plt',1);
 
 view(3)

@@ -25,7 +25,7 @@ for l_cal_val = l_cal_range
         title(l_cal_val)
         drawnow
     end
-    l_cal_val_std = [l_cal_val_std, std(lsri(1,:)+l_cal_val*lsri(4,:))];
+    l_cal_val_std = [l_cal_val_std, mean(std(squeeze(lsri(1,:,:)+l_cal_val*lsri(4,:,:))'))];
 end
 
 [~,l_cal_val_std_minloc] = min(l_cal_val_std);
@@ -41,7 +41,7 @@ for s_cal_val = s_cal_range
         title(s_cal_val)
         drawnow
     end
-    s_cal_val_std = [s_cal_val_std, std(lsri(2,:)+s_cal_val*lsri(4,:))];
+    s_cal_val_std = [s_cal_val_std, mean(std(squeeze(lsri(2,:,:)+s_cal_val*lsri(4,:,:))'))];
 end
 
 

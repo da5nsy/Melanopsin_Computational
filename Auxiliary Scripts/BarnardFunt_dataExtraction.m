@@ -19,7 +19,7 @@ clc, clear, close all
 %first, rename as .csv, open in excel and save as an xlsx doc.
 %I'm sure there's a better way to do this but this works (slowly)
 
-%M = xlsread('C:\Users\cege-user\Dropbox\UCL\Ongoing Work\reflect_db.reflect.xlsx');
+%M = xlsread('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\SFU\reflect_db.reflect.xlsx');
 
 %save...?
 

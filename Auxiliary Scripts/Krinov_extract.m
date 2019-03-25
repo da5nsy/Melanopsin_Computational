@@ -1,7 +1,7 @@
 %% 
 
 % Data provided by David Brainard.
-% Provides 191 spectra, though 2 seem to be on a different scale.
+% Provides 191 spectra, though 2 seem to be of a different scaling.
 
 % Description from Kohonen+ doi.org/10.1002/col.20244 :
 % "The Krinov data consists of 337 surface reflectance spectra

@@ -30,14 +30,28 @@ lsri_c = reshape(lsri_c,size(lsri));
 %[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,0:0.01:1,-2:0.01:-0.5,1,pltc_alt); 
 %[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,0:0.01:1,-2:0.01:-0.5,0,pltc_alt);
 
-[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,-5:0.1:5,-10:0.1:10,0,pltc_alt);
+[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,-5:0.01:5,-10:0.01:10,0,pltc_alt);
 
 lsri_mel(:,:,:,n) = [lsri_c(1,:,:)+sf_l*lsri_c(4,:,:);lsri_c(2,:,:)+sf_s*lsri_c(4,:,:)];
+
+K(n) = KMeansMark(lsri_mel(:,:,:,n));
+
 n=n+1;
 
 disp(offset)
 
 end
+
+%%
+figure, hold on
+plot(mel_offset_range +488,K)
+[T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(...
+    'SPD','Granada_sub',...
+    'SRF','Vrhel_nat_1',...
+    'SSF','SS10',...
+    'mel_offset',0,...
+    'lum','CIE_10');
+plot(SToWls(S_sh),T_SSF)
 
 %%
 figure, hold on

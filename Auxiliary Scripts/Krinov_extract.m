@@ -1,7 +1,9 @@
-%% 
+%% Extracting Krinov data from data provided by David Brainard.
 
-% Data provided by David Brainard.
-% Provides 191 spectra, though 2 seem to be of a different scaling.
+% The Canadian translation of Krinov's work (http://doi.org/10.4224/20386770) 
+% lists 370 measurements (though a small number are arguably non-natural).
+
+% Data provided by David Brainard provides 191 spectra (2 of which are differently scaled).
 
 % Description from Kohonen+ doi.org/10.1002/col.20244 :
 % "The Krinov data consists of 337 surface reflectance spectra
@@ -22,26 +24,30 @@
 % include 355...)
 % Extraction script here: https://github.com/da5nsy/Melanopsin_Computational/blob/2d324882e7461613c197fdd52b38951e9865224a/Auxiliary%20Scripts/BarnardFunt_dataExtraction.m
 
-% The Canadian translation of Krinov's work (http://doi.org/10.4224/20386770) 
-% lists 370 measurements (though a small number are arguably non-natural).
-
 
 %%
 
 clear, clc, close all
 
-dataFileName = 'C:\Users\cege-user\Downloads\krinov.text';
+dataFileName = 'C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Brainard_Krinov\krinov.text';
 fid = fopen(dataFileName, 'r');
-data = fscanf(fid,'%f',[191,Inf]);
+sur_krinov = fscanf(fid,'%f',[191,Inf])';
 fclose(fid);
 
-figure,
-plot(data([1:13,15:185,187:end],:)');
-%14 and 186 are way higher
+sur_krinov(:,14) = sur_krinov(:,14)/1000;
+sur_krinov(:,186) = sur_krinov(:,186)/1000;
+
+S_krinov = WlsToS([400:10:650]');
+
+% figure,
+% plot(SToWls(S_krinov),sur_krinov');
 
 %%
 
-keyFileName = 'C:\Users\cege-user\Downloads\krinov.key';
+clear key labels_krinov
+clc
+
+keyFileName = 'C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Brainard_Krinov\krinov.key';
 
 fid = fopen(keyFileName, 'r');
 while true
@@ -56,4 +62,11 @@ end
 fclose(fid);
 key = key(:,1:end-1)';
 
-clear thisline fid
+labels_krinov = cell2struct(key','label')';
+
+%%
+
+clear thisline fid ans dataFileName key keyFileName
+
+save('sur_krinov.mat')
+

@@ -110,39 +110,7 @@ ForsythMeasurementOfSuccess(lsri_mel,pltc_alt)
 
 %% kmeans
 
-clc
+KMeansMark(lsri_gw)
+KMeansMark(lsri_mel)
 
-km_idx = kmeans(lsri_gw([1,2],:)',size(lsri,2),'Replicates',50);
-pltc_alt2 = pltc_alt(:,:,1);
-figure
-scatter(lsri_gw(1,:),lsri_gw(2,:),...
-    [],pltc_alt2(:,km_idx)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-axis equal
-title('Grey world correction')
-km_r = reshape(km_idx,[11,130]); %respape
-km_m = repmat(mode(km_r')',1,130); %mode
-d = km_r == km_m;
-mean(d(:))
-
-km_idx = kmeans(lsri_mel([1,2],:)',size(lsri,2),'Replicates',50);
-pltc_alt2 = pltc_alt(:,:,1);
-figure
-scatter(lsri_mel(1,:),lsri_mel(2,:),...
-    [],pltc_alt2(:,km_idx)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-axis equal
-title('Melanopsin-based correction')
-km_r = reshape(km_idx,[11,130]); %respape
-km_m = repmat(mode(km_r')',1,130); %mode
-d = km_r == km_m;
-mean(d(:))
-
-
-% % Silloutte
-
-% %not sure if this is right:
-% figure,
-% silhouette(lsri_mel([1,2],:)',km_idx)
-
-
-% % Entropy / sum-non-mode
 

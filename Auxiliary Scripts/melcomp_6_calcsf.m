@@ -24,6 +24,7 @@ for l_cal_val = l_cal_range
         scatter(lsri(1,:)+l_cal_val*lsri(4,:),lsri(2,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
         title(l_cal_val)
         drawnow
+        pause(0.1)
     end
     l_cal_val_std = [l_cal_val_std, mean(std(squeeze(lsri(1,:,:)+l_cal_val*lsri(4,:,:))'))];
 end
@@ -40,6 +41,7 @@ for s_cal_val = s_cal_range
         scatter(lsri(1,:),lsri(2,:)+s_cal_val*lsri(4,:),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
         title(s_cal_val)
         drawnow
+        pause(0.1)
     end
     s_cal_val_std = [s_cal_val_std, mean(std(squeeze(lsri(2,:,:)+s_cal_val*lsri(4,:,:))'))];
 end

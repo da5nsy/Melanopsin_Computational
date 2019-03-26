@@ -2,7 +2,7 @@
 
 clear, clc, close all
 
-mel_offset_range = [-50:50];
+mel_offset_range = [-100:5:200];
 n=1;
 
 for offset = mel_offset_range
@@ -30,9 +30,7 @@ lsri_c = reshape(lsri_c,size(lsri));
 %[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,0:0.01:1,-2:0.01:-0.5,1,pltc_alt); 
 %[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,0:0.01:1,-2:0.01:-0.5,0,pltc_alt);
 
-[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,0:0.1:1,-5:0.1:5,0,pltc_alt);
-
-
+[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,-5:0.1:5,-10:0.1:10,0,pltc_alt);
 
 lsri_mel(:,:,:,n) = [lsri_c(1,:,:)+sf_l*lsri_c(4,:,:);lsri_c(2,:,:)+sf_s*lsri_c(4,:,:)];
 n=n+1;
@@ -52,12 +50,12 @@ cla
 scatter(lsri_mel_1(1,:),lsri_mel_1(2,:),...
     [],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
 axis equal
-xlim([-3 3])
-ylim([-3 3])
+xlim([-10 10])
+ylim([-10 10])
 cleanTicks
 title(mel_offset_range(i))
 
 drawnow
-%pause(0.1)
+pause(0.2)
 
 end

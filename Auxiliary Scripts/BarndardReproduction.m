@@ -23,8 +23,10 @@ nScenes = 1000;
 
 rng(1); %fixes random number generator for reproducibility
 
+AEM = [];
 for nSurfc = 1:length(nSurfList) %NSurfCount
     nSurf = nSurfList(nSurfc);
+    AngularError = [];
     for scene = 1:nScenes 
         
         % Generate random surfaces and illuminants and compute resulting RGBs
@@ -32,22 +34,24 @@ for nSurfc = 1:length(nSurfList) %NSurfCount
         surfs = data(3).data(:,randi(size(data(3).data,2),nSurf,1));        
         ill = data(5).data(:,randi(size(data(5).data,2)));
         RGB = data(4).data'*(ill.*surfs);
+        ill_RGB = data(4).data'*ill;
         
         % RGB(1,:) = RGB(1,:)+1000; %artifically make correction more extreme - for testing only
         
         % Copmute algo on RGB
-        %general_cc(RGB,0,1,0) %grey world
-        %fixedRGB = x(RGB)
+        [white_R ,white_G ,white_B] = general_cc(RGB,0,1,0); %grey world
         
         %assess algo
-        %number = metric(makeitRGB(ill),estimateWhitePoint(fixedRGB))
-        %store number somewhere somehow
+        AngularError = [AngularError, atan2d(norm(cross(ill_RGB,[white_R ,white_G ,white_B])),dot(ill_RGB,[white_R ,white_G ,white_B]))];
+        %rgDist = sqrt(
     end
     %calculate average performance for given number of surfs
     %average(number)
+    AEM = [AEM, mean(AngularError)];%Angular Error Mean
 end
 
-
+figure, 
+plot(nSurfList,AEM,'ko-')
 
 
 %%

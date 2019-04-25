@@ -16,42 +16,51 @@ S_data = [380,4,101];
 
 %%
 
-nSurfList = [4, 8, 16, 32, 65, 128, 256, 512, 1024];
+%nSurfList = [4, 8, 16, 32, 65, 128, 256, 512, 1024]; % Barnard et al.(10.1109/TIP.2002.802531)
+nSurfList = [2, 4, 8, 16, 32, 64]; % Hordley & Finlayson (10.1364/JOSAA.23.001008)
 nScenes = 1000;
 
 %%
 
 rng(1); %fixes random number generator for reproducibility
 
-AEM = [];
-for nSurfc = 1:length(nSurfList) %NSurfCount
-    nSurf = nSurfList(nSurfc);
-    AngularError = [];
-    for scene = 1:nScenes 
-        
-        % Generate random surfaces and illuminants and compute resulting RGBs
-        % note: randi is sampling with replacement. Use randperm if you require all unique values.
-        surfs = data(3).data(:,randi(size(data(3).data,2),nSurf,1));        
-        ill = data(5).data(:,randi(size(data(5).data,2)));
-        RGB = data(4).data'*(ill.*surfs);
-        ill_RGB = data(4).data'*ill;
-        
-        % RGB(1,:) = RGB(1,:)+1000; %artifically make correction more extreme - for testing only
-        
-        % Copmute algo on RGB
-        [white_R ,white_G ,white_B] = general_cc(RGB,0,1,0); %grey world
-        
-        %assess algo
-        AngularError = [AngularError, atan2d(norm(cross(ill_RGB,[white_R ,white_G ,white_B])),dot(ill_RGB,[white_R ,white_G ,white_B]))];
-        %rgDist = sqrt(
+mink_norm = [-1,1]; %This switches the cc algo from max-RGB to grey-world
+AE = NaN(length(mink_norm),length(nSurfList));
+for mn = 1:length(mink_norm)
+    for nSurfc = 1:length(nSurfList) %NSurfCount
+        nSurf = nSurfList(nSurfc);
+        AngularError = [];
+        for scene = 1:nScenes
+            
+            % Generate random surfaces and illuminants and compute resulting RGBs
+            % note: randi is sampling with replacement. Use randperm if you require all unique values.
+            surfs = data(3).data(:,randi(size(data(3).data,2),nSurf,1));
+            ill = data(5).data(:,randi(size(data(5).data,2)));
+            RGB = data(4).data'*(ill.*surfs);
+            ill_RGB = data(4).data'*ill;
+            
+            % RGB(1,:) = RGB(1,:)+1000; %artifically make correction more extreme - for testing only
+            
+            % Copmute algo on RGB
+            [white_R ,white_G ,white_B] = general_cc(RGB,0,mink_norm(mn),0); %grey world
+            
+            %assess algo
+            AngularError = [AngularError, atan2d(norm(cross(ill_RGB,[white_R ,white_G ,white_B])),dot(ill_RGB,[white_R ,white_G ,white_B]))];
+            %rgDist = sqrt(
+        end
+        %calculate average performance for given number of surfs
+        %average(number)
+        AE(mn,nSurfc) = rms(AngularError); %Root meas squre Angular Error
     end
-    %calculate average performance for given number of surfs
-    %average(number)
-    AEM = [AEM, mean(AngularError)];%Angular Error Mean
 end
 
-figure, 
-plot(nSurfList,AEM,'ko-')
+figure, hold on
+plot(log2(nSurfList),AE(1,:),'o-','Color',[1 0.4 0.9],'MarkerFaceColor',[1 0.4 0.6],'DisplayName','Max-RGB')
+plot(log2(nSurfList),AE(2,:),'gs-','MarkerFaceColor','g','DisplayName','Grey world')
+xticks(log2(nSurfList))
+xlabel('log 2 Num.Surfaces per Image')
+ylabel('RMS angular error')
+legend
 
 
 %%
@@ -64,7 +73,7 @@ scatter3(output_data(1,:),output_data(2,:),output_data(3,:),'*')
 
 %% Visualise correction
 
-figure, 
+figure,
 subplot(1,2,1)
 image1 = reshape(RGB,[3,32,32]);
 image1 = permute(image1,[3,2,1]);

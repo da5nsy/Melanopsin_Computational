@@ -1,11 +1,17 @@
+% Load and save Koivisto data
+
+% Available from http://www.uef.fi/web/spectral/natural-colors (2019/04/25)
+% Reference: Parkkinen, J., Jaaskelainen, T. and Kuittinen, M., 1988. Spectral representation of color images. In: [1988 Proceedings] 9th International Conference on Pattern Recognition. [online] [1988 Proceedings] 9th International Conference on Pattern Recognition. Rome, Italy: IEEE Comput. Soc. Press, pp.933–935. Available at: <http://ieeexplore.ieee.org/document/28405/> [Accessed 5 Oct. 2018].
+
+%%
 clear, clc, close all
 
+% Load data (converted to csv previously)
 [NUM,TXT,RAW] = xlsread('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Natural Reflectances\natural400_700_5.csv');
 
 %%
-clc
 
-for surf = 1:218
+for surf = 1:219
     clear A B C
     range = 6*surf-4:6*surf-1;
     %range = 2:5;
@@ -19,20 +25,29 @@ for surf = 1:218
     C = C(:);
     C(end+1) = RAW{6*surf,1};
     
-    SRF(:,surf) = C;
+    sur_koivisto(:,surf) = C;
+    labels_koivisto(surf).label = RAW{range(i)-4,1};
     
 end
 
-figure, plot(SRF) %that does not look right, but at least I'm getting at the data
+sur_koivisto(sur_koivisto > 4096) = 4096; % As per note on website
 
-%6x-4 gives the first line
+S_koivisto = WlsToS([400:5:700]');
 
+figure, plot(SToWls(S_koivisto),sur_koivisto)
 
+%% Save in PTB format for further use
 
-%% Things that should work but don't:
+save('sur_koivisto.mat','sur_koivisto','labels_koivisto','S_koivisto')
 
-%data = importdata('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Natural Reflectances\natural400_700_5.asc')
-%data = readmatrix('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Natural Reflectances\natural400_700_5.asc');
+%% Check it all worked:
+
+% clear, clc, close all
+% 
+% load sur_koivisto.mat
+% 
+% figure, plot(SToWls(S_koivisto),sur_koivisto)
+
 
 
 

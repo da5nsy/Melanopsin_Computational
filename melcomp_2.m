@@ -15,7 +15,7 @@ default_Z_ax       = 9;
 default_plt        = '';
 
 expectedSPD = {'Granada_sub','Granada','D-series'};
-expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_full','Foster'};
+expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_nat_extended','Vrhel_full','Foster'};
 expectedSSF = {'SS10','SP'};
 expectedlum = {'CIE_10','SP'};
 default_SPD = expectedSPD{3};
@@ -51,13 +51,10 @@ parse(p,varargin{:});
 lsri = log(lsri);
 
 lsri_c = lsri(:,:); %would be nice to not do this transformation, for easier access later, but I'd need to be very careful to check that it didn't change the function of the calculation below
-
 for i=1:size(lsri,1)
     lsri_c(i,:) = (lsri_c(i,:) - mean(lsri_c(i,:)))./std(lsri_c(i,:));
 end
-
 lsri_c = reshape(lsri_c,size(lsri));
-
 
 %compute colours for display
 pltc_alt = repmat(jet(size(T_SRF,2))',1,1,size(T_SPD,2));

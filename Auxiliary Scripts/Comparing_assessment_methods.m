@@ -67,6 +67,7 @@ lsri_c = reshape(lsri_c,size(lsri));
 
 
 
+
 %% Grey world
 
 lsri_m2 = mean(lsri_c,2);
@@ -74,17 +75,17 @@ lsri_m2 = mean(lsri_c,2);
 % scatter(lsri_m2(1,:),lsri_m2(2,:),'k.')
 
 lsri_gw = lsri_c - repmat(lsri_m2,1,size(lsri,2),1);
-% figure, hold on
-% scatter(lsri_gw(1,:),lsri_gw(2,:),...
-%     [],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-% scatter(0,0,'k.')
+figure, hold on
+scatter(lsri_gw(1,:),lsri_gw(2,:),...
+    [],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+scatter(0,0,'k.')
 
-% axis equal
-% xlim([-3 3])
-% ylim([-3 3])
-% cleanTicks
-% 
-% title('Grey world correction')
+axis equal
+xlim([-3 3])
+ylim([-3 3])
+cleanTicks
+
+title('Grey world correction')
 
 %% Melanopsin
 

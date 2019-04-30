@@ -51,6 +51,21 @@ end
 sf_s = s_cal_range(s_cal_val_std_minloc);
 
 %%
+
+d = diff(l_cal_val_std);
+if ~(and(d(1)<0,d(end)>0))
+    figure, plot(l_cal_range,l_cal_val_std)
+    error('Minima for l not reached. Modify search range')    
+end
+
+d = diff(s_cal_val_std);
+if ~(and(d(1)<0,d(end)>0))
+    figure, plot(s_cal_range,s_cal_val_std)
+    error('Minima for s not reached. Modify search range')
+end
+
+%% Force show the above figures, for debugging
+
 % figure, plot(l_cal_range,l_cal_val_std)
 % figure, plot(s_cal_range,s_cal_val_std)
 

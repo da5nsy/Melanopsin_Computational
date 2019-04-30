@@ -1,7 +1,7 @@
 %clear, close all
 
 figure,
-melcomp_2('SPD','Granada_sub','plt','3D');
+melcomp_2('SPD','Granada_sub','SRF','Vrhel_nat_extended','plt','3D');
 axis equal
 
 xlim([-3 3])

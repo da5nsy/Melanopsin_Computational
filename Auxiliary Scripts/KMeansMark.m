@@ -1,5 +1,6 @@
 function KMM = KMeansMark(lsri)
 
+rng(1)
 km_idx = kmeans(lsri([1,2],:)',size(lsri,2),'Replicates',50);
 %pltc_alt2 = pltc_alt(:,:,1);
 %figure

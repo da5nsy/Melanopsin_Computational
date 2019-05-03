@@ -1,16 +1,28 @@
-function KMM = KMeansMark(lsri)
+function KMM = KMeansMark(data,k,map)
+
+if ~exist('k','var')
+    k = size(data,2);
+end
+
+if ~exist('map','var')
+    map = repmat(1:size(data,2),size(data,3),1)';
+    % This might need permuting
+end
 
 rng(1)
-km_idx = kmeans(lsri([1,2],:)',size(lsri,2),'Replicates',50);
-%pltc_alt2 = pltc_alt(:,:,1);
-%figure
-%scatter(lsri_gw(1,:),lsri_gw(2,:),...
-%    [],pltc_alt2(:,km_idx)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-%axis equal
-%title('Grey world correction')
-km_r = reshape(km_idx,[size(lsri,2),size(lsri,3)]); %reshape
-km_m = repmat(mode(km_r')',1,size(lsri,3)); %mode
-d = km_r == km_m;
-KMM = mean(d(:));
+km_idx = kmeans(data([1,2],:)',k,'Replicates',50);
+% figure, scatter(data(1,:),data(2,:),[],km_idx)
+km_r = reshape(km_idx,[size(data,2),size(data,3)]); %reshape
+
+for i=1:k
+    lu(i) =  mode(km_r(map == i)); %lookup
+    pcC(i) = mean(lu(i) == km_r(map == i)); %percent correct 
+end
+
+KMM = mean(pcC);
+
+%km_m = repmat(mode(km_r')',1,size(data,3)); %mode
+%d = km_r == km_m;
+%KMM = mean(d(:));
 
 end

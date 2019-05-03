@@ -7,7 +7,7 @@ function [T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(varargin)
 
 %% Parse inputs
 expectedSPD = {'Granada','D-series','Granada_sub'};
-expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_nat_extended','Vrhel_full','Foster','bananas'};
+expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_nat_extended','Vrhel_full','Foster','bananas','Koivisto'};
 expectedSSF = {'SS10','SP'};
 expectedlum = {'CIE_10','SP'};
 
@@ -107,6 +107,14 @@ if strcmp(p.Results.SRF,'bananas')
     T_SRF = xlsread('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\UCDavis_Banana_Peel_ReflectanceData.xlsx','Sheet1','C2:AG11')';
     S_SRF = WlsToS([450:10:750]');
 end
+
+if strcmp(p.Results.SRF,'Koivisto')  
+    load sur_koivisto sur_koivisto S_koivisto
+    T_SRF = sur_koivisto;
+    S_SRF = S_koivisto;
+end
+
+
 
 %% T_SSF
 

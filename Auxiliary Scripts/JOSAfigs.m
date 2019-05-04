@@ -75,5 +75,17 @@ if print_figures
     save2pdf([base,'\hypI.pdf'])
 end
 
+%%
+close all
+
+melcomp_9
+
+figure(1)
+set(gcf, 'Position',  [plot_where plot_size])
+
+if print_figures
+    save2pdf([base,'\ass.pdf'])
+end
+
 
 

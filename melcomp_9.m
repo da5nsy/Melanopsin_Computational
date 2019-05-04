@@ -1,3 +1,5 @@
+function melcomp_9()
+
 % The goal here is to compare a melanopsin based correction with other
 % basic corrections (do nothing, grey world, bright-is-white/max-RGB)
 % based on the assessment method developed.
@@ -7,7 +9,7 @@ clc, clear, close all
 %% Load Data
 [T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(...
     'SPD','Granada_sub',...
-    'SRF','Vrhel_nat_extended',...
+    'SRF','Vrhel_nat_1',...
     'SSF','SS10',...
     'mel_offset',0,...
     'lum','CIE_10');
@@ -17,20 +19,27 @@ clc, clear, close all
 %First compute colorimetry under a mean illuminant, to work out which
 %reflectances to exclude
 [~, lsri_avIll] = melcomp_colorimetry(mean(T_SPD,2), T_SRF, T_SSF, T_lum, S_sh);
-exclRef = excludeSimilarRefs(lsri_avIll);
+exclRef = excludeSimilarRefs(lsri_avIll,0.003);
 T_SRF_reduced = T_SRF(:,~exclRef);
 
 [LMSRI, lsri] = melcomp_colorimetry(T_SPD, T_SRF_reduced, T_SSF, T_lum, S_sh);
 
 %% Normalise data for std and set mean to 0
 
-% % Testing standardness of distributions
-% hk=10;
-% figure,hist(lsri_c(1,:),hk)
-% figure,hist(lsri_c(2,:),hk)
-%
-% figure,hist(log(lsri_c(1,:)),hk)
-% figure,hist(log(lsri_c(2,:)),hk)
+% Testing standardness of distributions
+% hk=50;
+% figure,
+% for i=[1,2]
+%     subplot(3,2,i*2-1)    
+%     hist(lsri(i,:),hk), cleanTicks
+%     subplot(3,2,i*2)
+%     hist(log(lsri(i,:)),hk), cleanTicks
+% end
+% subplot(3,2,3*2-1)
+% hist(lsri(4,:),hk), cleanTicks
+% subplot(3,2,3*2)
+% hist(log(lsri(4,:)),hk), cleanTicks
+
 
 lsri = log(lsri);
 
@@ -56,9 +65,10 @@ for i=1:size(lsri,3)
 end
 
 rng(1)
-pcSurfRange = 5:5:100; %percent surfaces range
+pcSurfRange = 12:7:100; %percent surfaces range
 nMethods = 4;
 mark = zeros(nMethods,length(pcSurfRange));
+output = zeros(2,size(T_SRF_reduced,2),size(T_SPD,2),nMethods,length(pcSurfRange));
 for pcSurf = 1:length(pcSurfRange)
     nSurf = round((pcSurfRange(pcSurf)/100) * size(T_SRF_reduced,2));
     
@@ -72,11 +82,12 @@ for pcSurf = 1:length(pcSurfRange)
     end
     
     % Perform corrections
-    output = performCC(lsri2,Lum2);
+    output(:,1:nSurf,:,:,pcSurf) = performCC(lsri2,Lum2);
     
     % Score corrections
     for i=1:nMethods
-        mark(i,pcSurf) = KMeansMark(squeeze(output(:,:,:,i)),size(T_SRF_reduced,2),sel);
+        rng(1)
+        mark(i,pcSurf) = KMeansMark(squeeze(output(:,1:nSurf,:,i,pcSurf)),size(T_SRF_reduced,2),sel);
     end
     
     disp(pcSurfRange(pcSurf))
@@ -90,24 +101,45 @@ end
 
 %% Summary figure
 
-pltc_alt = repmat(jet(size(T_SRF_reduced,2))',1,1,size(T_SPD,2));
-titles = {'Baseline','Grey World','Bright-is-white','Melanopsin Correction'};
-
+titles = {'Do nothing','Grey World','Bright-is-White','Melanopsin'};
+markers = {'s:','d:','^:','o:'};
+mfc = hsv(nMethods);
+lw = 3;
 
 figure, hold on
-plot(pcSurfRange,mark')
-legend(titles,'Location','best')
-plot(pcSurfRange,1./round((pcSurfRange/100) * size(T_SRF_reduced,2)),'k','DisplayName','Chance')
+for i=1:4
+    plot(pcSurfRange,mark(i,:),markers{i},'Color',mfc(i,:),'MarkerFaceColor',mfc(i,:),'linewidth',lw)
+end
+legend(titles,'Location','Northwest')
+plot(pcSurfRange,1./round((pcSurfRange/100) * size(T_SRF_reduced,2)),'k','DisplayName','Chance','linewidth',lw-1)
 xlim([0 100])
 ylim([0 1])
 
-figure,
-for i=1:size(output,4)
-    subplot(sqrt(size(output,4)),sqrt(size(output,4)),i)
-    scatter(reshape(output(1,:,:,i),[],1),reshape(output(2,:,:,i),[],1),[],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-    title(titles{i})
-    axis equal
+xlabel(sprintf('Percentage of surfaces used in each run (/%d)',size(T_SRF_reduced,2)))
+ylabel('K-means-mark (/1)')
+grid on
+
+
+%% Figures for 10%, 50% and 100%
+
+pltc_alt = repmat(jet(size(T_SRF_reduced,2))',1,1,size(T_SPD,2));
+
+for j = [1,5,size(output,5)]
+    figure,
+    for i=1:nMethods
+        subplot(sqrt(size(output,4)),sqrt(size(output,4)),i)
+        scatter(reshape(output(1,:,:,i,j),[],1),...
+            reshape(output(2,:,:,i,j),[],1),...
+            'filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+        title(titles{i})
+        axis equal
+    end
 end
 
+% Colour-coding this will be a pain in the arse because I would need to go
+% back and save out the selections which I don't currently.
+%pltc_alt(:,:)'
+%reshape(pltc_alt,[],round(pcSurfRange(j)/100*size(T_SRF_reduced,2))*size(T_SPD,2))
 
 
+end

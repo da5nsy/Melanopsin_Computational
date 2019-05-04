@@ -1,4 +1,4 @@
-function exclRef = excludeSimilarRefs(lsri_avIll)
+function exclRef = excludeSimilarRefs(lsri_avIll,minD)
 
 %%
 % figure, hold on
@@ -6,13 +6,17 @@ function exclRef = excludeSimilarRefs(lsri_avIll)
 % axis equal
 
 %%
+if ~exist('minD','var')
+    minD = 0.002;
+end
+
 D = pdist(lsri_avIll(1:2,:)');
 exclRef = false(size(lsri_avIll,2),1);
 
 Ds = squareform(D);
 Ds(Ds == 0) = 1;
 
-while min(D) < 0.002
+while min(D) < minD
     Ds_temp = Ds;
     Ds_temp(exclRef,:) = 1;
     Ds_temp(:,exclRef) = 1;

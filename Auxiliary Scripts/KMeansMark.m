@@ -6,10 +6,8 @@ end
 
 if ~exist('map','var')
     map = repmat(1:size(data,2),size(data,3),1)';
-    % This might need permuting
 end
 
-rng(1)
 km_idx = kmeans(data([1,2],:)',k,'Replicates',50);
 % figure, scatter(data(1,:),data(2,:),[],km_idx)
 km_r = reshape(km_idx,[size(data,2),size(data,3)]); %reshape

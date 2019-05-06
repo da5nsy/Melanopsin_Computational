@@ -1,4 +1,4 @@
-function output = performCC(lsri,Lum)
+function [output,sf_l,sf_s] = performCC(lsri,Lum)
 
 % Do nothing 'correction' 
 % -----------------------
@@ -60,10 +60,12 @@ output(:,:,:,3) = BiW;
 % Melanopsin based correction
 % ---------------------------
 
-l_cal_range = 0:0.001:1.5;
-s_cal_range = -2:0.001:-0.15;
+%l_cal_range = 0:0.001:1.5;
+%s_cal_range = -2:0.001:-0.15;
+[sf_l,sf_s] = melcomp_6_calcsf(lsri, -5:0.01:5,-10:0.01:10); %calculates scaling factors
 
-[sf_l,sf_s] = melcomp_6_calcsf(lsri, l_cal_range, s_cal_range); %calculates scaling factors
+% sf_l = 0.6890;
+% sf_s = -0.9300;
 MC = lsri;
 MC(1,:) = MC(1,:)+sf_l*MC(4,:);
 MC(2,:) = MC(2,:)+sf_s*MC(4,:);

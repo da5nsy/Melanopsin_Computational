@@ -78,14 +78,21 @@ end
 %%
 close all
 
-melcomp_9
+melcomp_9;
 
 figure(1)
-set(gcf, 'Position',  [plot_where plot_size])
+set(gcf, 'Position',  [plot_where plot_size.*[1,1.5]])
 
 if print_figures
     save2pdf([base,'\ass.pdf'])
 end
 
+figure(2)
+set(gcf, 'Position',  [plot_where plot_size.*[1,2.5]])
+
+if print_figures
+    print([base,'\ass2'],'-djpeg')
+end
 
 
+close all

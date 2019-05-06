@@ -30,9 +30,9 @@ lsri_c = reshape(lsri_c,size(lsri));
 %[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,0:0.01:1,-2:0.01:-0.5,1,pltc_alt); 
 %[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,0:0.01:1,-2:0.01:-0.5,0,pltc_alt);
 
-[sf_l,sf_s] = melcomp_6_calcsf(lsri_c,-5:0.01:5,-10:0.01:10,0,pltc_alt);
+[sf_l(n),sf_s(n)] = melcomp_6_calcsf(lsri_c,-5:0.01:5,-10:0.01:10,0,pltc_alt);
 
-lsri_mel(:,:,:,n) = [lsri_c(1,:,:)+sf_l*lsri_c(4,:,:);lsri_c(2,:,:)+sf_s*lsri_c(4,:,:)];
+lsri_mel(:,:,:,n) = [lsri_c(1,:,:)+sf_l(n)*lsri_c(4,:,:);lsri_c(2,:,:)+sf_s(n)*lsri_c(4,:,:)];
 
 K(n) = KMeansMark(lsri_mel(:,:,:,n));
 

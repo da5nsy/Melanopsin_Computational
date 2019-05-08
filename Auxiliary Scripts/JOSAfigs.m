@@ -84,15 +84,56 @@ figure(1)
 set(gcf, 'Position',  [plot_where plot_size.*[1,1.5]])
 
 if print_figures
-    save2pdf([base,'\ass.pdf'])
+    save2pdf([base,'\ScoreByPerc.pdf'])
 end
 
 figure(2)
 set(gcf, 'Position',  [plot_where plot_size.*[1,2.5]])
 
 if print_figures
-    print([base,'\ass2'],'-djpeg')
+    print([base,'\OutputByPerc'],'-djpeg')
+end
+if print_figures
+    save2pdf([base,'\OutputByPerc.pdf'])
+end
+
+%%
+close all
+peak_locations = melcomp_9_caller(-88:162);
+
+figure(1)
+set(gcf, 'Position',  [plot_where plot_size])
+
+if print_figures
+    save2pdf([base,'\optimality.pdf'])
+end
+
+%%
+
+figure('Position',[plot_where plot_size.*[1,1.5]]),
+
+subplot(1,2,1)
+melcomp_9('mel_offset',516-488,'plt','single');
+axis equal
+axis([-2.5 2.5 -2.5 2.5])
+cleanTicks
+
+subplot(1,2,2)
+melcomp_9('mel_offset',576-488,'plt','single');
+axis equal
+axis([-2.5 2.5 -2.5 2.5])
+cleanTicks
+
+if print_figures
+    save2pdf([base,'\optimal.pdf'])
 end
 
 
-close all
+
+
+
+
+
+
+
+

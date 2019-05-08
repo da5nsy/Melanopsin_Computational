@@ -5,8 +5,8 @@ function [mark] = melcomp_9(varargin)
 % based on the assessment method developed.
 
 if ~exist('varargin','var'), clear, clc, close all, varargin = {}; end
-%If we're running this as a script rather than a function, this line sets 
-% a fresh slate and makes sure we use the defaults below (it acts as if 
+%If we're running this as a script rather than a function, this line sets
+% a fresh slate and makes sure we use the defaults below (it acts as if
 % we've called it as a function and not passed anything to it)
 
 default_plt = 'all'; %plotting requests
@@ -45,7 +45,7 @@ T_SRF_reduced = T_SRF(:,~exclRef);
 % hk=50;
 % figure,
 % for i=[1,2]
-%     subplot(3,2,i*2-1)    
+%     subplot(3,2,i*2-1)
 %     hist(lsri(i,:),hk), cleanTicks
 %     subplot(3,2,i*2)
 %     hist(log(lsri(i,:)),hk), cleanTicks
@@ -82,6 +82,7 @@ rng(1)
 nMethods = 4;
 mark = zeros(nMethods,length(p.Results.pcSurfRange));
 output = zeros(2,size(T_SRF_reduced,2),size(T_SPD,2),nMethods,length(p.Results.pcSurfRange));
+sel_store = zeros(length(p.Results.pcSurfRange),round((p.Results.pcSurfRange(end)/100) * size(T_SRF_reduced,2)),size(T_SPD,2));
 for pcSurf = 1:length(p.Results.pcSurfRange)
     nSurf(pcSurf) = round((p.Results.pcSurfRange(pcSurf)/100) * size(T_SRF_reduced,2));
     
@@ -93,9 +94,10 @@ for pcSurf = 1:length(p.Results.pcSurfRange)
         lsri2(:,:,i) = lsri(:,sel(:,i),i);
         Lum2(:,i) = Lum(sel(:,i),i); %!!!!!!!!!!!!!!!!
     end
+    sel_store(pcSurf,1:nSurf(pcSurf),:) = sel;
     
     % Perform corrections
-    [output(:,1:nSurf(pcSurf),:,:,pcSurf)] = performCC(lsri2,Lum2);
+    output(:,1:nSurf(pcSurf),:,:,pcSurf) = performCC(lsri2,Lum2);
     
     % Score corrections
     for i=1:nMethods
@@ -105,16 +107,16 @@ for pcSurf = 1:length(p.Results.pcSurfRange)
     
     disp(p.Results.pcSurfRange(pcSurf))
     
-%     plot(p.Results.pcSurfRange,mark','.')
-%     xlim([0 100])
-%     ylim([0 1])
-%     drawnow
+    %     plot(p.Results.pcSurfRange,mark','.')
+    %     xlim([0 100])
+    %     ylim([0 1])
+    %     drawnow
 end
 
 
 %% Summary figure
 
-if or(strcmp(p.Results.plt,'range'),strcmp(p.Results.plt,'all'))   
+if or(strcmp(p.Results.plt,'range'),strcmp(p.Results.plt,'all'))
     titles = {'Do nothing','Grey World','Bright-is-White','Melanopsin'};
     markers = {'s:','d:','^:','o:'};
     mfc = hsv(nMethods);
@@ -146,15 +148,11 @@ if or(strcmp(p.Results.plt,'MB'),strcmp(p.Results.plt,'all'))
     for i=1:nMethods
         for j = 1:length(jlist)
             subplot(nMethods,length(jlist),pltn)
-            scatter(reshape(output(1,:,:,i,jlist(j)),[],1),...
-                reshape(output(2,:,:,i,jlist(j)),[],1),...
-                'k.','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-%             gscatter(reshape(output(1,:,:,i,jlist(j)),[],1),...
-%                 reshape(output(2,:,:,i,jlist(j)),[],1),...
-%                 'k.',...
-%                 'MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-
-            axis equal
+            gscatter(reshape(output(1,1:nSurf(jlist(j)),:,i,jlist(j)),[],1),...
+                reshape(output(2,1:nSurf(jlist(j)),:,i,jlist(j)),[],1),...
+                reshape(sel_store(jlist(j),1:nSurf(jlist(j)),:),[],1),...
+                [],[],5)
+            axis([-5 5 -3 3])
             if jlist(j)~=1
                 yticks('')
             else
@@ -163,11 +161,24 @@ if or(strcmp(p.Results.plt,'MB'),strcmp(p.Results.plt,'all'))
             if i == 1
                 title(strcat(string(p.Results.pcSurfRange(jlist(j))),'%(',string(nSurf(end)),')=',string(nSurf(jlist(j)))))
             end
+            if i ~= nMethods
+                xticks('')
+            end
             pltn = pltn+1;
+            legend off
         end
     end
 end
 
+
+%% Single figure
+
+if strcmp(p.Results.plt,'single')
+    gscatter(reshape(output(1,1:nSurf(length(nSurf)),:,4,length(p.Results.pcSurfRange)),[],1),...
+             reshape(output(2,1:nSurf(length(nSurf)),:,4,length(p.Results.pcSurfRange)),[],1),...
+             reshape(sel_store(length(nSurf),:,:),[],1),[],[],5)
+         legend off
+end
 
 
 

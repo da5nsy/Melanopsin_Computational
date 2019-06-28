@@ -1,4 +1,4 @@
-function KMM = KMeansMark(data,k,map)
+function [KMM,km_idx] = KMeansMark(data,k,map)
 
 if ~exist('k','var')
     k = size(data,2);
@@ -8,7 +8,7 @@ if ~exist('map','var')
     map = repmat(1:size(data,2),size(data,3),1)';
 end
 
-km_idx = kmeans(data([1,2],:)',k,'Replicates',5);
+km_idx = kmeans(data([1,2],:)',k,'Replicates',20);
 % figure, scatter(data(1,:),data(2,:),[],km_idx)
 km_r = reshape(km_idx,[size(data,2),size(data,3)]); %reshape
 

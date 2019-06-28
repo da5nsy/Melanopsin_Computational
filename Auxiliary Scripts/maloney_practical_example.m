@@ -140,8 +140,6 @@ s_recovered = eg_inv*p;
 s
 s_recovered
 
-%s-s_recovered
-% Essentially the same. Presumably just precision errors
-
+%s-s_recovered % Essentially the same. Presumably just precision errors
 
 

@@ -22,7 +22,7 @@ max_s_scale = 0.04;
 set(0,'defaultAxesFontName', 'Courier')
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_6b_figs';
-print_figures = 1;
+print_figures = 0;
 
 %% Load Data
 

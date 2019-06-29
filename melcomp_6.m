@@ -376,27 +376,30 @@ end
 
 %% Plot 3D at first peak
 
-[~,pks_locs] = findpeaks(ex);
+% - % I have turned off the below because as of MATLAB 2019a it crashes
+% MATLAB on my machine - no idea why.
 
-% for i = 1:length(pks_locs)
-%     melcomp_6_looper(pca_range(pks_locs(i)),1,1)
+% [~,pks_locs] = findpeaks(ex);
+% 
+% % for i = 1:length(pks_locs)
+% %     melcomp_6_looper(pca_range(pks_locs(i)),1,1)
+% % end
+% 
+% figure('Position',[plot_where plot_size],'defaultLineLineWidth',4), hold on
+% xlabel('{\itl}_{MB}');
+% ylabel('{\its}_{MB}');
+% zlabel('{\iti}_{MB}');
+% melcomp_6_looper('mel_offset',pca_range(pks_locs(1)),'plt',1);
+% 
+% view(3)
+% 
+% xticks([min(xlim),max(xlim)]);
+% yticks([min(ylim),max(ylim)]);
+% zticks([min(zlim),max(zlim)]);
+% 
+% if print_figures
+%     save2pdf([base,'\3D.pdf'])
 % end
-
-figure('Position',[plot_where plot_size],'defaultLineLineWidth',4), hold on
-xlabel('{\itl}_{MB}');
-ylabel('{\its}_{MB}');
-zlabel('{\iti}_{MB}');
-melcomp_6_looper('mel_offset',pca_range(pks_locs(1)),'plt',1);
-
-view(3)
-
-xticks([min(xlim),max(xlim)]);
-yticks([min(ylim),max(ylim)]);
-zticks([min(zlim),max(zlim)]);
-
-if print_figures
-    save2pdf([base,'\3D.pdf'])
-end
 
 %% Show impact of varying parameters
 
@@ -446,6 +449,8 @@ for i=1:length(pca_range)
     ex(i) = pc(i).explained(3);
 end
 plot(pca_range,ex,'DisplayName','diff SSF')
+
+legend
 
 if print_figures
     save2pdf([base,'\optopt.pdf'])

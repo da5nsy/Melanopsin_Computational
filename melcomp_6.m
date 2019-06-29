@@ -254,7 +254,7 @@ if print_figures
     save2pdf([base,'\MBminMB3.pdf'])
 end
 
-save('lsri_melcorr.mat','lsri_melcorr');
+%save('lsri_melcorr.mat','lsri_melcorr');
 
 %% Plot spectral reflectance functions
 

@@ -111,9 +111,9 @@ end
 for i = 1:interval
     xlim(abxlim(:,i))
     ylim(abylim(:,i))
-    drawnow
-    
+        
     if saveGifs
+        drawnow
         frame = getframe(f);
         im{i} = frame2im(frame);
         [A,map] = rgb2ind(im{i},256);
@@ -227,25 +227,17 @@ scatter(s(4),lsri(1,:),lsri(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEd
 %% Plot transformation
 lsri_n = sqrt(lsri);
 
-lsri_c = lsri_n(:,:); %would be nice to not do this transformation, for easier access later, but I'd need to be very careful to check that it didn't change the function of the calculation below
-
+lsri_c = lsri_n(:,:); 
 for i=1:size(lsri,1)
     lsri_c(i,:) = (lsri_c(i,:) - mean(lsri_c(i,:)))./std(lsri_c(i,:));
 end
-
-% figure,
-% scatter(lsri_c(1,:),lsri_c(2,:),...
-%     [],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-% axis equal
-
 lsri_n = reshape(lsri_c,size(lsri));
 
 interval = 100;
 axlim = xlim;
-bxlim = [-4, 4]; %We lose a single point which goes out of bounds by setting it at +4
+bxlim = [-3, 5]; 
 aylim = ylim;
-%bylim = [-4, 4];
-bylim = [0, 0.4];
+bylim = [-3, 5];
 
 abxlim = zeros(2,interval);
 abylim = zeros(2,interval);
@@ -263,26 +255,26 @@ for i = 1:size(a,2)
 end
 
 axes(s(4))
-%axis auto
 for i=1:interval  
     cla
     scatter(ab(1,:,i),ab(2,:,i),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
-    %xlim(abxlim(:,i))
+    xlim(abxlim(:,i))
     ylim(abylim(:,i))
     drawnow
 end
 
-%scatter(s(4),lsri_n(1,:),lsri_n(2,:),'r','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
+axis equal %!!!!!!!!!!!!!!!!!! check this later, and pull the assigned values into bxlim and bylim
+xlabel('norm(sqrt({\itl}_{MB,10}))');
+ylabel('norm(sqrt({\its}_{MB,10}))');
 
+%% Check effect on spectral locus
+
+% Currently not working as spectral locus isn't normalised with the signals
+
+% sl2 = spectral_locus;
+% sl2(2,:) = sqrt(sl2(2,:));
+% scatter(s(4),sl2(1,:),sl2(2,:),[],RGB','filled');
 % axis auto
-% cleanTicks
-% ylabel('sqrt({\its}_{MB,10})');
-
-%%
-
-sl2 = spectral_locus;
-sl2(2,:) = sl2(2,:).^(1/2.5);
-scatter(s(4),sl2(1,:),sl2(2,:),[],RGB','filled');
 
 %% Grey world correction
 

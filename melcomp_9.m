@@ -63,11 +63,6 @@ for i=1:size(lsri,1)
     lsri_c(i,:) = (lsri_c(i,:) - mean(lsri_c(i,:)))./std(lsri_c(i,:));
 end
 
-% figure,
-% scatter(lsri_c(1,:),lsri_c(2,:),...
-%     [],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-% axis equal
-
 lsri = reshape(lsri_c,size(lsri));
 
 %% Perform corrections
@@ -99,11 +94,8 @@ for pcSurf = 1:length(p.Results.pcSurfRange)
     
     % Perform corrections
     output(:,1:nSurf(pcSurf),:,:,pcSurf) = performCC(lsri2,Lum2);
-    
-%     for i=1:size(lsri,1)
-%         lsri_c(i,:) = (lsri_c(i,:) - mean(lsri_c(i,:)))./std(lsri_c(i,:));
-%     end
 
+    % Normalise outputs
     output_norm(1,1:nSurf(pcSurf),:,:,pcSurf) =  output(1,1:nSurf(pcSurf),:,:,pcSurf)./std(output(1,1:nSurf(pcSurf),:,:,pcSurf));
     output_norm(2,1:nSurf(pcSurf),:,:,pcSurf) =  output(2,1:nSurf(pcSurf),:,:,pcSurf)./std(output(1,1:nSurf(pcSurf),:,:,pcSurf));
      

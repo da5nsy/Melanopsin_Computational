@@ -5,10 +5,6 @@
 clear, clc, close all
 
 set(0,'defaultAxesFontName', 'Courier')
-plot_where = [100,100];
-%plot_where = [1950,500];
-plot_size  = [1505,727];
-%plot_size  = [1100,500];
 
 min_l_scale = 0.6;
 max_l_scale = 0.9;
@@ -18,24 +14,16 @@ max_s_scale = 0.1;
 mktrns = 0.3; %marker transparency
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\ICVSgifs\';
-saveGifs = 0;
+saveGifs = 1;
 
 %% Prepare figure
 
-f = figure('Position',[plot_where plot_size],...
+f = figure('Position',[[1950,500], [1505,727]],...
     'defaultLineLineWidth',2,...
     'defaultAxesFontSize',12,...
-    'WindowStyle','docked'); 
-% f = figure('Position',[plot_where plot_size],...
-%     'defaultLineLineWidth',2,...
-%     'defaultAxesFontSize',12,...
-%     'color','white'); 
+    'color','white'); 
 hold on
-
-s(1) = subplot(3,4,1);
-s(2) = subplot(3,4,5);
-s(3) = subplot(3,4,9);
-s(4) = subplot(3,4,[2,3,4,6,7,8,10,11,12]);
+clf
 
 %% Load data 
 
@@ -47,7 +35,7 @@ s(4) = subplot(3,4,[2,3,4,6,7,8,10,11,12]);
     'lum','CIE_10');
 
 %% Plot mean SPD
-
+s(1) = subplot(3,4,1);
 plot(s(1),SToWls(S_sh),mean(T_SPD,2))
 
 %% Compute colorimetry
@@ -62,11 +50,11 @@ T_SRF_reduced = T_SRF(:,~exclRef);
 [~, lsri] = melcomp_colorimetry(T_SPD, T_SRF_reduced, T_SSF, T_lum, S_sh);
 
 %% Plot SRFs
-
+s(2) = subplot(3,4,5);
 plot(s(2),SToWls(S_sh),T_SRF_reduced)
 
 %% Plot SSFs
-
+s(3) = subplot(3,4,9);
 plot(s(3),SToWls(S_sh),T_SSF(:,[1:3,5]))
 
 %% Plot MB chromaticity diagram
@@ -81,6 +69,7 @@ RGB = XYZToSRGBPrimary(T_xyz1931);
 RGB(RGB<0) = 0;
 RGB(RGB>1) = 1;
 
+s(4) = subplot(3,4,[2,3,4,6,7,8,10,11,12]);
 scatter(s(4),spectral_locus(1,:),spectral_locus(2,:),[],RGB','filled')
 %scatter(s(4),spectral_locus(1,:),spectral_locus(2,:),'k','filled') %black version
 xlim([0.5 1])
@@ -113,22 +102,15 @@ for i = 1:interval
     ylim(abylim(:,i))
         
     if saveGifs
-        drawnow
-        frame = getframe(f);
-        im{i} = frame2im(frame);
-        [A,map] = rgb2ind(im{i},256);
-        if i == 1
-            imwrite(A,map,[base,'test','.gif'],'gif','LoopCount',0,'DelayTime',0.001);
-        else
-            imwrite(A,map,[base,'test','.gif'],'gif','WriteMode','append','DelayTime',0.001);
-        end
+        createGIF(f,base,'zoom') %Outside repo: available at: https://github.com/da5nsy/General-Purpose-Functions/blob/1604ee42c2377c72c99bc30c47bc839546aa7afb/createGIF.m
     end
 end
 
-% The following doesn't work currently because I forgot that the refs were
-% already a subsample of the Vrhel set (vrhel_nat_extended)
+%% add labels
 
-% %% add labels
+% % The following doesn't work currently because I forgot that the refs were
+% % already a subsample of the Vrhel set (vrhel_nat_extended)
+ 
 % load sur_vrhel.mat
 % labels_vrhel(137).label = 'peach skin -- yellow'; %correct typo
 % 
@@ -148,8 +130,9 @@ axes(s(1)), hold on
 for i=1:size(T_SPD,2)
     plot(s(1),SToWls(S_sh),T_SPD(:,i))
     scatter(s(4),lsri(1,:,i),lsri(2,:,i),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
-    %drawnow
-    % save frame of gif
+    if saveGifs
+        createGIF(f,base,'addIllums')
+    end
 end
 
 %% Shift back to ideal
@@ -167,7 +150,9 @@ axes(s(4))
 for i=1:interval  
     cla
     scatter(ab(1,:,i),ab(2,:,i),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
-    drawnow
+    if saveGifs
+        createGIF(f,base,'shiftBackToIdeal')
+    end
 end
 
 
@@ -195,7 +180,9 @@ axes(s(4))
 for i=1:interval  
     cla
     scatter(ab(1,:,i),ab(2,:,i),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
-    drawnow
+    if saveGifs
+        createGIF(f,base,'addNoise')
+    end
 end
 
 %% Jump through the steps of KMeansMark
@@ -276,7 +263,22 @@ ylabel('norm(sqrt({\its}_{MB,10}))');
 % scatter(s(4),sl2(1,:),sl2(2,:),[],RGB','filled');
 % axis auto
 
-%% Grey world correction
+%% Perform CC
+
+Lum = zeros(size(T_SRF_reduced,2),size(T_SPD,2));
+for i=1:size(lsri,3)
+    Lum(:,i) = T_lum'*(T_SRF_reduced.*T_SPD(:,i));
+end
+
+output = performCC(lsri_n,Lum);
+
+% output_norm(1,1:nSurf(pcSurf),:,:,pcSurf) =  output(1,1:nSurf(pcSurf),:,:,pcSurf)./std(output(1,1:nSurf(pcSurf),:,:,pcSurf));
+% output_norm(2,1:nSurf(pcSurf),:,:,pcSurf) =  output(2,1:nSurf(pcSurf),:,:,pcSurf)./std(output(1,1:nSurf(pcSurf),:,:,pcSurf));
+
+figure,
+scatter(reshape(output(1,:,:,4),[],1),reshape(output(2,:,:,4),[],1))
+
+%% Grey world correction visualisation
 
 % Highlight data for a single illuminant
 scatter(lsri_n(1,:,n_ill),lsri_n(2,:,n_ill),'r','filled')
@@ -298,19 +300,12 @@ lsri_c = lsri_n - corrector;
 cla
 scatter(lsri_c(1,:),lsri_c(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
 scatter(lsri_mc(1,1,1),lsri_mc(2,1,1),'r*')
-xlabel('{\it }_{ }');
-ylabel('{\it }_{ }');
-
-% Assessment
-
-% Show k-means algo running
-% Show marking of k-means
 
 %% Same for bright-is white
 
-%% Now for melanopsin based algo
 
-% Handle data is exactly the same way
+
+%% Now for melanopsin based algo
 
 cla
 

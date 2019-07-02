@@ -62,7 +62,7 @@ output(:,:,:,3) = BiW;
 
 %l_cal_range = 0:0.001:1.5;
 %s_cal_range = -2:0.001:-0.15;
-[sf_l,sf_s] = melcomp_6_calcsf(lsri, -5:0.01:5,-10:0.01:10); %calculates scaling factors
+[sf_l,sf_s] = melcomp_6_calcsf(lsri, -1:0.001:1,-1:0.001:1); %calculates scaling factors
 
 % sf_l = 0.6890;
 % sf_s = -0.9300;

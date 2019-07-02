@@ -18,18 +18,18 @@ max_s_scale = 0.1;
 mktrns = 0.3; %marker transparency
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\ICVSgifs\';
-saveGifs = 1;
+saveGifs = 0;
 
 %% Prepare figure
 
-% f = figure('Position',[plot_where plot_size],...
-%     'defaultLineLineWidth',2,...
-%     'defaultAxesFontSize',12,...
-%     'WindowStyle','docked'); 
 f = figure('Position',[plot_where plot_size],...
     'defaultLineLineWidth',2,...
     'defaultAxesFontSize',12,...
-    'color','white'); 
+    'WindowStyle','docked'); 
+% f = figure('Position',[plot_where plot_size],...
+%     'defaultLineLineWidth',2,...
+%     'defaultAxesFontSize',12,...
+%     'color','white'); 
 hold on
 
 s(1) = subplot(3,4,1);
@@ -46,7 +46,7 @@ s(4) = subplot(3,4,[2,3,4,6,7,8,10,11,12]);
     'mel_offset',0,...
     'lum','CIE_10');
 
-%% Plot SPDs
+%% Plot mean SPD
 
 plot(s(1),SToWls(S_sh),mean(T_SPD,2))
 
@@ -125,11 +125,14 @@ for i = 1:interval
     end
 end
 
-
+% The following doesn't work currently because I forgot that the refs were
+% already a subsample of the Vrhel set (vrhel_nat_extended)
 
 % %% add labels
 % load sur_vrhel.mat
 % labels_vrhel(137).label = 'peach skin -- yellow'; %correct typo
+% 
+% Vrhel_nat_extended_refs=[1:44,65,69,118:154];
 % 
 % temp = 1:size(T_SRF,2);
 % refs = temp(~exclRef);
@@ -222,22 +225,20 @@ scatter(s(4),lsri(1,:),lsri(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEd
 %histogram(s(5),lsri(2,:,:), 'Orientation', 'horizontal')
 
 %% Plot transformation
-%lsri_n = lsri.^(1/2.5);
-lsri_n = lsri;
-lsri_n(2,:,:) = lsri_n(2,:,:).^(1/2.5);
+lsri_n = sqrt(lsri);
 
-% lsri_c = lsri_n(:,:); %would be nice to not do this transformation, for easier access later, but I'd need to be very careful to check that it didn't change the function of the calculation below
-% 
-% for i=1:size(lsri,1)
-%     lsri_c(i,:) = (lsri_c(i,:) - mean(lsri_c(i,:)))./std(lsri_c(i,:));
-% end
-% 
-% % figure,
-% % scatter(lsri_c(1,:),lsri_c(2,:),...
-% %     [],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
-% % axis equal
-% 
-% lsri_n = reshape(lsri_c,size(lsri));
+lsri_c = lsri_n(:,:); %would be nice to not do this transformation, for easier access later, but I'd need to be very careful to check that it didn't change the function of the calculation below
+
+for i=1:size(lsri,1)
+    lsri_c(i,:) = (lsri_c(i,:) - mean(lsri_c(i,:)))./std(lsri_c(i,:));
+end
+
+% figure,
+% scatter(lsri_c(1,:),lsri_c(2,:),...
+%     [],pltc_alt(:,:)','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+% axis equal
+
+lsri_n = reshape(lsri_c,size(lsri));
 
 interval = 100;
 axlim = xlim;

@@ -19,6 +19,8 @@ if saveFigs
     warning('Save figs is on - you sure? This will overwrite.')
 end
 
+demo_ill = 15;
+
 %% Prepare figure
 %[1950,500]
 
@@ -38,10 +40,10 @@ clf
     'mel_offset',0,...
     'lum','CIE_10');
 
-%% Plot mean SPD
+%% Plot SPD
 
 s(1) = subplot(3,4,1);
-plot(s(1),SToWls(S_sh),T_SPD(:,15)) %random number just to get one that looks good on the axes
+plot(s(1),SToWls(S_sh),T_SPD(:,demo_ill)) %random number just to get one that looks good on the axes
 xlim([390 730])
 ylim([0 1.7])
 yticks([0 1])
@@ -111,7 +113,7 @@ end
 
 %%
 hold on
-scatter(lsri(1,:,15),lsri(2,:,15),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
+scatter(lsri(1,:,demo_ill),lsri(2,:,demo_ill),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
 if saveFigs
     print([base,'1f_MBpoints.png'],'-dpng','-r0')
 end
@@ -171,7 +173,7 @@ end
 
 interval = 20;
 a = [lsri(1,:);lsri(2,:)];
-b = repmat([lsri(1,:,15);lsri(2,:,15)],1,size(T_SPD,2));
+b = repmat([lsri(1,:,demo_ill);lsri(2,:,demo_ill)],1,size(T_SPD,2));
 ab = zeros([size(a,1),size(a,2),interval]);
 for i = 1:size(a,2)
     ab(1,i,:) = linspace(a(1,i),b(1,i),interval); 
@@ -190,7 +192,7 @@ end
 
 %% Add noise
 
-hypI = repmat([lsri(1,:,15);lsri(2,:,15)],1,1,130);
+hypI = repmat([lsri(1,:,demo_ill);lsri(2,:,demo_ill)],1,1,130);
 
 rng(1)
 noise = normrnd(0,0.002,size(hypI));
@@ -200,7 +202,7 @@ hypI = hypI+noise;
 hypI2 = hypI(:,:);
 
 interval = 20;
-a = repmat([lsri(1,:,15);lsri(2,:,15)],1,size(T_SPD,2));
+a = repmat([lsri(1,:,demo_ill);lsri(2,:,demo_ill)],1,size(T_SPD,2));
 b = hypI2;
 ab = zeros([size(a,1),size(a,2),interval]);
 for i = 1:size(a,2)
@@ -350,29 +352,31 @@ if saveFigs
 end
 
 % Highlight data for a single illuminant
-scatter(s2(2),lsri_n(1,:,15),lsri_n(2,:,15),'r','filled')
+scatter(s2(2),lsri_n(1,:,demo_ill),lsri_n(2,:,demo_ill),'r','filled')
 if saveFigs
     print([base,'2b_GW1.png'],'-dpng','-r0')
 end
 
 % Calculate mean
-scatter(s2(2),mean(lsri_n(1,:,15)),mean(lsri_n(2,:,15)),1000,'r*')
+scatter(s2(2),mean(lsri_n(1,:,demo_ill)),mean(lsri_n(2,:,demo_ill)),100,'b^','filled')
 if saveFigs
     print([base,'2b_GW2.png'],'-dpng','-r0')
 end
 
+% for i = 1:size(T_SRF_reduced,2)
+%     plot([mean(lsri_n(1,:,demo_ill)),lsri_n(1,i,demo_ill)],[mean(lsri_n(2,:,demo_ill)),lsri_n(2,i,demo_ill)],'b')
+% end
+
 % Calculate means for all the illuminants
-cla
-scatter(lsri_n(1,:),lsri_n(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns) %replot original data
+%cla
+%scatter(lsri_n(1,:),lsri_n(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns) %replot original data
 lsri_m2 = mean(lsri_n,2);
-scatter(s2(2),squeeze(lsri_m2(1,:,:)),squeeze(lsri_m2(2,:,:)),1000,'r*')
+scatter(s2(2),squeeze(lsri_m2(1,:,:)),squeeze(lsri_m2(2,:,:)),100,'b^','filled')
 if saveFigs
     print([base,'2b_GW3.png'],'-dpng','-r0')
 end
 
-corrector = lsri_m2-lsri_m2(:,:,1);
-lsri_mc = lsri_m2 - corrector;
-lsri_c = lsri_n - corrector;
+lsri_c = lsri_n - lsri_m2;
 
 interval = 20;
 a = [lsri_n(1,:);lsri_n(2,:)];
@@ -384,7 +388,8 @@ for i = 1:size(a,2)
 end
 
 c = [squeeze(lsri_m2(1,:,:))';squeeze(lsri_m2(2,:,:))'];
-d = repmat(lsri_m2(1:2,:,1),1,130);
+%d = repmat(lsri_m2(1:2,:,1),1,130);
+d = zeros(size(c));
 cd = zeros([size(c,1),size(c,2),interval]);
 for i = 1:size(c,2)
     cd(1,i,:) = linspace(c(1,i),d(1,i),interval); 
@@ -395,16 +400,97 @@ cla
 for i=1:interval  
     cla
     scatter(ab(1,:,i),ab(2,:,i),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
-    scatter(cd(1,:,i),cd(2,:,i),1000,'r*')
+    scatter(cd(1,:,i),cd(2,:,i),100,'b^','filled')
+    %Tried to plot lines throughout. Abandoned because the data has been
+    %restructured by this point which would make it very fiddly.
+%     for j = 1:size(T_SRF_reduced,2)
+%         plot([cd(1,demo_ill,i)],[],'b')
+%     end
+    drawnow
     if saveFigs
         createGIF(f2,base,'2b_GW4',i)
     end
 end
 
+plot([0,0],ylim,'k:')
+plot(xlim,[0,0],'k:')
+if saveFigs
+    createGIF(f2,base,'2b_GW5',i)
+end
 
 %% Same for bright-is white
 
+s2(3) = subplot(2,2,3);
+hold on
+axis equal
 
+scatter(lsri_n(1,:),lsri_n(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
+if saveFigs
+    print([base,'2c_BiW1.png'],'-dpng','-r0')
+end
+
+% Calculate Luminance
+Lum = zeros(size(T_SRF_reduced,2),size(T_SPD,2));
+for i=1:size(lsri,3)
+    Lum(:,i) = T_lum'*(T_SRF_reduced.*T_SPD(:,i));
+end
+
+% Highlight data for a single illuminant
+scatter(s2(3),lsri_n(1,:,demo_ill),lsri_n(2,:,demo_ill),'r','filled')
+if saveFigs
+    print([base,'2c_BiW2.png'],'-dpng','-r0')
+end
+
+[~,maxLoc] = max(Lum);
+scatter(s2(3),lsri_n(1,maxLoc(demo_ill),demo_ill),lsri_n(2,maxLoc(demo_ill),demo_ill),100,'b^','filled')
+if saveFigs
+    print([base,'2c_BiW3.png'],'-dpng','-r0')
+end
+
+% Calculate maxes for all the illuminants
+cla
+for i=1:size(T_SPD,2)
+    lsri_biwm(:,1,i) = lsri_n(:,maxLoc(i),i); %lsri Bright is White max
+end
+scatter(lsri_n(1,:),lsri_n(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns) %replot original data
+scatter(s2(3),squeeze(lsri_biwm(1,:,:)),squeeze(lsri_biwm(2,:,:)),100,'b^','filled')
+if saveFigs
+    print([base,'2c_BiW4.png'],'-dpng','-r0')
+end
+
+lsri_c_biw = lsri_n - lsri_biwm;
+
+interval = 20;
+a = [lsri_n(1,:);lsri_n(2,:)];
+b = [lsri_c_biw(1,:);lsri_c_biw(2,:)];
+ab = zeros([size(a,1),size(a,2),interval]);
+for i = 1:size(a,2)
+    ab(1,i,:) = linspace(a(1,i),b(1,i),interval); 
+    ab(2,i,:) = linspace(a(2,i),b(2,i),interval); 
+end
+
+c = [squeeze(lsri_biwm(1,:,:))';squeeze(lsri_biwm(2,:,:))'];
+%d = repmat(lsri_m2(1:2,:,1),1,130);
+d = zeros(size(c));
+cd = zeros([size(c,1),size(c,2),interval]);
+for i = 1:size(c,2)
+    cd(1,i,:) = linspace(c(1,i),d(1,i),interval); 
+    cd(2,i,:) = linspace(c(2,i),d(2,i),interval); 
+end
+
+cla
+for i=1:interval  
+    cla
+    scatter(ab(1,:,i),ab(2,:,i),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
+    scatter(cd(1,:,i),cd(2,:,i),100,'b^','filled')
+    drawnow
+    if saveFigs
+        createGIF(f2,base,'2c_BiW5',i)
+    end
+end
+
+plot([0,0],ylim,'k:')
+plot(xlim,[0,0],'k:')
 
 %% Now for melanopsin based algo
 

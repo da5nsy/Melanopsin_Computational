@@ -363,10 +363,6 @@ if saveFigs
     print([base,'2b_GW2.png'],'-dpng','-r0')
 end
 
-% for i = 1:size(T_SRF_reduced,2)
-%     plot([mean(lsri_n(1,:,demo_ill)),lsri_n(1,i,demo_ill)],[mean(lsri_n(2,:,demo_ill)),lsri_n(2,i,demo_ill)],'b')
-% end
-
 % Calculate means for all the illuminants
 %cla
 %scatter(lsri_n(1,:),lsri_n(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns) %replot original data
@@ -401,11 +397,6 @@ for i=1:interval
     cla
     scatter(ab(1,:,i),ab(2,:,i),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
     scatter(cd(1,:,i),cd(2,:,i),100,'b^','filled')
-    %Tried to plot lines throughout. Abandoned because the data has been
-    %restructured by this point which would make it very fiddly.
-%     for j = 1:size(T_SRF_reduced,2)
-%         plot([cd(1,demo_ill,i)],[],'b')
-%     end
     drawnow
     if saveFigs
         createGIF(f2,base,'2b_GW4',i)

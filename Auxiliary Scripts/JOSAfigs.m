@@ -12,7 +12,7 @@ mktrns = 0.3; %marker transparency
 set(0,'defaultAxesFontName', 'Courier')
 
 base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\JOSA\figs';
-print_figures = 1;
+print_figures = 0;
 
 %%
 

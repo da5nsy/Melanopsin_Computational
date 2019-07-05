@@ -13,12 +13,16 @@ max_s_scale = 0.1;
 
 mktrns = 0.3; %marker transparency
 
-base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\ICVSgifs\';
-saveGifs = 1;
+base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\ICVSfigs\';
+saveFigs = 0;
+if saveFigs
+    warning('Save figs is on - you sure? This will overwrite.')
+end
 
 %% Prepare figure
+%[1950,500]
 
-f = figure('Position',[[1950,500], [1505,727]],...
+f = figure('Position',[[100,100], [1505,727]],...
     'defaultLineLineWidth',2,...
     'defaultAxesFontSize',12,...
     'color','white'); 
@@ -35,8 +39,17 @@ clf
     'lum','CIE_10');
 
 %% Plot mean SPD
+
 s(1) = subplot(3,4,1);
-plot(s(1),SToWls(S_sh),mean(T_SPD,2))
+plot(s(1),SToWls(S_sh),T_SPD(:,15)) %random number just to get one that looks good on the axes
+xlim([390 730])
+ylim([0 1.7])
+yticks([0 1])
+xlabel('Wavelength (nm)')
+ylabel('Spec. Irradiance')
+if saveFigs
+    print([base,'1a_SPD.png'],'-dpng','-r0')
+end
 
 %% Compute colorimetry
 
@@ -51,11 +64,25 @@ T_SRF_reduced = T_SRF(:,~exclRef);
 
 %% Plot SRFs
 s(2) = subplot(3,4,5);
-plot(s(2),SToWls(S_sh),T_SRF_reduced)
+plot(SToWls(S_sh),T_SRF_reduced)
+xlim([390 730])
+xlabel('Wavelength (nm)')
+ylabel('Reflectance')
+yticks(ylim)
+if saveFigs
+    print([base,'1b_SRFs.png'],'-dpng','-r0')
+end
 
 %% Plot SSFs
 s(3) = subplot(3,4,9);
-plot(s(3),SToWls(S_sh),T_SSF(:,[1:3,5]))
+plot(SToWls(S_sh),T_SSF(:,1:3))
+xlim([390 730])
+xlabel('Wavelength (nm)')
+ylabel('Norm. Spec. Sens.')
+yticks(ylim)
+if saveFigs
+    print([base,'1c_SSFs.png'],'-dpng','-r0')
+end
 
 %% Plot MB chromaticity diagram
 
@@ -78,15 +105,20 @@ ylim([0 1])
 %yticks([0 1])
 xlabel('{\itl}_{MB,10}');
 ylabel('{\its}_{MB,10}');
+if saveFigs
+    print([base,'1e_MB.png'],'-dpng','-r0')
+end
 
 %%
 hold on
-rng(1); n_ill = randi(size(T_SPD,2)); %pick a random spectrum (55th under current settings, changes if you downsample the illuminant data, for example)
-scatter(lsri(1,:,n_ill),lsri(2,:,n_ill),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
+scatter(lsri(1,:,15),lsri(2,:,15),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
+if saveFigs
+    print([base,'1f_MBpoints.png'],'-dpng','-r0')
+end
 
 %% Zoom
 
-interval = 50;
+interval = 20;
 axlim = xlim;
 bxlim = [min_l_scale, max_l_scale];
 aylim = ylim;
@@ -101,8 +133,8 @@ for i = 1:interval
     xlim(abxlim(:,i))
     ylim(abylim(:,i))
         
-    if saveGifs
-        createGIF(f,base,'zoom') %Outside repo: available at: https://github.com/da5nsy/General-Purpose-Functions/blob/1604ee42c2377c72c99bc30c47bc839546aa7afb/createGIF.m
+    if saveFigs
+        createGIF(f,base,'1g_MBzoom',i) %Outside repo: available at: https://github.com/da5nsy/General-Purpose-Functions/blob/1604ee42c2377c72c99bc30c47bc839546aa7afb/createGIF.m
     end
 end
 
@@ -120,7 +152,7 @@ end
 % refs = temp(~exclRef);
 % 
 % for i=1:length(refs)
-%     text(lsri(1,i,n_ill)+0.005,lsri(2,i,n_ill)+0.00015,labels_vrhel(refs(i)).label,'Rotation',5,'FontName','Courier')
+%     text(lsri(1,i,15)+0.005,lsri(2,i,15)+0.00015,labels_vrhel(refs(i)).label,'Rotation',5,'FontName','Courier')
 % end
 
 %% Add more illums
@@ -130,8 +162,8 @@ axes(s(1)), hold on
 for i=1:size(T_SPD,2)
     plot(s(1),SToWls(S_sh),T_SPD(:,i))
     scatter(s(4),lsri(1,:,i),lsri(2,:,i),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
-    if saveGifs
-        createGIF(f,base,'addIllums')
+    if saveFigs
+        createGIF(f,base,'1h_MBaddIllums',i)
     end
 end
 
@@ -139,7 +171,7 @@ end
 
 interval = 20;
 a = [lsri(1,:);lsri(2,:)];
-b = repmat([lsri(1,:,n_ill);lsri(2,:,n_ill)],1,size(T_SPD,2));
+b = repmat([lsri(1,:,15);lsri(2,:,15)],1,size(T_SPD,2));
 ab = zeros([size(a,1),size(a,2),interval]);
 for i = 1:size(a,2)
     ab(1,i,:) = linspace(a(1,i),b(1,i),interval); 
@@ -150,15 +182,15 @@ axes(s(4))
 for i=1:interval  
     cla
     scatter(ab(1,:,i),ab(2,:,i),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
-    if saveGifs
-        createGIF(f,base,'shiftBackToIdeal')
+    if saveFigs
+        createGIF(f,base,'1i_MBshiftBackToIdeal',i)
     end
 end
 
 
 %% Add noise
 
-hypI = repmat([lsri(1,:,n_ill);lsri(2,:,n_ill)],1,1,130);
+hypI = repmat([lsri(1,:,15);lsri(2,:,15)],1,1,130);
 
 rng(1)
 noise = normrnd(0,0.002,size(hypI));
@@ -168,7 +200,7 @@ hypI = hypI+noise;
 hypI2 = hypI(:,:);
 
 interval = 20;
-a = repmat([lsri(1,:,n_ill);lsri(2,:,n_ill)],1,size(T_SPD,2));
+a = repmat([lsri(1,:,15);lsri(2,:,15)],1,size(T_SPD,2));
 b = hypI2;
 ab = zeros([size(a,1),size(a,2),interval]);
 for i = 1:size(a,2)
@@ -180,9 +212,13 @@ axes(s(4))
 for i=1:interval  
     cla
     scatter(ab(1,:,i),ab(2,:,i),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
-    if saveGifs
-        createGIF(f,base,'addNoise')
+    if saveFigs
+        createGIF(f,base,'1j_MBaddNoise',i)
     end
+end
+
+if saveFigs
+    print([base,'1j2_MBNoise.png'],'-dpng','-r0')
 end
 
 %% Jump through the steps of KMeansMark
@@ -196,11 +232,15 @@ scatter(hypI(1,:),hypI(2,:),[],km_idx,'filled','MarkerFaceAlpha',mktrns,'MarkerE
 
 text(0.8,0.08,['KMeansMark =', string(KMM)],'FontName','Courier','FontSize',15)
 
+if saveFigs
+    print([base,'1k_KMM.png'],'-dpng','-r0')
+end
+
 % Highlight correct vs incorrect
 
 %% Now let's try some real algos...
 
-%% But before we do, sqrt data 
+%% But before we do, log data 
 
 %Replot original data
 cla
@@ -212,7 +252,7 @@ scatter(s(4),lsri(1,:),lsri(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEd
 %histogram(s(5),lsri(2,:,:), 'Orientation', 'horizontal')
 
 %% Plot transformation
-lsri_n = sqrt(lsri);
+lsri_n = log(lsri);
 
 lsri_c = lsri_n(:,:); 
 for i=1:size(lsri,1)
@@ -248,11 +288,14 @@ for i=1:interval
     xlim(abxlim(:,i))
     ylim(abylim(:,i))
     drawnow
+    if saveFigs
+        createGIF(f,base,'1l_PreAlgoTransf',i)
+    end
 end
 
 axis equal %!!!!!!!!!!!!!!!!!! check this later, and pull the assigned values into bxlim and bylim
-xlabel('norm(sqrt({\itl}_{MB,10}))');
-ylabel('norm(sqrt({\its}_{MB,10}))');
+xlabel('norm(log({\itl}_{MB,10}))');
+ylabel('norm(log({\its}_{MB,10}))');
 
 %% Check effect on spectral locus
 
@@ -265,41 +308,99 @@ ylabel('norm(sqrt({\its}_{MB,10}))');
 
 %% Perform CC
 
-Lum = zeros(size(T_SRF_reduced,2),size(T_SPD,2));
-for i=1:size(lsri,3)
-    Lum(:,i) = T_lum'*(T_SRF_reduced.*T_SPD(:,i));
-end
-
-output = performCC(lsri_n,Lum);
+% Lum = zeros(size(T_SRF_reduced,2),size(T_SPD,2));
+% for i=1:size(lsri,3)
+%     Lum(:,i) = T_lum'*(T_SRF_reduced.*T_SPD(:,i));
+% end
+% 
+% output = performCC(lsri_n,Lum);
 
 % output_norm(1,1:nSurf(pcSurf),:,:,pcSurf) =  output(1,1:nSurf(pcSurf),:,:,pcSurf)./std(output(1,1:nSurf(pcSurf),:,:,pcSurf));
 % output_norm(2,1:nSurf(pcSurf),:,:,pcSurf) =  output(2,1:nSurf(pcSurf),:,:,pcSurf)./std(output(1,1:nSurf(pcSurf),:,:,pcSurf));
 
-figure,
-scatter(reshape(output(1,:,:,4),[],1),reshape(output(2,:,:,4),[],1))
+% figure,
+% scatter(reshape(output(1,:,:,4),[],1),reshape(output(2,:,:,4),[],1))
 
-%% Grey world correction visualisation
+%% Algo visualisation
+
+f2 = figure('Position',[[100,100], [1505,727]],...
+    'defaultLineLineWidth',2,...
+    'defaultAxesFontSize',12,...
+    'color','white'); 
+hold on
+clf
+
+% DN
+s2(1) = subplot(2,2,1);
+scatter(lsri_n(1,:),lsri_n(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
+axis equal
+
+if saveFigs
+    print([base,'2a_DN.png'],'-dpng','-r0')
+end
+
+%% GW
+s2(2) = subplot(2,2,2);
+hold on
+axis equal
+
+scatter(lsri_n(1,:),lsri_n(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
+if saveFigs
+    print([base,'2b_GW0.png'],'-dpng','-r0')
+end
 
 % Highlight data for a single illuminant
-scatter(lsri_n(1,:,n_ill),lsri_n(2,:,n_ill),'r','filled')
+scatter(s2(2),lsri_n(1,:,15),lsri_n(2,:,15),'r','filled')
+if saveFigs
+    print([base,'2b_GW1.png'],'-dpng','-r0')
+end
 
 % Calculate mean
-scatter(mean(lsri_n(1,:,n_ill)),mean(lsri_n(2,:,n_ill)),'r*')
+scatter(s2(2),mean(lsri_n(1,:,15)),mean(lsri_n(2,:,15)),1000,'r*')
+if saveFigs
+    print([base,'2b_GW2.png'],'-dpng','-r0')
+end
 
 % Calculate means for all the illuminants
+cla
+scatter(lsri_n(1,:),lsri_n(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns) %replot original data
 lsri_m2 = mean(lsri_n,2);
-scatter(squeeze(lsri_m2(1,:,:)),squeeze(lsri_m2(2,:,:)),'r*')
-
-%%
-% Drag them back together
-% (change axis labels)
+scatter(s2(2),squeeze(lsri_m2(1,:,:)),squeeze(lsri_m2(2,:,:)),1000,'r*')
+if saveFigs
+    print([base,'2b_GW3.png'],'-dpng','-r0')
+end
 
 corrector = lsri_m2-lsri_m2(:,:,1);
 lsri_mc = lsri_m2 - corrector;
 lsri_c = lsri_n - corrector;
+
+interval = 20;
+a = [lsri_n(1,:);lsri_n(2,:)];
+b = [lsri_c(1,:);lsri_c(2,:)];
+ab = zeros([size(a,1),size(a,2),interval]);
+for i = 1:size(a,2)
+    ab(1,i,:) = linspace(a(1,i),b(1,i),interval); 
+    ab(2,i,:) = linspace(a(2,i),b(2,i),interval); 
+end
+
+c = [squeeze(lsri_m2(1,:,:))';squeeze(lsri_m2(2,:,:))'];
+d = repmat(lsri_m2(1:2,:,1),1,130);
+cd = zeros([size(c,1),size(c,2),interval]);
+for i = 1:size(c,2)
+    cd(1,i,:) = linspace(c(1,i),d(1,i),interval); 
+    cd(2,i,:) = linspace(c(2,i),d(2,i),interval); 
+end
+
 cla
-scatter(lsri_c(1,:),lsri_c(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
-scatter(lsri_mc(1,1,1),lsri_mc(2,1,1),'r*')
+for i=1:interval  
+    cla
+    scatter(ab(1,:,i),ab(2,:,i),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
+    scatter(cd(1,:,i),cd(2,:,i),1000,'r*')
+    if saveFigs
+        createGIF(f2,base,'2b_GW4',i)
+    end
+end
+
 
 %% Same for bright-is white
 

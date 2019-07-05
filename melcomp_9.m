@@ -55,7 +55,7 @@ T_SRF_reduced = T_SRF(:,~exclRef);
 % subplot(3,2,3*2)
 % hist(log(lsri(4,:)),hk), cleanTicks
 
-lsri = sqrt(lsri);
+lsri = log(lsri);
 
 lsri_c = lsri(:,:); %would be nice to not do this transformation, for easier access later, but I'd need to be very careful to check that it didn't change the function of the calculation below
 
@@ -101,7 +101,7 @@ for pcSurf = 1:length(p.Results.pcSurfRange)
      
     % Score corrections
     for i=1:nMethods
-        rng(1)
+        %rng(1)
         mark(i,pcSurf) = KMeansMark(squeeze(output(:,1:nSurf(pcSurf),:,i,pcSurf)),size(T_SRF_reduced,2),sel);
     end
     

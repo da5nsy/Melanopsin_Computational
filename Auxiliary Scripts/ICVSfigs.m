@@ -14,7 +14,7 @@ max_s_scale = 0.1;
 mktrns = 0.3; %marker transparency
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\ICVSfigs\';
-saveFigs = 0;
+saveFigs = 1;
 if saveFigs
     warning('Save figs is on - you sure? This will overwrite.')
 end
@@ -334,8 +334,9 @@ clf
 
 % DN
 s2(1) = subplot(2,2,1);
-scatter(lsri_n(1,:),lsri_n(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
+hold on
 axis equal
+scatter(lsri_n(1,:),lsri_n(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
 
 if saveFigs
     print([base,'2a_DN.png'],'-dpng','-r0')
@@ -406,7 +407,7 @@ end
 plot([0,0],ylim,'k:')
 plot(xlim,[0,0],'k:')
 if saveFigs
-    createGIF(f2,base,'2b_GW5',i)
+    print([base,'2b_GW5.png'],'-dpng','-r0')
 end
 
 %% Same for bright-is white
@@ -482,16 +483,20 @@ end
 
 plot([0,0],ylim,'k:')
 plot(xlim,[0,0],'k:')
+if saveFigs
+    print([base,'2b_BiW6.png'],'-dpng','-r0')
+end
 
 %% Now for melanopsin based algo
 
-cla
+s2(4) = subplot(2,2,4);
+hold on
+axis equal
 
-for i=1:size(T_SPD,2)
-    plot(s(1),SToWls(S_sh),T_SPD(:,i))
-    scatter3(s(4),lsri_n(1,:,i),lsri_n(2,:,i),lsri_n(4,:,i),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
+scatter(lsri_n(1,:),lsri_n(2,:),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
+if saveFigs
+    print([base,'2d_MC1.png'],'-dpng','-r0')
 end
-cleanTicks
 
 % Shift to 3D (show sweet angle)
 % Find a way to visualise the differencing

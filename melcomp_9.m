@@ -1,4 +1,4 @@
-function [mark] = melcomp_9(varargin)
+function [mark,output,sel_store] = melcomp_9(varargin)
 
 % The goal here is to compare a melanopsin based correction with other
 % basic corrections (do nothing, grey world, bright-is-white/max-RGB)

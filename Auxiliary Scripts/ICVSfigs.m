@@ -498,10 +498,77 @@ if saveFigs
     print([base,'2d_MC1.png'],'-dpng','-r0')
 end
 
-% Shift to 3D (show sweet angle)
-% Find a way to visualise the differencing
+% Highlight data for a single illuminant
+scatter(s2(4),lsri_n(1,:,demo_ill),lsri_n(2,:,demo_ill),'r','filled')
+if saveFigs
+    print([base,'2d_MC2.png'],'-dpng','-r0')
+end
 
-% Show the results of the 4 algos, with inset scores.
+% Highlight data for a single illuminant
+scatter(s2(4),lsri_n(1,:,demo_ill),lsri_n(2,:,demo_ill),(lsri_n(4,:,demo_ill)-min(lsri_n(4,:,demo_ill))+0.0001)*20,'b^','filled')
+if saveFigs
+    print([base,'2d_MC3.png'],'-dpng','-r0')
+end
+
+[sf_l,sf_s] = melcomp_6_calcsf(lsri_n, -10:0.01:10,-10:0.01:10); %calculates scaling factors
+
+% sf_l = 0.6890;
+% sf_s = -0.9300;
+MC = lsri_n;
+MC(1,:) = MC(1,:)+sf_l*MC(4,:);
+MC(2,:) = MC(2,:)+sf_s*MC(4,:);
+
+% cla
+% scatter(s2(4),MC(1,:),MC(2,:),'k','filled');
+
+interval = 20;
+a = [lsri_n(1,:);lsri_n(2,:)];
+b = MC(1:2,:);
+ab = zeros([size(a,1),size(a,2),interval]);
+for i = 1:size(a,2)
+    ab(1,i,:) = linspace(a(1,i),b(1,i),interval); 
+    ab(2,i,:) = linspace(a(2,i),b(2,i),interval); 
+end
+
+for i=1:interval  
+    cla
+    scatter(ab(1,:,i),ab(2,:,i),'k','filled','MarkerFaceAlpha',mktrns,'MarkerEdgeAlpha',mktrns)
+    drawnow
+    if saveFigs
+        createGIF(f2,base,'2d_MC4',i)
+    end
+end
+
+%% Inset scores.
+
+%%
+
+jlist = 12:10:100;
+for pcSurf = 1:length(jlist)
+    nSurf(pcSurf) = round((jlist(pcSurf)/100) * size(T_SRF_reduced,2));
+end
+
+try
+    load jlist.mat
+catch
+    [mark,output,sel_store] = melcomp_9('plt','none','pcSurfRange',jlist);
+    save('jlist.mat')
+end
+
+% This is where it's fucking up currently:
+figure,
+for j=1:jlist(end:-1:1)
+    for i=1:4
+        subplot(2,2,i)
+        gscatter(reshape(output(1,1:nSurf(jlist(j)),:,i,jlist(j)),[],1),...
+            reshape(output(2,1:nSurf(jlist(j)),:,i,jlist(j)),[],1),...
+            reshape(sel_store(jlist(j),1:nSurf(jlist(j)),:),[],1),...
+            [],[],5)
+        axis([-5 5 -3 3])
+        drawnow
+    end
+end
+
 
 %% But what happens if we limit the number of surfaces under each illuminant
 

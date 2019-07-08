@@ -14,7 +14,7 @@ max_s_scale = 0.1;
 mktrns = 0.3; %marker transparency
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\ICVSfigs\';
-saveFigs = 1;
+saveFigs = 0;
 if saveFigs
     warning('Save figs is on - you sure? This will overwrite.')
 end
@@ -262,7 +262,7 @@ for i=1:size(lsri,1)
 end
 lsri_n = reshape(lsri_c,size(lsri));
 
-interval = 100;
+interval = 20;
 axlim = xlim;
 bxlim = [-3, 5]; 
 aylim = ylim;
@@ -555,18 +555,18 @@ catch
     save('jlist.mat')
 end
 
-% This is where it's fucking up currently:
 figure,
-for j=1:jlist(end:-1:1)
+for j=length(jlist):-1:1
     for i=1:4
         subplot(2,2,i)
-        gscatter(reshape(output(1,1:nSurf(jlist(j)),:,i,jlist(j)),[],1),...
-            reshape(output(2,1:nSurf(jlist(j)),:,i,jlist(j)),[],1),...
-            reshape(sel_store(jlist(j),1:nSurf(jlist(j)),:),[],1),...
+        gscatter(reshape(output(1,1:nSurf(j),:,i,j),[],1),...
+                 reshape(output(2,1:nSurf(j),:,i,j),[],1),...
+            reshape(sel_store(j,1:nSurf(j),:),[],1),...
             [],[],5)
         axis([-5 5 -3 3])
-        drawnow
+        legend off
     end
+    drawnow
 end
 
 

@@ -35,14 +35,14 @@ output(:,:,:,2) = gw;
 % a neutral chromaticity, and will be shifted to the origin, with
 % everything else denoted in reference to that.
 
-BiW = zeros(size(lsri(1:2,:,:)));
-maxLumLoc = zeros(size(lsri,3),1);
-for i=1:size(lsri,3)
-    [~,maxLumLoc(i)] = max(Lum(:,i));
-    IllEst(:,i) = lsri(1:2,maxLumLoc(i),i); %Illuminant estimate
-    BiW(:,:,i) = lsri(1:2,:,i) - IllEst(:,i);
-end
-output(:,:,:,3) = BiW;
+% % % % % % BiW = zeros(size(lsri(1:2,:,:)));
+% % % % % % maxLumLoc = zeros(size(lsri,3),1);
+% % % % % % for i=1:size(lsri,3)
+% % % % % %     [~,maxLumLoc(i)] = max(Lum(:,i));
+% % % % % %     IllEst(:,i) = lsri(1:2,maxLumLoc(i),i); %Illuminant estimate
+% % % % % %     BiW(:,:,i) = lsri(1:2,:,i) - IllEst(:,i);
+% % % % % % end
+% % % % % % output(:,:,:,3) = BiW;
 
 % % Figures to check operation
 % figure, hold on
@@ -62,7 +62,7 @@ output(:,:,:,3) = BiW;
 
 %l_cal_range = 0:0.001:1.5;
 %s_cal_range = -2:0.001:-0.15;
-[sf_l,sf_s] = melcomp_6_calcsf(lsri, -1:0.001:1,-1:0.001:1); %calculates scaling factors
+[sf_l,sf_s] = melcomp_6_calcsf(lsri, -10:0.01:10,-10:0.01:10); %calculates scaling factors
 
 % sf_l = 0.6890;
 % sf_s = -0.9300;

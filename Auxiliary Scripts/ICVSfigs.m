@@ -404,8 +404,8 @@ for i=1:interval
     end
 end
 
-plot([0,0],ylim,'k:')
-plot(xlim,[0,0],'k:')
+%plot([0,0],ylim,'k:')
+%plot(xlim,[0,0],'k:')
 if saveFigs
     print([base,'2b_GW5.png'],'-dpng','-r0')
 end
@@ -481,8 +481,8 @@ for i=1:interval
     end
 end
 
-plot([0,0],ylim,'k:')
-plot(xlim,[0,0],'k:')
+%plot([0,0],ylim,'k:')
+%plot(xlim,[0,0],'k:')
 if saveFigs
     print([base,'2b_BiW6.png'],'-dpng','-r0')
 end
@@ -552,21 +552,26 @@ try
     load jlist.mat
 catch
     [mark,output,sel_store] = melcomp_9('plt','none','pcSurfRange',jlist);
-    save('jlist.mat')
+    save('jlist.mat','mark','output','sel_store')
 end
 
-figure,
+counter = 1;
 for j=length(jlist):-1:1
     for i=1:4
-        subplot(2,2,i)
+        axes(s2(i))
+        cla
+        axis manual
         gscatter(reshape(output(1,1:nSurf(j),:,i,j),[],1),...
                  reshape(output(2,1:nSurf(j),:,i,j),[],1),...
             reshape(sel_store(j,1:nSurf(j),:),[],1),...
             [],[],5)
-        axis([-5 5 -3 3])
         legend off
     end
     drawnow
+    if saveFigs
+        createGIF(f2,base,'3a_degredation',counter)
+        counter = counter + 1;
+    end
 end
 
 

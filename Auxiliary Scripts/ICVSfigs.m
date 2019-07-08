@@ -14,7 +14,7 @@ max_s_scale = 0.1;
 mktrns = 0.3; %marker transparency
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\ICVSfigs\';
-saveFigs = 0;
+saveFigs = 1;
 if saveFigs
     warning('Save figs is on - you sure? This will overwrite.')
 end
@@ -510,7 +510,7 @@ if saveFigs
     print([base,'2d_MC3.png'],'-dpng','-r0')
 end
 
-[sf_l,sf_s] = melcomp_6_calcsf(lsri_n, -10:0.01:10,-10:0.01:10); %calculates scaling factors
+[sf_l,sf_s] = melcomp_6_calcsf(lsri_n, -10:0.001:10,-10:0.001:10); %calculates scaling factors
 
 % sf_l = 0.6890;
 % sf_s = -0.9300;
@@ -543,7 +543,7 @@ end
 
 %%
 
-jlist = 12:10:100;
+jlist = 12:100;
 for pcSurf = 1:length(jlist)
     nSurf(pcSurf) = round((jlist(pcSurf)/100) * size(T_SRF_reduced,2));
 end
@@ -569,24 +569,44 @@ for j=length(jlist):-1:1
     end
     drawnow
     if saveFigs
-        createGIF(f2,base,'3a_degredation',counter)
+        if counter == 1            
+            print([base,'3a_degredation.png'],'-dpng','-r0')
+        end
+        createGIF(f2,base,'3b_degredation',counter)
         counter = counter + 1;
     end
 end
 
 
-%% But what happens if we limit the number of surfaces under each illuminant
+%% Summary plot
 
-% (This is a bit like walking around with a macbeth colour checker 5 inches
-% from your face)
+f3 = figure('Position',[[100,100], [1505,727]],...
+    'defaultLineLineWidth',2,...
+    'defaultAxesFontSize',12,...
+    'color','white'); 
+hold on
 
-% Then we see degraded performance from the GW and BiW algos
-% This is because as we decrease the number of surfaces, we decrease the
-% odds of one of these high level metrics being representative of the
-% illuminant
+titles = {'Do nothing','Grey World','Bright-is-White','Melanopsin'};
+markers = {'s:','d:','^:','o:'};
+nMethods = 4;
+mfc = hsv(nMethods); %marker face colour
+lw = 3; %linewidth
 
-% And so we make a prediction from this data - that the melanopsin signal
-% is useful in scenes chromatic biases
+for i=1:nMethods
+    plot(jlist,mark(i,:),markers{i},'Color',mfc(i,:),'MarkerFaceColor',mfc(i,:),'linewidth',lw)
+end
+legend(titles,'Location','Northwest')
+%plot(p.Results.pcSurfRange,1./round((p.Results.pcSurfRange/100) * size(T_SRF_reduced,2)),'k','DisplayName','Chance','linewidth',lw-1)
+xlim([0 100])
+ylim([0 1])
+
+xlabel(sprintf('Percentage of surfaces used in each run (/%d)',size(T_SRF_reduced,2)))
+ylabel('K-means-mark')
+grid on
+
+if saveFigs
+    print([base,'4a_summary.png'],'-dpng','-r0')
+end
 
 %%
 
@@ -612,3 +632,6 @@ end
 % for i=range
 %     plot(SToWls(S_melanopsin+[i,0,0]),T_melanopsin,'k')
 % end
+
+%%
+

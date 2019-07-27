@@ -38,11 +38,11 @@ parse(p,varargin{:});
 % Only the natural reflectances?
 NatOnly = 1;
 
-% Run the null condition? (Random data)
-RandomData = 1;
+% Run the Random data condition?
+RandomData = 0;
 
 % Display Settings
-dS=15;
+dS=10;
 dMEC=[.2 .2 .2];
 dMFC=[.8 .8 .9];
 dLW=.1;
@@ -50,15 +50,20 @@ dLW=.1;
 plot_where = [500,200];
 plot_size  = [800,400];
 
-set(0,'defaultAxesFontName', 'Courier')
+set(groot,'defaultfigureposition',[100 100 500 400]); 
+set(groot,'defaultLineLineWidth',2);
+set(groot,'defaultAxesFontName', 'Courier');
+set(groot,'defaultAxesFontSize',12);
+set(groot,'defaultFigureRenderer', 'painters') %renders pdfs as vectors
+set(groot,'defaultfigurecolor','white')
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_1';
 disp_figures  = 1;
-print_figures = 0;
+print_figures = 1;
 
 min_l_scale = 0.62;
 max_l_scale = 0.82;
-max_s_scale = 0.04;
+max_s_scale = 0.05;
 
 %% LOAD
 
@@ -104,7 +109,7 @@ plot_corr = 1;
 if plot_corr && disp_figures
     plotOrderNames = {'L','M','S','R','I'};
     plotOrderNums = [1,2,3];
-    figure('Position',[plot_where plot_size]), hold on
+    figure, hold on
     for i=1:length(plotOrderNums)
         sp(i)=subplot(1,3,i); hold on
         scatter(...
@@ -149,7 +154,7 @@ plot_predict = 1;
 if plot_predict && disp_figures
     plotOrderNames = {'L','M','S','R','I'};
     plotOrderNums = [1,2,3,5];
-    figure('Position',[plot_where plot_size])
+    figure
     for i=1:length(plotOrderNums)
         sp(i)=subplot(2,2,i);
         hold on
@@ -172,18 +177,23 @@ if plot_predict && disp_figures
             'MarkerEdgeColor',dMEC,...
             'MarkerFaceColor','r',...
             'LineWidth',dLW...
-            )
-        
-        view(3)
+            )        
+        view(sp(i),[-64,11]);
         xlim([min_l_scale max_l_scale]);
         ylim([0 0.05]);
-        xlabel('{\itl}_{MB}');
-        ylabel('{\its}_{MB}');
+        zlim([0 ceil(max(zlim)/5)*5]); %round up to next 10
         zlabel(sp(i),['{\it',plotOrderNames{plotOrderNums(i)},'}']);
-        %view(sp(i),[70,16]);
-        xticks([min(xlim),max(xlim)])
-        yticks([min(ylim),max(ylim)])
-        zticks([min(zlim),max(zlim)])
+        if i==1
+            xticks([min(xlim),max(xlim)])
+            yticks([min(ylim),max(ylim)])
+            zticks([min(zlim),max(zlim)])
+            xlabel('{\itl}_{MB}');
+            ylabel('{\its}_{MB}');            
+        else
+            xticks([])
+            yticks([])
+            zticks([min(zlim),max(zlim)])
+        end
     end
 end
 
@@ -218,7 +228,7 @@ if plot_comb && disp_figures
                 LMSRI_rand(plotOrderNums1(i),:)./LMSRI_rand(plotOrderNums2(i),:),...
                 dS,...
                 'MarkerEdgeColor',dMEC,...
-                'MarkerFaceColor',dMFC,...
+                'MarkerFaceColor','b',...
                 'LineWidth',dLW...
                 )
         else
@@ -261,7 +271,8 @@ if plot_comb && disp_figures
     %
     
     auto_rotate=    0;
-    saveGif=        0; %save a 360 gif? %Not currently working !!!!!!!!!!!!!!!!!!!!!!!1
+    saveGif=        0; %save a 360 gif? 
+    %Not currently working !!!!!!!!!!!!!!!!!!!!!!!1
     
     if auto_rotate
         i=1;
@@ -287,7 +298,11 @@ if plot_comb && disp_figures
 end
 
 if print_figures
-    save2pdf([base,'\allComboSignals.pdf'])
+    if RandomData
+        save2pdf([base,'\allComboSignals_rand.pdf'])
+    else
+        save2pdf([base,'\allComboSignals.pdf'])
+    end
 end
 
 %% Basic MB plot
@@ -295,15 +310,30 @@ end
 plot_MBbas = 1;
 
 if plot_MBbas && disp_figures
-    figure('Position',[plot_where plot_size]), hold on
+    figure, hold on
     %MB_locus=LMSToMacBoyn(T_SSF(:,1:3)',T_SSF(:,1:3)',T_lum');
     %fill([MB_locus(1,3:end),MB_locus(1,3)],[MB_locus(2,3:end),MB_locus(2,3)],'k','LineStyle','none','FaceAlpha','0.1')
     %text_nm=string(SToWls(S_sh))';
     %text(MB_locus(1,[3:26,27,30,36,41:4:52]),MB_locus(2,[3:26,27,30,36,41:4:52]),text_nm([3:26,27,30,36,41:4:52]))
     
-    scatter(lsri(1,:),lsri(2,:),'filled')
+    dMECalt = hsv(size(T_SRF,2));
     
-    xlim([min_l_scale max_l_scale]);ylim([0 max_s_scale]);
+    for i=1:size(T_SRF,2)
+        scatter(lsri(1,i,:),lsri(2,i,:),dS,...
+            'MarkerEdgeColor',dMECalt(i,:),...
+            'MarkerFaceColor',dMFC,...
+            'LineWidth',dLW...
+            )
+    end
+    
+    scatter(lsri_neutral(1,:),lsri_neutral(2,:),dS,...
+        'MarkerEdgeColor',dMEC,...
+        'MarkerFaceColor','r',...
+        'LineWidth',dLW...
+        )
+    
+    xlim([min_l_scale max_l_scale]);
+    ylim([0 max_s_scale]);
     xticks([min(xlim),max(xlim)])
     yticks([min(ylim),max(ylim)])
     xlabel('{\itl}_{MB}');
@@ -320,7 +350,7 @@ end
 plot_it = 1;
 
 if plot_it && disp_figures
-    figure('Position',[plot_where plot_size]), hold on
+    figure, hold on
 end
 
 MBx=lsri;
@@ -370,11 +400,16 @@ MB_star(2,:,:)=lsri(2,:,:) + fac2 * lsri(4,:,:);
 
 if or(plot_appf && disp_figures,p.Results.plt_appf_overide)
     
-    figure('Position',[plot_where plot_size]), hold on
-    scatter(MB_star(1,:),MB_star(2,:),'filled')
+    figure, hold on
+    for i=1:size(T_SRF,2)
+        scatter(MB_star(1,i,:),MB_star(2,i,:),dS,...
+            'MarkerEdgeColor',dMECalt(i,:),...
+            'MarkerFaceColor',dMFC,...
+            'LineWidth',dLW...
+            )
+    end
     
-    %xticks([])
-    %yticks([])
+    cleanTicks
     xlabel('{\itl}_{MB} + {\itk_1i}_{MB}');
     ylabel('{\its}_{MB} + {\itk_2i}_{MB}');
     

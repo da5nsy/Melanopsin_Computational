@@ -539,8 +539,6 @@ for i=1:interval
     end
 end
 
-%% Inset scores.
-
 %%
 
 jlist = 12:100;
@@ -560,7 +558,7 @@ for j=length(jlist):-1:1
     for i=1:4
         axes(s2(i))
         cla
-        axis manual
+        %axis manual
         gscatter(reshape(output(1,1:nSurf(j),:,i,j),[],1),...
                  reshape(output(2,1:nSurf(j),:,i,j),[],1),...
             reshape(sel_store(j,1:nSurf(j),:),[],1),...
@@ -611,6 +609,18 @@ end
 %%
 
 % But is it more valuable than another random signal?
+
+f3 = figure('Position',[[100,100], [1505,727]],...
+    'defaultLineLineWidth',2,...
+    'defaultAxesFontSize',12,...
+    'color','white'); 
+
+melcomp_9_caller
+xlim([min(xlim),670])
+
+if saveFigs
+    print([base,'5a_diffMel.png'],'-dpng','-r0')
+end
 
 %%
 

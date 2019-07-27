@@ -1,4 +1,4 @@
-function [mark,output,sel_store] = melcomp_9(varargin)
+function [mark,output,sel_store,sf_s,sf_l] = melcomp_9(varargin)
 
 % The goal here is to compare a melanopsin based correction with other
 % basic corrections (do nothing, grey world, bright-is-white/max-RGB)
@@ -12,11 +12,13 @@ if ~exist('varargin','var'), clear, clc, close all, varargin = {}; end
 default_plt = 'all'; %plotting requests
 default_pcSurfRange = [12:7:100,100]; %percent surfaces range
 default_mel_offset = 0;
+default_SSF = 'SS10';
 
 p = inputParser;
 addParameter(p,'plt',default_plt);
 addParameter(p,'pcSurfRange',default_pcSurfRange);
 addParameter(p,'mel_offset',default_mel_offset);
+addParameter(p,'SSF',default_SSF);
 
 parse(p,varargin{:});
 
@@ -24,7 +26,7 @@ parse(p,varargin{:});
 [T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(...
     'SPD','Granada_sub',...
     'SRF','Vrhel_nat_extended',...
-    'SSF','SS10',...
+    'SSF',p.Results.SSF,...
     'mel_offset',p.Results.mel_offset,...
     'lum','CIE_10');
 
@@ -79,30 +81,42 @@ mark = zeros(nMethods,length(p.Results.pcSurfRange));
 output = zeros(2,size(T_SRF_reduced,2),size(T_SPD,2),nMethods,length(p.Results.pcSurfRange));
 output_norm = zeros(2,size(T_SRF_reduced,2),size(T_SPD,2),nMethods,length(p.Results.pcSurfRange));
 sel_store = zeros(length(p.Results.pcSurfRange),round((p.Results.pcSurfRange(end)/100) * size(T_SRF_reduced,2)),size(T_SPD,2));
-for pcSurf = 1:length(p.Results.pcSurfRange)
+for pcSurf = 1:length(p.Results.pcSurfRange)    
     nSurf(pcSurf) = round((p.Results.pcSurfRange(pcSurf)/100) * size(T_SRF_reduced,2));
-    
-    lsri2 = zeros(size(lsri,1),nSurf(pcSurf),size(T_SPD,2));
-    Lum2 = zeros(nSurf(pcSurf),size(T_SPD,2));
-    sel = zeros(nSurf(pcSurf),size(T_SPD,2));
-    for i = 1:size(T_SPD,2)
-        sel(:,i) = randperm(size(T_SRF_reduced,2),nSurf(pcSurf)); %selection
-        lsri2(:,:,i) = lsri(:,sel(:,i),i);
-        Lum2(:,i) = Lum(sel(:,i),i); %!!!!!!!!!!!!!!!!
+    if length(p.Results.pcSurfRange) ~= 1
+        
+        lsri2 = zeros(size(lsri,1),nSurf(pcSurf),size(T_SPD,2));
+        Lum2 = zeros(nSurf(pcSurf),size(T_SPD,2));
+        sel = zeros(nSurf(pcSurf),size(T_SPD,2));
+        for i = 1:size(T_SPD,2)
+            sel(:,i) = randperm(size(T_SRF_reduced,2),nSurf(pcSurf)); %selection
+            lsri2(:,:,i) = lsri(:,sel(:,i),i);
+            Lum2(:,i) = Lum(sel(:,i),i); %!!!!!!!!!!!!!!!!
+        end
+        sel_store(pcSurf,1:nSurf(pcSurf),:) = sel;
+        
+        
+        % Perform corrections
+        [output(:,1:nSurf(pcSurf),:,:,pcSurf),sf_l(pcSurf),sf_s(pcSurf)] = performCC(lsri2,Lum2);
+    else
+        % Perform corrections directly, without random permutation
+        [output,sf_l,sf_s] = performCC(lsri,Lum,1);
     end
-    sel_store(pcSurf,1:nSurf(pcSurf),:) = sel;
     
-    % Perform corrections
-    output(:,1:nSurf(pcSurf),:,:,pcSurf) = performCC(lsri2,Lum2);
-
+    
+    
     % Normalise outputs
     output_norm(1,1:nSurf(pcSurf),:,:,pcSurf) =  output(1,1:nSurf(pcSurf),:,:,pcSurf)./std(output(1,1:nSurf(pcSurf),:,:,pcSurf));
     output_norm(2,1:nSurf(pcSurf),:,:,pcSurf) =  output(2,1:nSurf(pcSurf),:,:,pcSurf)./std(output(1,1:nSurf(pcSurf),:,:,pcSurf));
      
     % Score corrections
     for i=1:nMethods
-        %rng(1)
-        mark(i,pcSurf) = KMeansMark(squeeze(output(:,1:nSurf(pcSurf),:,i,pcSurf)),size(T_SRF_reduced,2),sel);
+        rng(1)
+        if length(p.Results.pcSurfRange) ~= 1
+            mark(i,pcSurf) = KMeansMark(squeeze(output(:,1:nSurf(pcSurf),:,i,pcSurf)),size(T_SRF_reduced,2),sel);
+        else            
+            mark(i,pcSurf) = KMeansMark(squeeze(output(:,1:nSurf(pcSurf),:,i,pcSurf)),size(T_SRF_reduced,2));
+        end
     end
     
     disp(p.Results.pcSurfRange(pcSurf))

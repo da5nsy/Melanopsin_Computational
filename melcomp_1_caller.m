@@ -3,6 +3,13 @@ clear, clc, close all
 plot_where = [500,200];
 plot_size  = [800,400];
 
+set(groot,'defaultfigureposition',[100 100 500 400]); 
+set(groot,'defaultLineLineWidth',2);
+set(groot,'defaultAxesFontName', 'Courier');
+set(groot,'defaultAxesFontSize',12);
+set(groot,'defaultFigureRenderer', 'painters') %renders pdfs as vectors
+set(groot,'defaultfigurecolor','white')
+
 set(0,'defaultAxesFontName', 'Courier')
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_1_caller';
@@ -14,7 +21,7 @@ print_figures = 1;
 try load('C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\melcomp_1_results.mat')
 catch
     
-    figure('Position',[plot_where plot_size]), hold on
+    figure, hold on
     
     range= [-150:10:-60,-58:2:138,140:10:200];
     
@@ -50,7 +57,7 @@ melpeak = 488+range;
 
 norm = 1;
 
-figure('Position',[plot_where plot_size]), hold on
+figure, hold on
 
 if norm
     plot([melpeak(range==0),melpeak(range==0)],[0,1],...
@@ -75,6 +82,7 @@ legend('Location','best')
 xlabel('Nominal Melanopic Peak (nm)')
 ylabel({'Minimum standard deviation',' of whole set (normalised)'})
 axis tight
+yticks([0 1])
 
 if print_figures
     save2pdf([base,'\opt.pdf'])
@@ -82,12 +90,14 @@ end
 
 %% Spread
 
-figure('Position',[plot_where plot_size]), hold on
+figure, hold on
 scatter(melpeak,spread(1,:)/max(spread(1,:)),'r','filled')
 scatter(melpeak,spread(2,:)/max(spread(2,:)),'b','filled')
 xlabel('Nominal Melanopic Peak (nm)')
 ylabel('Mean of inter-object distances')
 axis tight
+ylim([0 1])
+yticks([0 1])
 if print_figures
     save2pdf([base,'\sdmeans.pdf'])
 end

@@ -3,7 +3,7 @@ function [corr_return, p_1, p_2] = melcomp_3(fv_ind,sv_ind)
 % fv_ind = 18; % first value index
 % sv_ind = 1; %second value index
 
-%clear, clc, close all
+clear, clc, close all
 
 base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Project Overview Presentation';
 
@@ -19,15 +19,18 @@ figure('Position',[plot_where plot_size],'defaultLineLineWidth',2)
 hold on
 set(gca, 'FontSize', 16)
 
-%% SPDs (Spectral Power Distributions)
+%% Load data
 
-load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_daylight_2600_161.mat');
-% http://colorimaginglab.ugr.es/pages/Data#__doku_granada_daylight_spectral_database
-% From: J. Hernández-Andrés, J. Romero& R.L. Lee, Jr., "Colorimetric and
-%       spectroradiometric characteristics of narrow-field-of-view
-%       clear skylight in Granada, Spain" (2001)
-T_SPD=final; clear final
-S_SPD=[300,5,161];
+[T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader('SRF','Vrhel_nat_extended');
+
+% Compute colorimetry
+[LMSRI, lsri] = melcomp_colorimetry(T_SPD, T_SRF, T_SSF, T_lum, S_sh);
+
+% Log conversion straightens out some of the relationships for easier
+% handling later
+lsri = log(lsri);
+
+%% SPDs (Spectral Power Distributions)
 
 % try load melcomp_3_addI.mat %bit slow so I saved it out
 % catch
@@ -48,34 +51,31 @@ S_SPD=[300,5,161];
 plt_SPD = 1;
 if plt_SPD
     cla
-    xlim([390 730]); xticks(400:100:700);
-    ylim([0 2]); yticks([0,1,2]);
+    axis tight
+    xticks(400:100:700);
+    yticks([0,1,2]);
     xlabel('Wavelength'); ylabel('Power');
     
-    plot(SToWls([380,5,81]),T_SPD(17:97,103)) %single spd
+    plot(SToWls(S_sh),T_SPD(:,103)) %single spd
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
-    plot(SToWls([380,5,81]),T_SPD(17:97,:)) %all spd
+    plot(SToWls(S_sh),T_SPD) %all spd
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 end
 
 %% SRFs (Spectral Reflectance Functions)
 
-load sur_vrhel
-T_SRF = sur_vrhel(:,[1:44,65,69,81:154]); %natural only
-S_SRF = S_vrhel;
-
 plt_refs = 1;
 if plt_refs
     cla
-    xlim([390 730]); xticks(400:100:700);
+    xticks(400:100:700);
     ylim([0 1]); yticks([0,1]);
     xlabel('Wavelength'); ylabel('Reflectance');
     
-    plot(SToWls(S_SRF),T_SRF(:,109)) %pear
+    plot(SToWls(S_sh),T_SRF(:,72)) %pear
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
-    plot(SToWls(S_SRF),T_SRF) %all
+    plot(SToWls(S_sh),T_SRF) %all
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 end
 
@@ -86,18 +86,6 @@ end
 
 %% SSF (Spectral Sensitivity Functions)
 
-% change for ss at some point in future (?)
-load T_cones_sp T_cones_sp S_cones_sp
-T_SSF = T_cones_sp;
-S_SSF = S_cones_sp;
-clear T_cones_sp S_cones_sp
-
-load T_rods T_rods S_rods
-load T_melanopsin T_melanopsin S_melanopsin
-T_mel = SplineCmf(S_melanopsin, T_melanopsin, S_melanopsin - [10, 0, 0],1); %Increasing the range of this function in case it ends up limiting the range of S_sh, and shorten variable names
-S_mel = S_melanopsin - [10, 0, 0];
-clear S_melanopsin T_melanopsin
-
 plt_spec_sens = 1;
 if plt_spec_sens
     figure(1)
@@ -105,31 +93,14 @@ if plt_spec_sens
     xlim([390 730]); xticks(400:100:700);
     ylim([0 1]); yticks([0,1]);
     ylabel('Sensitivity')
-    plot(SToWls(S_SSF),T_SSF)
-    plot(SToWls(S_rods),T_rods)
-    plot(SToWls(S_mel),T_mel)
+    plot(SToWls(S_sh),T_SSF)
+    %plot(SToWls(S_rods),T_rods)
+    %plot(SToWls(S_mel),T_mel)
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 end
 
-%% Interpolate functions to match range and interval
-
-%reduce all data down to the common range/interval
-S_sh = [max([S_SPD(1),S_SRF(1),S_SSF(1)]),max([S_SPD(2),S_SRF(2),S_SSF(2)]),min([S_SPD(3),S_SRF(3),S_SSF(3)])]; %S_shared: work out what the lowest common denominator for the range/interval of the data is
-%S_sh = [400,5,61]; % brute force way to do something like the variableweights thing
-
-T_SPD = SplineSpd(S_SPD,T_SPD,S_sh,1); % extend == 1: Cubic spline, extends with last value in that direction
-T_SRF = SplineSrf(S_SRF,T_SRF,S_sh,1);
-T_SSF  = SplineCmf(S_SSF,T_SSF,S_sh,1)';
-T_rods = SplineCmf(S_rods,T_rods,S_sh)'; %extend? !!!!!!!!!!
-T_mel  = SplineCmf(S_mel,T_mel,S_sh)'; %extend? !!!!!!!!!!
-[S_SPD, S_SRF, S_SSF, S_rods, S_mel] = deal(S_sh);
-
-% combine sensitivity vectors
-T_LMSRI=[T_SSF,T_rods,T_mel];
-S_LMSRI=S_sh;
-
-% compute peaks of spectral sensitivities
-[~,ms_ind] = max(T_LMSRI);
+%% compute peaks of spectral sensitivities
+[~,ms_ind] = max(T_SSF);
 S_full = SToWls(S_sh);
 ms_val = S_full(ms_ind);
 
@@ -164,15 +135,15 @@ if plt_pc_p
         'k','LineStyle','none','FaceAlpha','0.03');
     
     %normalised PCs:
-    %plot(SToWls(S_SPD),pc.coeff(:,1:3)./max(pc.coeff(:,1:3)))
+    %plot(SToWls(S_sh),pc.coeff(:,1:3)./max(pc.coeff(:,1:3)))
     
-    plot(SToWls(S_SPD),pc_p.coeff(:,1))
+    plot(SToWls(S_sh),pc_p.coeff(:,1))
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
-    plot(SToWls(S_SPD),pc_p.coeff(:,2))
+    plot(SToWls(S_sh),pc_p.coeff(:,2))
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
-    plot(SToWls(S_SPD),pc_p.coeff(:,3))
+    plot(SToWls(S_sh),pc_p.coeff(:,3))
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
     cla
@@ -183,9 +154,9 @@ if plt_pc_p
     recon_p(:,1) = pc_p.score(103,:)   * pc_p.coeff'        + pc_p.mu; % Reconstructed with all PCs
     recon_p(:,2) = pc_p.score(103,1:3) * pc_p.coeff(:,1:3)' + pc_p.mu; % Reconstructed with 3 PCs
     
-    %plot(SToWls(S_SPD), T_SPD(:,103), 'b') % Original data
-    %plot(SToWls(S_SPD), recon_p(:,1), 'g') % All PC
-    plot(SToWls(S_SPD), recon_p(:,2), 'r') % 3 PC
+    %plot(SToWls(S_sh), T_SPD(:,103), 'b') % Original data
+    %plot(SToWls(S_sh), recon_p(:,1), 'g') % All PC
+    plot(SToWls(S_sh), recon_p(:,2), 'r') % 3 PC
     % legend({'Original Data','Reconstructed with 1:3'})
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
@@ -207,33 +178,33 @@ if plt_pc_r
     fill([min(xlim),max(xlim),max(xlim),min(xlim),min(xlim)],[-1,-1,0,0,-1],...
         'k','LineStyle','none','FaceAlpha','0.03');
     
-    %plot(SToWls(S_SRF),pc.coeff(:,1:3)./max(pc.coeff(:,1:3)))
+    %plot(SToWls(S_sh),pc.coeff(:,1:3)./max(pc.coeff(:,1:3)))
     
-    plot(SToWls(S_SRF),pc_r.coeff(:,1))
+    plot(SToWls(S_sh),pc_r.coeff(:,1))
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
-    plot(SToWls(S_SRF),pc_r.coeff(:,2))
+    plot(SToWls(S_sh),pc_r.coeff(:,2))
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
-    plot(SToWls(S_SRF),pc_r.coeff(:,3))
+    plot(SToWls(S_sh),pc_r.coeff(:,3))
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
     cla
     hold on
     ylim([0 1]); yticks([0,1]);
     
-    recon_r(:,1) = pc_r.score(109,:)   * pc_r.coeff'        + pc_r.mu; % Reconstructed with all PCs
-    recon_r(:,2) = pc_r.score(109,1:3) * pc_r.coeff(:,1:3)' + pc_r.mu; % Reconstructed with 3 PCs
+    recon_r(:,1) = pc_r.score(72,:)   * pc_r.coeff'        + pc_r.mu; % Reconstructed with all PCs
+    recon_r(:,2) = pc_r.score(72,1:3) * pc_r.coeff(:,1:3)' + pc_r.mu; % Reconstructed with 3 PCs
     
-    %plot(SToWls(S_SRF), T_SRF(:,109), 'b') % Original data
-    %plot(SToWls(S_SRF), recon_r(:,1), 'g') % All PC
-    plot(SToWls(S_SRF), recon_r(:,2), 'r') % 3 PC
+    %plot(SToWls(S_sh), T_SRF(:,72), 'b') % Original data
+    %plot(SToWls(S_sh), recon_r(:,1), 'g') % All PC
+    plot(SToWls(S_sh), recon_r(:,2), 'r') % 3 PC
     % legend({'Original Data','Reconstructed with 1:3'})
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
     % figure, plot((pc_r.score*pc_r.coeff' + repmat(pc_r.mu,length(pc_r.score),1))') %all the data reconstructed
     
-    % disp(pc_r.score(109,1:3)) %values for demo ref
+    % disp(pc_r.score(72,1:3)) %values for demo ref
 end
 
 % Show the effect of changing the weight of PC2
@@ -249,7 +220,7 @@ if plt_pc2_demo
     fill([min(xlim),max(xlim),max(xlim),min(xlim),min(xlim)],[-1,-1,0,0,-1],...
         'k','LineStyle','none','FaceAlpha','0.03');
     
-    plot(SToWls(S_SPD),pc_p.coeff(:,2),'Color',cols(2,:))
+    plot(SToWls(S_sh),pc_p.coeff(:,2),'Color',cols(2,:))
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
     plot([ms_val(3),ms_val(3)],[min(ylim),max(ylim)],'Color','k')
@@ -259,7 +230,7 @@ if plt_pc2_demo
     cla
     fill([min(xlim),max(xlim),max(xlim),min(xlim),min(xlim)],[-1,-1,0,0,-1],...
         'k','LineStyle','none','FaceAlpha','0.03');
-    plot(SToWls(S_SPD),pc_p.coeff(:,2)*-1,'Color',cols(2,:)*((-1+2)/4))
+    plot(SToWls(S_sh),pc_p.coeff(:,2)*-1,'Color',cols(2,:)*((-1+2)/4))
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
     plot([ms_val(3),ms_val(3)],[min(ylim),max(ylim)],'Color','k')
@@ -270,21 +241,11 @@ if plt_pc2_demo
     fill([min(xlim),max(xlim),max(xlim),min(xlim),min(xlim)],[-1,-1,0,0,-1],...
         'k','LineStyle','none','FaceAlpha','0.03');
     for i = -1.5:0.5:1.5
-        plot(SToWls(S_SPD),pc_p.coeff(:,2)*i,'Color',cols(2,:)*((i+3)/4))
+        plot(SToWls(S_sh),pc_p.coeff(:,2)*i,'Color',cols(2,:)*((i+3)/4))
     end
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 end
 
-
-%% Calculate colour signals
-
-for i=1:size(T_SPD,2)
-    T_rad(:,:,i)  = T_SRF.*T_SPD(:,i);
-    LMSRI(:,:,i)  = T_LMSRI'*T_rad(:,:,i);
-    lsri(1:2,:,i) = LMSToMacBoyn(LMSRI(1:3,:,i)); %change this to be more direct !!!!!!!!!!!!!!
-    lsri(3,:,i)   = LMSRI(4,:,i)./(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)); % double check this !!!!!!!!!!!!!!
-    lsri(4,:,i)   = LMSRI(5,:,i)./(0.6373*LMSRI(1,:,i)+0.3924*LMSRI(2,:,i)); % double check this !!!!!!!!!!!!!!
-end
 
 %% Calculate lines of fit between S and I values
 

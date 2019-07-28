@@ -187,3 +187,54 @@ figure,
 imagesc(T_SPD_c_log)
 colorbar
 
+%% -- Archiving from melcomp_3 -- %%
+% It doesn't really belong in there but there's some nice bits so I'll keep
+% it here commented out for now:
+
+% %% Why S and I when larger intervals are available?
+% 
+% % Correlation image across reflectance spectra
+% figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
+% hold on
+% set(gca, 'FontSize', 16)
+% 
+% sur_vrhel_n = sur_vrhel(:,[1:44,65,69,81:154]);
+% sur_vrhel_c = corr(sur_vrhel_n');
+% surf(sur_vrhel_c*100,'EdgeColor','none')
+% axis image
+% colormap gray
+% S_vrhel_f = SToWls(S_vrhel);
+% xticks(6:50:200)
+% yticks(6:50:200)
+% set(gca,'XTickLabel',S_vrhel_f(xticks))
+% set(gca,'YTickLabel',S_vrhel_f(yticks))
+% if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+% 
+% plot3([26,26],[min(ylim),max(ylim)],[max(zlim),max(zlim)],'Color','b')
+% plot3([50,50],[min(ylim),max(ylim)],[max(zlim),max(zlim)],'Color','k')
+% plot3([min(xlim),max(xlim)],[26,26],[max(zlim),max(zlim)],'Color','b')
+% plot3([min(xlim),max(xlim)],[50,50],[max(zlim),max(zlim)],'Color','k')
+% if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+% 
+% plot3([88,88],[min(ylim),max(ylim)],[max(zlim),max(zlim)],'Color','r')
+% plot3([78,78],[min(ylim),max(ylim)],[max(zlim),max(zlim)],'Color','g')
+% plot3([58,58],[min(ylim),max(ylim)],[max(zlim),max(zlim)],'Color',[0.5,0.5,0.5])
+% plot3([min(xlim),max(xlim)],[88,88],[max(zlim),max(zlim)],'Color','r')
+% plot3([min(xlim),max(xlim)],[78,78],[max(zlim),max(zlim)],'Color','g')
+% plot3([min(xlim),max(xlim)],[58,58],[max(zlim),max(zlim)],'Color',[0.5,0.5,0.5])
+% if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+% 
+% %-% Plot normalised spectral reflectances
+% figure(1)
+% cla
+% hold on
+% xlim([390 730]); xticks(400:100:700);
+% ylim([0 10]); yticks([0,10]);
+% xlabel('Wavelength'); ylabel('Normalised  Reflectance');
+% 
+% plot([440,440],[min(ylim),max(ylim)],'b:')
+% plot([488,488],[min(ylim),max(ylim)],'k:')
+% 
+% plot(SToWls(S_vrhel),sur_vrhel_n./sur_vrhel_n(26,:))
+% if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+

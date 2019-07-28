@@ -5,23 +5,30 @@ function [corr_return, p_1, p_2] = melcomp_3(fv_ind,sv_ind)
 
 clear, clc, close all
 
-base = 'C:\Users\cege-user\Dropbox\UCL\Ongoing Work\Melanopsin Computational\Project Overview Presentation';
+base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_3';
 
-ff = '-dtiff'; %file format
-p  = 0; %print? (aka save?), set to 1 to begin saving
+set(groot,'defaultfigureposition',[100 100 500 400]); 
+set(groot,'defaultLineLineWidth',2);
+set(groot,'defaultAxesFontName', 'Courier');
+set(groot,'defaultAxesFontSize',12);
+set(groot,'defaultFigureRenderer', 'painters') %renders pdfs as vectors
+set(groot,'defaultfigurecolor','white')
+
+ff = '-dpng'; %file format
+p  = 1; %print? (aka save?), set to 1 to begin saving
 
 plot_where = [800,50];
 plot_size  = [800,375];
 
 %% Start the figure
 
-figure('Position',[plot_where plot_size],'defaultLineLineWidth',2)
+figure
 hold on
 set(gca, 'FontSize', 16)
 
 %% Load data
 
-[T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader('SRF','Vrhel_nat_extended');
+[T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader('SRF','Vrhel_nat_extended','SSF','SP','Lum','SP');
 
 % Compute colorimetry
 [LMSRI, lsri] = melcomp_colorimetry(T_SPD, T_SRF, T_SSF, T_lum, S_sh);
@@ -53,8 +60,8 @@ if plt_SPD
     cla
     axis tight
     xticks(400:100:700);
-    yticks([0,1,2]);
-    xlabel('Wavelength'); ylabel('Power');
+    ylim([0,2.1]),yticks([0,1,2]);
+    xlabel('Wavelength (nm)'); ylabel('Power (W m ^-^2 nm^-^1)');
     
     plot(SToWls(S_sh),T_SPD(:,103)) %single spd
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
@@ -70,7 +77,7 @@ if plt_refs
     cla
     xticks(400:100:700);
     ylim([0 1]); yticks([0,1]);
-    xlabel('Wavelength'); ylabel('Reflectance');
+    xlabel('Wavelength (nm)'); ylabel('Reflectance');
     
     plot(SToWls(S_sh),T_SRF(:,72)) %pear
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
@@ -325,7 +332,7 @@ plt_lbls{7}  = 's';
 plt_lbls{8}  = 'r';
 plt_lbls{9}  = 'i';
 plt_lbls{10} = 'L+M';
-plt_lbls{11} = '(0.6373*L)+(0.3924*M)';
+plt_lbls{11} = 'SP\_Lum'; %'(0.6373*L)+(0.3924*M)';
 plt_lbls{12} = 'r + i';
 plt_lbls{13} = 'L/M';
 plt_lbls{14} = 'L/S';
@@ -416,14 +423,14 @@ if plt_viz
     subplot(1,2,1)
     imagesc(crl)
     colorbar
-    title('correlation between signal and PC weight')
+    title({'correlation between signal', 'and PC weight'})
     xlabel('PC')
     
     set(gca, 'XTick', 1:nPC);
     set(gca, 'YTick', 1:size(cs,1));
     set(gca, 'YTickLabel', plt_lbls);
     colormap('gray');
-    set(gca, 'FontSize', 16)
+    %set(gca, 'FontSize', 16)
     
     subplot(1,2,2)
     imagesc(crl_norm)
@@ -431,11 +438,11 @@ if plt_viz
     title('normalised')
     xlabel('PC')
     
-    set(gca, 'XTick', 1:nPC);
-    set(gca, 'YTick', 1:size(cs,1));
-    set(gca, 'YTickLabel', plt_lbls);
-    colormap('gray');
-    set(gca, 'FontSize', 16)
+%     set(gca, 'XTick', 1:nPC);
+     set(gca, 'YTick', []);
+%     set(gca, 'YTickLabel', plt_lbls);
+%     colormap('gray');
+%     set(gca, 'FontSize', 16)
     
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 end

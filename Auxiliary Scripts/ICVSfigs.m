@@ -14,7 +14,7 @@ max_s_scale = 0.1;
 mktrns = 0.3; %marker transparency
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\ICVSfigs\';
-saveFigs = 1;
+saveFigs = 0;
 if saveFigs
     warning('Save figs is on - you sure? This will overwrite.')
 end

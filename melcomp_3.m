@@ -122,9 +122,21 @@ elseif vw == 1 %S + L and max in between
     pc_p.variableweights = T_SSF(:,1)+T_SSF(:,3);
     [~,t_p_locs] = findpeaks(pc_p.variableweights);
     pc_p.variableweights(t_p_locs(1):t_p_locs(2)) = max(pc_p.variableweights);
-    %plot(SToWls(S_sh),pc_p.variableweights)
+    pc_p.variableweights(pc_p.variableweights>1) = 1;
 elseif vw == 2 %S+L+I
     pc_p.variableweights = T_SSF(:,1)+T_SSF(:,3)+T_mel(:,1);
+end
+
+plt_vw = 1;
+if plt_vw
+    cla
+    plot(SToWls(S_sh),pc_p.variableweights)
+    xlim([390 730]);
+    xticks(400:100:700);
+    ylim([0 1]);
+    yticks(ylim);
+    ylabel('Weight')    
+    if p, print([base,'\vw'],ff); p=p+1; end %save figure
 end
 
 [pc_p.coeff, pc_p.score, pc_p.latent, pc_p.tsquared, pc_p.explained, pc_p.mu] = pca(T_SPD','VariableWeights',pc_p.variableweights);

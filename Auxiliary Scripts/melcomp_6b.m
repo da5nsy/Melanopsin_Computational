@@ -281,7 +281,7 @@ cla
 legend('on')
 ylim('auto')
     
-pca_range = -70:10:130;
+pca_range = -70:130;
 
 % default
 for i=1:length(pca_range)

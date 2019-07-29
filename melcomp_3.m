@@ -708,50 +708,80 @@ return
 %     scatter3(cs(14,ref,:),pc_p.score(:,2),pc_p.score(:,1),'.')
 % end
 % 
-% %% New version of 'Calc correlation between' taking into account amended signals
-% 
-% lore = load('melcomp_3_correlation_results.mat'); %loaded results
-% 
-% plt_viz = 1;
-% if plt_viz
-%     figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
-%     hold on
-%     
-%     crl2 = crl;
-%     crl2(:,2) = max(lore.corr_return');
-%     
-%     subplot(1,2,1)
-%     imagesc(crl2)
-%     colorbar
-%     title('correlation between signal and PC weight')
-%     xlabel('PC')
-%     
-%     set(gca, 'XTick', 1:nPC);
-%     set(gca, 'YTick', 1:size(cs,1));
-%     set(gca, 'YTickLabel', plt_lbls);
-%     colormap('gray');
-%     set(gca, 'FontSize', 16)
-%     
-%     crl_norm2 = crl2;
-%     for i=1:3 %leftover, be careful
-%         crl_norm2(:,i) = crl_norm2(:,i) - min(crl_norm2(:,i));
-%         crl_norm2(:,i) = crl_norm2(:,i) / max(crl_norm2(:,i));
-%     end
-%     
-%     subplot(1,2,2)
-%     imagesc(crl_norm2)
-%     colorbar
-%     title('normalised')
-%     xlabel('PC')
-%     
-%     set(gca, 'XTick', 1:nPC);
-%     set(gca, 'YTick', 1:size(cs,1));
-%     set(gca, 'YTickLabel', plt_lbls);
-%     colormap('gray');
-%     set(gca, 'FontSize', 16)
-%     
-%     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
-% end
+%% New version of 'Calc correlation between' taking into account amended signals
+
+clear, clc, close all
+lore = load('melcomp_3_correlation_results.mat'); %loaded results
+
+plt_viz = 1;
+if plt_viz
+    figure
+    hold on
+    
+    ncs = size(lore.corr_return,1);%number of colour signals
+    nPC = 3; %number of principal components
+    crl2 = zeros(ncs,nPC);
+    crl2(:,1:3) = lore.corr_return(:,1:3);
+    
+    subplot(1,2,1)
+    imagesc(crl2)
+    colorbar
+    title('correlation between signal and PC weight')
+    xlabel('PC')
+    
+    set(gca, 'XTick', 1:nPC);
+    set(gca, 'YTick', 1:ncs);
+    set(gca, 'YTickLabel', lore.plt_lbls);
+    colormap('gray');
+    
+    crl_norm2 = crl2;
+    for i=1:3 %leftover, be careful
+        crl_norm2(:,i) = crl_norm2(:,i) - min(crl_norm2(:,i));
+        crl_norm2(:,i) = crl_norm2(:,i) / max(crl_norm2(:,i));
+    end
+    
+    subplot(1,2,2)
+    imagesc(crl_norm2)
+    colorbar
+    title('normalised')
+    xlabel('PC')
+    
+    set(gca, 'XTick', 1:nPC);
+    set(gca, 'YTick', 1:ncs);
+    set(gca, 'YTickLabel', lore.plt_lbls);
+    colormap('gray');
+    
+    %if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+end
+
+%%
+plt_sca2 = 1;
+if plt_sca2
+    counter = 1;
+    figure('Position',[plot_where 250 900])
+    for i=[6:9, 13:18]
+        for j=2
+            subplot(length([6:9, 13:18]),1,counter), hold on
+            counter = counter + 1;
+            %scatter(squeeze(cs(i,:,:)),repmat(pc_p.score(:,j),1,83,1)','r.')
+            scatter(reshape(squeeze(cs(i,:,:)),1,[]),reshape(repmat(pc_p.score(:,j),1,83,1),1,[])','r.')
+            %ylabel(plt_lbls{i},'rotation',0)
+            legend(plt_lbls{i},'AutoUpdate', 'Off')
+            set(gca,'XTick',[])
+            set(gca,'XTickLabel',[])
+            set(gca,'YTick',[])
+            set(gca,'YTickLabel',[])
+            
+            set(gca,'Color',repmat(crl_norm(i,j),3,1))
+            axis tight
+            
+            pft = polyfit(squeeze(mean(cs(i,:,:),2)),pc_p.score(:,j),1);
+            x = linspace(min(squeeze(mean(cs(i,:,:),2))),max(squeeze(mean(cs(i,:,:),2))));
+            y = pft(1)*x +pft(2);
+            plot(x,y,'k')
+        end
+    end
+end
 
 
 end

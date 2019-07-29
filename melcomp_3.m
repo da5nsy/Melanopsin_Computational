@@ -15,7 +15,7 @@ set(groot,'defaultFigureRenderer', 'painters') %renders pdfs as vectors
 set(groot,'defaultfigurecolor','white')
 
 ff = '-dpng'; %file format
-p  = 1; %print? (aka save?), set to 1 to begin saving
+p  = 0; %print? (aka save?), set to 1 to begin saving
 
 plot_where = [800,50];
 plot_size  = [800,375];
@@ -122,7 +122,7 @@ elseif vw == 1 %S + L and max in between
     pc_p.variableweights = T_SSF(:,1)+T_SSF(:,3);
     [~,t_p_locs] = findpeaks(pc_p.variableweights);
     pc_p.variableweights(t_p_locs(1):t_p_locs(2)) = max(pc_p.variableweights);
-    %plot(pc.variableweights)
+    %plot(SToWls(S_sh),pc_p.variableweights)
 elseif vw == 2 %S+L+I
     pc_p.variableweights = T_SSF(:,1)+T_SSF(:,3)+T_mel(:,1);
 end
@@ -498,7 +498,7 @@ end
 %% Scatter plots between...
 
 %L against PC1
-figure(1)
+figure(1), hold on
 cla
 scatter(squeeze(mean(cs(1,:,:),2)),pc_p.score(:,1),'k.')
 xlabel(plt_lbls{1})
@@ -511,7 +511,7 @@ yticks('auto')
 f_L1 = polyfit(squeeze(mean(cs(1,:,:),2)),pc_p.score(:,1),1);
 x = linspace(min(squeeze(mean(cs(1,:,:),2))),max(squeeze(mean(cs(1,:,:),2))));
 y = x*f_L1(1)+f_L1(2);
-plot(x,y)
+plot(x,y,'b')
 
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
@@ -524,7 +524,7 @@ ylabel('PC2')
 f_SI2 = polyfit(squeeze(mean(cs(18,:,:),2)),pc_p.score(:,2),1);
 x = linspace(min(squeeze(mean(cs(18,:,:),2))),max(squeeze(mean(cs(18,:,:),2))));
 y = x*f_SI2(1)+f_SI2(2);
-plot(x,y)
+plot(x,y,'b')
 
 if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
 
@@ -657,7 +657,7 @@ legend({'Data: PC2',['Model: (',num2str(p_1(1),3),' * ',plt_lbls{sv_ind},' + ',n
 
 %% Consider 2D correlation of model to PC2
 
-figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
+figure
 hold on
 set(gca, 'FontSize', 16)
 
@@ -668,20 +668,21 @@ estimatedPC2 =  m .* (fv) + c;
 
 %scatter(estimatedPC2,pc_p.score(:,2),'k.')
 
-scatter3(estimatedPC2,pc_p.score(:,2),sv,'k.')
-plot(estimatedPC2,polyval(polyfit(estimatedPC2,pc_p.score(:,2),1),estimatedPC2),'k')
+%scatter3(estimatedPC2,pc_p.score(:,2),sv,'k.')
+%plot(estimatedPC2,polyval(polyfit(estimatedPC2,pc_p.score(:,2),1),estimatedPC2),'k')
 
-scatter3(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),sv(sv>0.5),'g.')
+scatter3(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),sv(sv>0.5),'k.')
 y = polyval(polyfit(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),1),estimatedPC2(sv>0.5));
-plot3(estimatedPC2(sv>0.5),y,1:length(y),'g')
+plot(estimatedPC2(sv>0.5),y,'b')
 
-%disp(polyfit(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),1))
+disp(polyfit(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2),1))
 
 %xlabel(['Estimated PC2 based on ' plt_lbls{fv_ind}])
-xlabel(['(',num2str(p_1(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_1(2),3),') * ',plt_lbls{fv_ind},...
-    ' + (',num2str(p_2(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_2(2),3),')'])
+xlabel({['(',num2str(p_1(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_1(2),3),') * ',plt_lbls{fv_ind}],...
+    [' + (',num2str(p_2(1),3),' * ',plt_lbls{sv_ind},' + ',num2str(p_2(2),3),')']})
 ylabel('PC2')
 zlabel(plt_lbls{sv_ind})
+cleanTicks
 
 % %hard code print with additional prefix
 %print([base,'\f7\f7_',num2str(fv_ind),'_',num2str(sv_ind)],ff);
@@ -693,62 +694,64 @@ corr_return = corr(estimatedPC2(sv>0.5),pc_p.score((sv>0.5),2));
 
 return
 
-%% Scatter FULL data
+% The following currently crashes MATLAB
 
-figure, hold on
-for ref = 1:size(T_SRF,2)
-    scatter3(cs(18,ref,:),pc_p.score(:,2),pc_p.score(:,1),'.')
-end
-
-figure, hold on
-for ref = 1:size(T_SRF,2)
-    scatter3(cs(14,ref,:),pc_p.score(:,2),pc_p.score(:,1),'.')
-end
-
-%% New version of 'Calc correlation between' taking into account amended signals
-
-lore = load('melcomp_3_correlation_results.mat'); %loaded results
-
-plt_viz = 1;
-if plt_viz
-    figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
-    hold on
-    
-    crl2 = crl;
-    crl2(:,2) = max(lore.corr_return');
-    
-    subplot(1,2,1)
-    imagesc(crl2)
-    colorbar
-    title('correlation between signal and PC weight')
-    xlabel('PC')
-    
-    set(gca, 'XTick', 1:nPC);
-    set(gca, 'YTick', 1:size(cs,1));
-    set(gca, 'YTickLabel', plt_lbls);
-    colormap('gray');
-    set(gca, 'FontSize', 16)
-    
-    crl_norm2 = crl2;
-    for i=1:3 %leftover, be careful
-        crl_norm2(:,i) = crl_norm2(:,i) - min(crl_norm2(:,i));
-        crl_norm2(:,i) = crl_norm2(:,i) / max(crl_norm2(:,i));
-    end
-    
-    subplot(1,2,2)
-    imagesc(crl_norm2)
-    colorbar
-    title('normalised')
-    xlabel('PC')
-    
-    set(gca, 'XTick', 1:nPC);
-    set(gca, 'YTick', 1:size(cs,1));
-    set(gca, 'YTickLabel', plt_lbls);
-    colormap('gray');
-    set(gca, 'FontSize', 16)
-    
-    if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
-end
+% %% Scatter FULL data
+% 
+% figure, hold on
+% for ref = 1:size(T_SRF,2)
+%     scatter3(cs(18,ref,:),pc_p.score(:,2),pc_p.score(:,1),'.')
+% end
+% 
+% figure, hold on
+% for ref = 1:size(T_SRF,2)
+%     scatter3(cs(14,ref,:),pc_p.score(:,2),pc_p.score(:,1),'.')
+% end
+% 
+% %% New version of 'Calc correlation between' taking into account amended signals
+% 
+% lore = load('melcomp_3_correlation_results.mat'); %loaded results
+% 
+% plt_viz = 1;
+% if plt_viz
+%     figure('Position',[plot_where 800 800],'defaultLineLineWidth',2)
+%     hold on
+%     
+%     crl2 = crl;
+%     crl2(:,2) = max(lore.corr_return');
+%     
+%     subplot(1,2,1)
+%     imagesc(crl2)
+%     colorbar
+%     title('correlation between signal and PC weight')
+%     xlabel('PC')
+%     
+%     set(gca, 'XTick', 1:nPC);
+%     set(gca, 'YTick', 1:size(cs,1));
+%     set(gca, 'YTickLabel', plt_lbls);
+%     colormap('gray');
+%     set(gca, 'FontSize', 16)
+%     
+%     crl_norm2 = crl2;
+%     for i=1:3 %leftover, be careful
+%         crl_norm2(:,i) = crl_norm2(:,i) - min(crl_norm2(:,i));
+%         crl_norm2(:,i) = crl_norm2(:,i) / max(crl_norm2(:,i));
+%     end
+%     
+%     subplot(1,2,2)
+%     imagesc(crl_norm2)
+%     colorbar
+%     title('normalised')
+%     xlabel('PC')
+%     
+%     set(gca, 'XTick', 1:nPC);
+%     set(gca, 'YTick', 1:size(cs,1));
+%     set(gca, 'YTickLabel', plt_lbls);
+%     colormap('gray');
+%     set(gca, 'FontSize', 16)
+%     
+%     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
+% end
 
 
 end

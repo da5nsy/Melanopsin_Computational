@@ -20,6 +20,7 @@ p = inputParser;
 addParameter(p,'mel_offset',default_mel_offset);
 addParameter(p,'norm',default_norm);
 addParameter(p,'plt',default_plt);
+addParameter(p,'LMSToMacBoyn_old',0);
 addParameter(p,'SPD',default_SPD, @(x) any(validatestring(x,expectedSPD)));
 addParameter(p,'SRF',default_SRF, @(x) any(validatestring(x,expectedSRF)));
 addParameter(p,'SSF',default_SSF, @(x) any(validatestring(x,expectedSSF)));
@@ -47,9 +48,15 @@ t_i   = zeros([2,size(T_SRF,2),size(T_SPD,2)]); %t for temp
 for i=1:size(T_SPD,2)
     T_rad(:,:,i)  = T_SRF.*T_SPD(:,i);
     LMSRI(:,:,i)  = T_SSF'*T_rad(:,:,i);
-    lsri(1:2,:,i) = LMSToMacBoyn(LMSRI(1:3,:,i),T_SSF(:,1:3)',T_lum');
-    t_r(:,:,i)    = LMSToMacBoyn(LMSRI([1,2,4],:,i),[T_SSF(:,1:2)';T_SSF(:,4)'],T_lum');
-    t_i(:,:,i)    = LMSToMacBoyn(LMSRI([1,2,5],:,i),[T_SSF(:,1:2)';T_SSF(:,5)'],T_lum');
+    if p.Results.LMSToMacBoyn_old
+        lsri(1:2,:,i) = LMSToMacBoyn_old(LMSRI(1:3,:,i),T_SSF(:,1:3)',T_lum');
+        t_r(:,:,i)    = LMSToMacBoyn_old(LMSRI([1,2,4],:,i),[T_SSF(:,1:2)';T_SSF(:,4)'],T_lum');
+        t_i(:,:,i)    = LMSToMacBoyn_old(LMSRI([1,2,5],:,i),[T_SSF(:,1:2)';T_SSF(:,5)'],T_lum');
+    else
+        lsri(1:2,:,i) = LMSToMacBoyn(LMSRI(1:3,:,i),T_SSF(:,1:3)',T_lum');
+        t_r(:,:,i)    = LMSToMacBoyn(LMSRI([1,2,4],:,i),[T_SSF(:,1:2)';T_SSF(:,4)'],T_lum');
+        t_i(:,:,i)    = LMSToMacBoyn(LMSRI([1,2,5],:,i),[T_SSF(:,1:2)';T_SSF(:,5)'],T_lum');
+    end
 end
 lsri(3,:,:) = t_r(2,:,:); clear t_r
 lsri(4,:,:) = t_i(2,:,:); clear t_i

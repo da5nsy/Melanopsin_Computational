@@ -380,23 +380,23 @@ end
 % MATLAB on my machine - no idea why.
 
 % [~,pks_locs] = findpeaks(ex);
-% 
+%
 % % for i = 1:length(pks_locs)
 % %     melcomp_6_looper(pca_range(pks_locs(i)),1,1)
 % % end
-% 
+%
 % figure('Position',[plot_where plot_size],'defaultLineLineWidth',4), hold on
 % xlabel('{\itl}_{MB}');
 % ylabel('{\its}_{MB}');
 % zlabel('{\iti}_{MB}');
 % melcomp_6_looper('mel_offset',pca_range(pks_locs(1)),'plt',1);
-% 
+%
 % view(3)
-% 
+%
 % xticks([min(xlim),max(xlim)]);
 % yticks([min(ylim),max(ylim)]);
 % zticks([min(zlim),max(zlim)]);
-% 
+%
 % if print_figures
 %     save2pdf([base,'\3D.pdf'])
 % end
@@ -407,50 +407,58 @@ figure(3), hold on
 cla
 legend('on')
 ylim('auto')
+
+pca_range = -70:130;
+
+for j=[0,1]
     
-pca_range = -70:10:130;
+    % default
+    for i=1:length(pca_range)
+        pc(i) = melcomp_6_looper('mel_offset',pca_range(i),'LMSToMacBoyn_old',j);
+        disp(pca_range(i))
+    end
+    for i=1:length(pca_range)
+        ex(i) = pc(i).explained(3);
+    end
+    plot(pca_range,ex,'DisplayName','Standard')
+    drawnow
+    
+    % norm off
+    for i=1:length(pca_range)
+        pc(i) = melcomp_6_looper('mel_offset',pca_range(i),'norm',0,'LMSToMacBoyn_old',j);
+        disp(pca_range(i))
+    end
+    for i=1:length(pca_range)
+        ex(i) = pc(i).explained(3);
+    end
+    plot(pca_range,ex,'DisplayName','diff MB scaling')
+    drawnow
+    
+    % different refs
+    for i=1:length(pca_range)
+        pc(i) = melcomp_6_looper('mel_offset',pca_range(i),'SRF','Vrhel_nat_1','LMSToMacBoyn_old',j);
+        disp(pca_range(i))
+    end
+    for i=1:length(pca_range)
+        ex(i) = pc(i).explained(3);
+    end
+    plot(pca_range,ex,'DisplayName','diff SRF')
+    drawnow
+    
+    % different SSFs
+    for i=1:length(pca_range)
+        pc(i) = melcomp_6_looper('mel_offset',pca_range(i),'SSF','SP','lum','SP','LMSToMacBoyn_old',j);
+        disp(pca_range(i))
+    end
+    for i=1:length(pca_range)
+        ex(i) = pc(i).explained(3);
+    end
+    plot(pca_range,ex,'DisplayName','diff SSF')
+    drawnow
+end
 
-% default
-for i=1:length(pca_range)
-    pc(i) = melcomp_6_looper('mel_offset',pca_range(i));
-    disp(pca_range(i))
-end
-for i=1:length(pca_range)
-    ex(i) = pc(i).explained(3);
-end
-plot(pca_range,ex,'DisplayName','Standard')
-
-% norm off
-for i=1:length(pca_range)
-    pc(i) = melcomp_6_looper('mel_offset',pca_range(i),'norm',0);
-    disp(pca_range(i))
-end
-for i=1:length(pca_range)
-    ex(i) = pc(i).explained(3);
-end
-plot(pca_range,ex,'DisplayName','diff MB scaling')
-
-% different refs
-for i=1:length(pca_range)
-    pc(i) = melcomp_6_looper('mel_offset',pca_range(i),'SRF','Vrhel_nat_1');
-    disp(pca_range(i))
-end
-for i=1:length(pca_range)
-    ex(i) = pc(i).explained(3);
-end
-plot(pca_range,ex,'DisplayName','diff SRF')
-
-% different SSFs
-for i=1:length(pca_range)
-    pc(i) = melcomp_6_looper('mel_offset',pca_range(i),'SSF','SP','lum','SP');
-    disp(pca_range(i))
-end
-for i=1:length(pca_range)
-    ex(i) = pc(i).explained(3);
-end
-plot(pca_range,ex,'DisplayName','diff SSF')
-
-legend
+axis tight
+legend('Location','best')
 
 if print_figures
     save2pdf([base,'\optopt.pdf'])

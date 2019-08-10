@@ -17,6 +17,7 @@ function [MB1_minSD,MB2_minSD,MB1_baselineSD,MB2_baslineSD,spread,MB_star_m]= me
 
 % TO-DO
 % Fix gif saving issue
+% Would be nice to decrease file/loading size of full-page graphics
 
 %% Pre-flight
 

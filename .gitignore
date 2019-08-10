@@ -1,5 +1,5 @@
 *.asv
-melcomp_3_fullWorkspace.mat
-melcomp_3_gamedata.mat
 figs/
-jlist.mat
+Auxiliary Scripts/melcomp_3_fullWorkspace.mat
+Auxiliary Scripts/melcomp_3_gamedata.mat
+Auxiliary Scripts/jlist.mat

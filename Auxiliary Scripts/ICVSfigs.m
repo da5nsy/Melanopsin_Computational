@@ -539,7 +539,7 @@ for i=1:interval
     end
 end
 
-%%
+%% Degredation
 
 jlist = 12:100;
 for pcSurf = 1:length(jlist)

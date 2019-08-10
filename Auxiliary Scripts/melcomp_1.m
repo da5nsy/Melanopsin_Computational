@@ -48,9 +48,6 @@ dMEC=[.2 .2 .2];
 dMFC=[.8 .8 .9];
 dLW=.1;
 
-plot_where = [500,200];
-plot_size  = [800,400];
-
 set(groot,'defaultfigureposition',[100 100 500 400]); 
 set(groot,'defaultLineLineWidth',2);
 set(groot,'defaultAxesFontName', 'Courier');
@@ -60,7 +57,7 @@ set(groot,'defaultfigurecolor','white')
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\melcomp_1';
 disp_figures  = 1;
-print_figures = 1;
+print_figures = 0;
 
 min_l_scale = 0.62;
 max_l_scale = 0.82;
@@ -93,8 +90,8 @@ end
 LMSRI_rand = (randn(size(LMSRI,1),1,size(LMSRI,3))+5)*20;
 for i=1:size(T_SPD,2)
     lsri_rand(1:2,:,i) = LMSToMacBoyn(LMSRI_rand(1:3,:,i),T_SSF(:,1:3)',T_lum');
-    t_r(:,:,i)    = LMSToMacBoyn(LMSRI_rand([1,2,4],:,i),[T_SSF(:,1:2)';T_SSF(:,4)'],T_lum');
-    t_i(:,:,i)    = LMSToMacBoyn(LMSRI_rand([1,2,5],:,i),[T_SSF(:,1:2)';T_SSF(:,5)'],T_lum');
+    t_r(:,:,i)         = LMSToMacBoyn(LMSRI_rand([1,2,4],:,i),[T_SSF(:,1:2)';T_SSF(:,4)'],T_lum');
+    t_i(:,:,i)         = LMSToMacBoyn(LMSRI_rand([1,2,5],:,i),[T_SSF(:,1:2)';T_SSF(:,5)'],T_lum');
 end
 lsri_rand(3,:,:) = t_r(2,:,:); clear t_r
 lsri_rand(4,:,:) = t_i(2,:,:); clear t_i

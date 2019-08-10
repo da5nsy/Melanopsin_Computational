@@ -55,7 +55,7 @@ end
 
 if strcmp(p.Results.SRF,'Vrhel_nat_1')
     load sur_vrhel.mat sur_vrhel S_vrhel   
-    refs=[87, 93, 94, 134, 137, 138, 65, 19, 24, 140, 141];
+    refs=[87, 93, 134, 137, 138, 65, 19, 24, 140, 141];
     T_SRF=sur_vrhel(:,refs);
     S_SRF = S_vrhel;
 end

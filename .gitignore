@@ -1,4 +1,5 @@
 *.asv
+*.gif
 figs/
 Auxiliary Scripts/melcomp_3_fullWorkspace.mat
 Auxiliary Scripts/melcomp_3_gamedata.mat

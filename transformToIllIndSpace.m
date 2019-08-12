@@ -1,4 +1,4 @@
-function [minSD_l,minSD_s,sf_l,sf_s] = transformToIllIndSpace(offset,wholeset,disp,print)
+function [minSD_l,minSD_s,sf_l,sf_s,MB_star] = transformToIllIndSpace(offset,wholeset,disp,print)
 
 
 %% Pre-flight

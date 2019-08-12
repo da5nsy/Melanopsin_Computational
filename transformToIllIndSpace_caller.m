@@ -38,13 +38,13 @@ end
 %% Test out the proposed values
 
 [~,minloc1] = min(MB1_minSD);
-transformToIllIndSpace(minloc1,wholeset,1,0);
+transformToIllIndSpace(range(minloc1),wholeset,1,0);
 if wholeset
     save2pdf([base, 'correctedChromaticities_range',num2str(488+range(minloc1)),'.pdf'])
 end
 
 [~,minloc2] = min(MB2_minSD);
-transformToIllIndSpace(minloc2,wholeset,1,0);
+transformToIllIndSpace(range(minloc2),wholeset,1,0);
 if wholeset
     save2pdf([base, 'correctedChromaticities_range',num2str(488+range(minloc2)),'.pdf'])
 end

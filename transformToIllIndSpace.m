@@ -1,4 +1,4 @@
-function [MB1_minSD,MB2_minSD,fac1,fac2] = transformToIllIndSpace(offset,wholeset,disp,print)
+function [minSD_l,minSD_s,sf_l,sf_s] = transformToIllIndSpace(offset,wholeset,disp,print)
 
 
 %% Pre-flight
@@ -7,8 +7,8 @@ try
     nargin;
 catch
     clear, clc, close all;
-    offset = 0;
-    wholeset = 0;
+    offset = 75;
+    wholeset = 1;
 end
 
 % Display Settings
@@ -33,7 +33,7 @@ set(groot,'defaultAxesColorOrder',cols(randperm(size(cols,1)),:))
 if exist('print','var')
     plt.print = print;
 else
-    plt.print = 1; % Save
+    plt.print = 0; % Save
 end
 if plt.print
     warning('plt.print is enabled - you sure? This will overwrite existing figures.')
@@ -65,9 +65,9 @@ if plt.disp
 end
 
 if wholeset
-    [sf_l,sf_s] = calcsf(lsri, -2:0.01:2, -2:0.01:2,plt,1);
+    [sf_l,sf_s,minSD_l,minSD_s] = calcsf(lsri, -2:0.01:2, -2:0.01:2,plt,1);
 else
-    [sf_l,sf_s] = calcsf(lsri, -2:0.01:2, -2:0.01:2,plt,0);
+    [sf_l,sf_s,minSD_l,minSD_s] = calcsf(lsri, -2:0.01:2, -2:0.01:2,plt,0);
 end
 
 if plt.print

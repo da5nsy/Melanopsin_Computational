@@ -1,4 +1,4 @@
-function [sf_l,sf_s] = calcsf(lsri, l_cal_range, s_cal_range, plt, wholeset)
+function [sf_l,sf_s,minSD_l,minSD_s] = calcsf(lsri, l_cal_range, s_cal_range, plt, wholeset)
 
 % This function calculates optimal scaling factors for k
 % Modified from melcomp_6_calcsf.m
@@ -58,21 +58,26 @@ for i=1:2 % for both l and s
     end
 end
 
-[~,cal_val_std_minloc] = min(cal_val_std,[],2);
+[minSD,cal_val_std_minloc] = min(cal_val_std,[],2);
+
+minSD_l = minSD(1);
+minSD_s = minSD(2);
 
 sf_l = l_cal_range(cal_val_std_minloc(1));
 sf_s = s_cal_range(cal_val_std_minloc(2));
 
 %%
 
-d = diff(cal_val_std);
-if or(~(and(d(1)<0,d(end)>0)),(isfield(plt,'sfs') && plt.sfs)) % If you've requested this plot, or if there's an error...
-    figure, 
+d1 = diff(cal_val_std(1,:));
+d2 = diff(cal_val_std(2,:));
+if or((isfield(plt,'sfs') && plt.sfs),...
+        (or(~(and(d1(1)<0,d1(end)>0)),~(and(d2(1)<0,d2(end)>0))))) % If you've requested this plot, or if there's an error...
+    figure,
     plot(l_cal_range,cal_val_std)
     xlabel('k')
     ylabel('SD')
     legend('k1','k2')
-    if ~(and(d(1)<0,d(end)>0))
+    if or(~(and(d1(1)<0,d1(end)>0)),~(and(d2(1)<0,d2(end)>0)))
         error('Minima for l not reached. Modify search range')
     end
 end

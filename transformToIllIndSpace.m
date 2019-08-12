@@ -53,41 +53,21 @@ base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\fig
 
 [~, lsri] = melcomp_colorimetry(T_SPD, T_SRF, T_SSF, T_lum, S_sh);
 
+% Log tranform, zero mean, and normalise by SD
+lsri = log(lsri);
+lsri = lsri - mean(lsri(:,:),2);
+lsri = lsri./std(lsri(:,:),[],2);
+
 %% Finding k to minimise SD of entire set
 
-MBx=lsri;
-MBx1std=[]; %Initialise variables so that they can be added to
-MBx2std=[];
-
-if wholeset %minimise SD for the whole set
-    for S1= -2:0.01:2
-        MBx(1,:,:)=lsri(1,:,:)+S1*lsri(4,:,:);
-        MBx1std=[MBx1std,[S1;std(MBx(1,:))]];
-    end
-    
-    for S2= -2:0.01:2
-        MBx(2,:,:)=lsri(2,:,:)+S2*lsri(4,:,:);
-        MBx2std=[MBx2std,[S2;std(MBx(2,:))]];
-    end
-else %minimise SD for each set
-    for S1= -2:0.01:2
-        MBx(1,:,:)=lsri(1,:,:)+S1*lsri(4,:,:);
-        MBx1std=[MBx1std,[S1;mean(std(squeeze(MBx(1,:,:))'))]];
-    end
-    
-    for S2= -2:0.01:2
-        MBx(2,:,:)=lsri(2,:,:)+S2*lsri(4,:,:);
-        MBx2std=[MBx2std,[S2;mean(std(squeeze(MBx(2,:,:))'))]];
-    end
+if plt.disp
+    plt.sfs = 1;
 end
 
-if plt.disp
-    figure, hold on
-    plot(MBx1std(1,:),MBx1std(2,:))
-    plot(MBx2std(1,:),MBx2std(2,:))
-    xlabel('k')
-    ylabel('SD')
-    legend('k1','k2')
+if wholeset
+    [sf_l,sf_s] = calcsf(lsri, -2:0.01:2, -2:0.01:2,plt,1);
+else
+    [sf_l,sf_s] = calcsf(lsri, -2:0.01:2, -2:0.01:2,plt,0);
 end
 
 if plt.print
@@ -100,15 +80,9 @@ end
 
 % % Apply factors
 
-[MB1_minSD, MB1_minSD_loc] = min(MBx1std(2,:));
-[MB2_minSD, MB2_minSD_loc] = min(MBx2std(2,:));
-
-fac1 = MBx1std(1,MB1_minSD_loc);
-fac2 = MBx2std(1,MB2_minSD_loc);
-
 MB_star = zeros(size(lsri(1:2,:,:)));
-MB_star(1,:,:)=lsri(1,:,:) + fac1 * lsri(4,:,:);
-MB_star(2,:,:)=lsri(2,:,:) + fac2 * lsri(4,:,:);
+MB_star(1,:,:)=lsri(1,:,:) + sf_l * lsri(4,:,:);
+MB_star(2,:,:)=lsri(2,:,:) + sf_s * lsri(4,:,:);
 
 if plt.disp    
     figure, hold on    

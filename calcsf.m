@@ -3,12 +3,14 @@ function [sf_l,sf_s,minSD_l,minSD_s] = calcsf(lsri, l_cal_range, s_cal_range, pl
 % This function calculates optimal scaling factors for k
 % Modified from melcomp_6_calcsf.m
 
+% Default behavoir assumes you want to minimise SD for individual groupings
+
 switch nargin
     case 0
         error('This function needs lsri at minimum')
     case 1
-        l_cal_range = 0.35:0.0001:0.7;
-        s_cal_range = -0.35:0.0001:-0.15;
+        l_cal_range = linspace(-2,2,2000);
+        s_cal_range = linspace(-2,2,2000);
         plt.iterations = 0;
         plt.sfs = 0;
         wholeset = 0;

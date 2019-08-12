@@ -7,7 +7,7 @@ try
     nargin;
 catch
     clear, clc, close all;
-    offset = 75;
+    offset = 0;
     wholeset = 1;
 end
 

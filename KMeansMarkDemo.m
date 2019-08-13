@@ -15,7 +15,7 @@ set(groot,'defaultAxesColorOrder',cols(randperm(size(cols,1)),:))
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\KMeansMarkDemo';
 
-plt.print = 1;
+plt.print = 0;
 if plt.print
     warning('plt.print is enabled - you sure? This will overwrite existing figures.')
 end

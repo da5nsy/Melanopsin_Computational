@@ -1,4 +1,4 @@
-function [output,mark,sf_l,sf_s] = tempname(lsri,Lum,autoScale,pcSurfRange)
+function [output,mark,sf_l,sf_s] = tempname_inhiding(lsri,Lum,autoScale,pcSurfRange)
 
 %%
 

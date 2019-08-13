@@ -64,11 +64,7 @@ if plt.disp
     plt.sfs = 1;
 end
 
-if wholeset
-    [sf_l,sf_s,minSD_l,minSD_s] = calcsf(lsri, -2:0.01:2, -2:0.01:2,plt,1);
-else
-    [sf_l,sf_s,minSD_l,minSD_s] = calcsf(lsri, -2:0.01:2, -2:0.01:2,plt,0);
-end
+[sf_l,sf_s,minSD_l,minSD_s] = calcsf(lsri,'plt',plt,'wholeset',0);
 
 if plt.print
     if wholeset

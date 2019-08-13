@@ -1,4 +1,4 @@
-function [output,sf_l,sf_s] = performCC(lsri,Lum,autoScale)
+function [output,sf_l,sf_s] = performCC(lsri,Lum,autoScale,map)
 
 % Do nothing 'correction' 
 % -----------------------
@@ -61,10 +61,14 @@ output(:,:,:,3) = BiW;
 % ---------------------------
 
 if autoScale == 1
-    [sf_l,sf_s] = calcsf(lsri, -2:0.01:2, -2:0.01:2); %calculates scaling factors
+    if exist('map','var')
+        [sf_l,sf_s] = calcsf(lsri,'wholeset',0,'map',map); %calculates scaling factors
+    else
+        [sf_l,sf_s] = calcsf(lsri,'wholeset',0); %calculates scaling factors
+    end
 else
-    sf_l = 0.5733;
-    sf_s = -0.9395;
+    sf_l = 0.57;
+    sf_s = -0.94;
 end
 
 MC = lsri;

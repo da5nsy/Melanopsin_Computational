@@ -27,7 +27,7 @@ base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\fig
 
 [T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(...
     'SPD','Granada_sub',...
-    'SRF','Vrhel_nat_1',...
+    'SRF','Vrhel_nat_extended',...
     'SSF','SS10',...
     'lum','CIE_10',...
     'mel_offset',0);
@@ -48,52 +48,53 @@ for i=1:size(lsri,3)
     Lum(:,i) = T_lum'*(T_SRF.*T_SPD(:,i));
 end
 
-[output,sf_l,sf_s] = performCC(lsri,Lum,1);
-
-%% Plot outputs
-
-figure('Position',[100 100 800 1000],'Renderer','opengl') %~500kb vs ~150kb with opengl (because it makes it a bitmap rather than a vector
-
-for i = 1:size(output,4)
-    subplot(2,2,i)
-    hold on
-    for j=1:size(T_SRF,2)
-        scatter(output(1,j,:,i),output(2,j,:,i),d.s,'filled','MarkerFaceAlpha',d.MFA)
+for pcSurf = [100,50]
+    [output,mark,~,~,sel_store] = performCCandMarkForRange(lsri,Lum,0,pcSurf);
+    
+    % Plot outputs
+    
+    figure('Position',[100 100 800 1000],'Renderer','opengl') %~500kb vs ~150kb with opengl (because it makes it a bitmap rather than a vector
+    
+    sel_store = squeeze(sel_store);
+    
+    for i = 1:size(output,4)
+        subplot(2,2,i)
+        hold on
+        for j=1:size(T_SRF,2)
+            pointsToPlot_l = squeeze(output(1,:,:,i));
+            pointsToPlot_s = squeeze(output(2,:,:,i));
+            scatter(pointsToPlot_l(sel_store == j),pointsToPlot_s(sel_store == j),...
+                d.s,'filled','MarkerFaceAlpha',d.MFA)
+        end
+        cleanTicks
+        xlabel('{\itl}_{MB}*');
+        ylabel('{\its}_{MB}*');
     end
-    cleanTicks
-    xlabel('{\itl}_{MB}*');
-    ylabel('{\its}_{MB}*');
+    
+    disp(mark)
+    
+    if plt.print
+        save2pdf([base,'\output',num2str(pcSurf),'.pdf'])
+    end
+    
 end
 
-if plt.print
-    save2pdf([base,'\output2.pdf'])
-end
-
-%% Kmeans
-
-for i = 1:size(output,4)
-    KMeansMark(squeeze(output(:,:,:,i)))
-end
-
-%% Perform corrections
-
-% Calculate luminance for BiW
-Lum = zeros(size(T_SRF,2),size(T_SPD,2));
-for i=1:size(lsri,3)
-    Lum(:,i) = T_lum'*(T_SRF.*T_SPD(:,i));
-end
+%% Try a full range
 
 pcSurfRange = 20:10:100;
 
-rng(1)
+[output,mark,sf_l,sf_s,sel_store] = performCCandMarkForRange(lsri,Lum,0,pcSurfRange);
 
-
-%%
 figure, plot(pcSurfRange,mark','o')
-legend('Location','best')
+legend({'DN','GW','BiW','Mel'},'Location','best')
 ylim([0 1])
 
+xlabel('% of surfaces')
+ylabel('k-means-mark')
 
+if plt.print
+    save2pdf([base,'\outputRange.pdf'])
+end
 
 
 

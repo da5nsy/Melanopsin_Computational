@@ -16,8 +16,8 @@ defaultmap = repmat(1:size(lsri,2),size(lsri,3),1)';
 
 p = inputParser;
 
-addParameter(p,'l_cal_range',linspace(-2,2,401));
-addParameter(p,'s_cal_range',linspace(-2,2,401));
+addParameter(p,'l_cal_range',linspace(-5,5,401));
+addParameter(p,'s_cal_range',linspace(-5,5,401));
 addParameter(p,'plt',defaultplt);
 addParameter(p,'wholeset',0);
 addParameter(p,'map',defaultmap);

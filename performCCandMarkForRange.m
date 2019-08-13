@@ -26,7 +26,7 @@ for pcSI = 1:length(pcSurfRange) %percent surfaces index
     
     % Score corrections
     for meth=1:nMethods
-        rng(1)
+        %rng(1)
         mark(meth,pcSI) = KMeansMark(squeeze(output(:,1:nSurf(pcSI),:,meth,pcSI)),size(lsri,2),sel);
     end
     

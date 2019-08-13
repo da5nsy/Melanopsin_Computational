@@ -16,8 +16,10 @@ switch nargin
         wholeset = 0;
 end
 
-if isfield(plt,'iterations') && plt.iterations % check it exists AND is turned on
-    figure, hold on
+if exist('plt','var')
+    if isfield(plt,'iterations') && plt.iterations % check it exists AND is turned on
+        figure, hold on
+    end
 end
 
 
@@ -31,30 +33,32 @@ for i=1:2 % for both l and s
         range = s_cal_range;
     end
     for cal_val = range
-        if isfield(plt,'iterations') && plt.iterations
-            cla reset
-            if i == 1
-                scatter(lsri(1,:)+cal_val*lsri(4,:),lsri(2,:),...
-                    'k','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6) % would be nice to add colour
-            else
-                scatter(lsri(1,:),lsri(2,:)+cal_val*lsri(4,:),...
-                    'k','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+        if exist('plt','var')
+            if isfield(plt,'iterations') && plt.iterations
+                cla reset
+                if i == 1
+                    scatter(lsri(1,:)+cal_val*lsri(4,:),lsri(2,:),...
+                        'k','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6) % would be nice to add colour
+                else
+                    scatter(lsri(1,:),lsri(2,:)+cal_val*lsri(4,:),...
+                        'k','filled','MarkerFaceAlpha',.6,'MarkerEdgeAlpha',.6)
+                end
+                title(cal_val)
+                drawnow
+                %pause(0.1)
             end
-            title(cal_val)
-            drawnow
-            %pause(0.1)
-        end
-        if ~wholeset
-            if i==1
-                cal_val_std(i,find(range == cal_val)) = mean(std(squeeze(lsri(1,:,:)+cal_val*lsri(4,:,:))'));
+            if ~wholeset
+                if i==1
+                    cal_val_std(i,find(range == cal_val)) = mean(std(squeeze(lsri(1,:,:)+cal_val*lsri(4,:,:))'));
+                else
+                    cal_val_std(i,find(range == cal_val)) = mean(std(squeeze(lsri(2,:,:)+cal_val*lsri(4,:,:))'));
+                end
             else
-                cal_val_std(i,find(range == cal_val)) = mean(std(squeeze(lsri(2,:,:)+cal_val*lsri(4,:,:))'));
-            end
-        else
-            if i==1
-                cal_val_std(i,find(range == cal_val)) = std(lsri(1,:)+cal_val*lsri(4,:));
-            else
-                cal_val_std(i,find(range == cal_val)) = std(lsri(2,:)+cal_val*lsri(4,:));
+                if i==1
+                    cal_val_std(i,find(range == cal_val)) = std(lsri(1,:)+cal_val*lsri(4,:));
+                else
+                    cal_val_std(i,find(range == cal_val)) = std(lsri(2,:)+cal_val*lsri(4,:));
+                end
             end
         end
     end
@@ -72,8 +76,9 @@ sf_s = s_cal_range(cal_val_std_minloc(2));
 
 d1 = diff(cal_val_std(1,:));
 d2 = diff(cal_val_std(2,:));
-if or((isfield(plt,'sfs') && plt.sfs),...
-        (or(~(and(d1(1)<0,d1(end)>0)),~(and(d2(1)<0,d2(end)>0))))) % If you've requested this plot, or if there's an error...
+if ((or(~(and(d1(1)<0,d1(end)>0)),~(and(d2(1)<0,d2(end)>0)))))
+    %     if or((isfield(plt,'sfs') && plt.sfs),...
+    %         (or(~(and(d1(1)<0,d1(end)>0)),~(and(d2(1)<0,d2(end)>0))))) % If you've requested this plot, or if there's an error...
     figure,
     plot(l_cal_range,cal_val_std)
     xlabel('k')

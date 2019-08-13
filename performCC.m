@@ -61,7 +61,7 @@ output(:,:,:,3) = BiW;
 % ---------------------------
 
 if autoScale == 1
-    [sf_l,sf_s] = melcomp_6_calcsf(lsri, -2:0.01:2,-2:0.01:2); %calculates scaling factors
+    [sf_l,sf_s] = calcsf(lsri, -2:0.01:2, -2:0.01:2); %calculates scaling factors
 else
     sf_l = 1.081;
     sf_s = -0.797;

@@ -21,7 +21,7 @@ plt.print = 0; % Save
 if plt.print
     warning('plt.print is enabled - you sure? This will overwrite existing figures.')
 end
-base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\fullPipeline';
+base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\comparisonFourAlgos';
 
 %% Load Data
 
@@ -42,4 +42,11 @@ lsri = lsri - mean(lsri(:,:),2);
 lsri = lsri./std(lsri(:,:),[],2);
 
 %%
+
+Lum = zeros(size(T_SRF,2),size(T_SPD,2));
+for i=1:size(lsri,3)
+    Lum(:,i) = T_lum'*(T_SRF.*T_SPD(:,i));
+end
+
+[output,sf_l,sf_s] = performCC(lsri,Lum,1);
 

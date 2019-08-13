@@ -7,7 +7,7 @@ function [T_SPD, T_SRF, T_SSF, T_lum, S_sh] = melcomp_loader(varargin)
 
 %% Parse inputs
 expectedSPD = {'Granada','D-series','Granada_sub'};
-expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_nat_extended','Vrhel_full','Foster','bananas','Koivisto'};
+expectedSRF = {'Vrhel_nat_1','Vrhel_nat_2','Vrhel_nat_extended','Vrhel_nat_extended_exclSimilar','Vrhel_full','Foster','bananas','Koivisto'};
 expectedSSF = {'SS10','SP'};
 expectedlum = {'CIE_10','SP'};
 
@@ -55,28 +55,35 @@ end
 
 if strcmp(p.Results.SRF,'Vrhel_nat_1')
     load sur_vrhel.mat sur_vrhel S_vrhel   
-    refs=[87, 93, 134, 137, 138, 65, 19, 24, 140, 141];
-    T_SRF=sur_vrhel(:,refs);
+    refs = [87, 93, 134, 137, 138, 65, 19, 24, 140, 141];
+    T_SRF = sur_vrhel(:,refs);
     S_SRF = S_vrhel;
 end
 
 if strcmp(p.Results.SRF,'Vrhel_nat_2')
     load sur_vrhel.mat sur_vrhel S_vrhel   
-    refs=[38, 15, 134, 137, 138, 65, 19, 24, 140, 26];
-    T_SRF=sur_vrhel(:,refs);
+    refs = [38, 15, 134, 137, 138, 65, 19, 24, 140, 26];
+    T_SRF = sur_vrhel(:,refs);
     S_SRF = S_vrhel;
 end
 
 if strcmp(p.Results.SRF,'Vrhel_nat_extended')
     load sur_vrhel.mat sur_vrhel S_vrhel   
-    refs=[1:44,65,69,118:154];
-    T_SRF=sur_vrhel(:,refs);
+    refs = [1:44,65,69,118:154];
+    T_SRF = sur_vrhel(:,refs);
+    S_SRF = S_vrhel;
+end
+
+if strcmp(p.Results.SRF,'Vrhel_nat_extended_exclSimilar')
+    load sur_vrhel.mat sur_vrhel S_vrhel   
+    refs = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,24,26,27,28,29,31,34,36,37,38,39,40,118,119,120,121,122,123,124,127,129,130,132,133,140,147,148,149,151];
+    T_SRF = sur_vrhel(:,refs);
     S_SRF = S_vrhel;
 end
 
 if strcmp(p.Results.SRF,'Vrhel_full')
     load sur_vrhel.mat sur_vrhel S_vrhel   
-    T_SRF=sur_vrhel;
+    T_SRF = sur_vrhel;
     S_SRF = S_vrhel;
 end
 

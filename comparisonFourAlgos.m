@@ -49,7 +49,7 @@ for i=1:size(lsri,3)
 end
 
 for pcSurf = [100,50]
-    [output,mark,~,~,sel_store] = performCCandMarkForRange(lsri,Lum,0,pcSurf);
+    [output,mark,sf_l,sf_s,sel_store] = performCCandMarkForRange(lsri,Lum,0,pcSurf);
     
     % Plot outputs
     

@@ -102,12 +102,6 @@ for pcSurf = 1:length(p.Results.pcSurfRange)
         % Perform corrections directly, without random permutation
         [output,sf_l,sf_s] = performCC(lsri,Lum,1);
     end
-    
-    
-    
-    % Normalise outputs
-    output_norm(1,1:nSurf(pcSurf),:,:,pcSurf) =  output(1,1:nSurf(pcSurf),:,:,pcSurf)./std(output(1,1:nSurf(pcSurf),:,:,pcSurf));
-    output_norm(2,1:nSurf(pcSurf),:,:,pcSurf) =  output(2,1:nSurf(pcSurf),:,:,pcSurf)./std(output(1,1:nSurf(pcSurf),:,:,pcSurf));
      
     % Score corrections
     for i=1:nMethods

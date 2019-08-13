@@ -41,7 +41,7 @@ lsri = log(lsri);
 lsri = lsri - mean(lsri(:,:),2);
 lsri = lsri./std(lsri(:,:),[],2);
 
-%%
+%% Perform CC algos
 
 Lum = zeros(size(T_SRF,2),size(T_SPD,2));
 for i=1:size(lsri,3)
@@ -49,4 +49,53 @@ for i=1:size(lsri,3)
 end
 
 [output,sf_l,sf_s] = performCC(lsri,Lum,1);
+
+%% Plot outputs
+
+figure('Position',[100 100 800 1000],'Renderer','opengl') %~500kb vs ~150kb with opengl (because it makes it a bitmap rather than a vector
+
+for i = 1:size(output,4)
+    subplot(2,2,i)
+    hold on
+    for j=1:size(T_SRF,2)
+        scatter(output(1,j,:,i),output(2,j,:,i),d.s,'filled','MarkerFaceAlpha',d.MFA)
+    end
+    cleanTicks
+    xlabel('{\itl}_{MB}*');
+    ylabel('{\its}_{MB}*');
+end
+
+if plt.print
+    save2pdf([base,'\output2.pdf'])
+end
+
+%% Kmeans
+
+for i = 1:size(output,4)
+    KMeansMark(squeeze(output(:,:,:,i)))
+end
+
+%% Perform corrections
+
+% Calculate luminance for BiW
+Lum = zeros(size(T_SRF,2),size(T_SPD,2));
+for i=1:size(lsri,3)
+    Lum(:,i) = T_lum'*(T_SRF.*T_SPD(:,i));
+end
+
+pcSurfRange = 20:10:100;
+
+rng(1)
+
+
+%%
+figure, plot(pcSurfRange,mark','o')
+legend('Location','best')
+ylim([0 1])
+
+
+
+
+
+
 

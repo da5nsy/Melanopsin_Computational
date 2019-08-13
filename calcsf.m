@@ -8,11 +8,13 @@ function [sf_l,sf_s,minSD_l,minSD_s] = calcsf(lsri, l_cal_range, s_cal_range, pl
 switch nargin
     case 0
         error('This function needs lsri at minimum')
-    case 1
+    case {1,2,3}
         l_cal_range = linspace(-2,2,2000);
         s_cal_range = linspace(-2,2,2000);
         plt.iterations = 0;
         plt.sfs = 0;
+        wholeset = 0;
+    case 4
         wholeset = 0;
 end
 
@@ -47,20 +49,21 @@ for i=1:2 % for both l and s
                 drawnow
                 %pause(0.1)
             end
-            if ~wholeset
-                if i==1
-                    cal_val_std(i,find(range == cal_val)) = mean(std(squeeze(lsri(1,:,:)+cal_val*lsri(4,:,:))'));
-                else
-                    cal_val_std(i,find(range == cal_val)) = mean(std(squeeze(lsri(2,:,:)+cal_val*lsri(4,:,:))'));
-                end
+        end
+        if ~wholeset
+            if i==1
+                cal_val_std(i,find(range == cal_val)) = mean(std(squeeze(lsri(1,:,:)+cal_val*lsri(4,:,:))'));
             else
-                if i==1
-                    cal_val_std(i,find(range == cal_val)) = std(lsri(1,:)+cal_val*lsri(4,:));
-                else
-                    cal_val_std(i,find(range == cal_val)) = std(lsri(2,:)+cal_val*lsri(4,:));
-                end
+                cal_val_std(i,find(range == cal_val)) = mean(std(squeeze(lsri(2,:,:)+cal_val*lsri(4,:,:))'));
+            end
+        else
+            if i==1
+                cal_val_std(i,find(range == cal_val)) = std(lsri(1,:)+cal_val*lsri(4,:));
+            else
+                cal_val_std(i,find(range == cal_val)) = std(lsri(2,:)+cal_val*lsri(4,:));
             end
         end
+        
     end
 end
 

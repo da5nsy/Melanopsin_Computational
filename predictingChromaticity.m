@@ -89,7 +89,7 @@ if plt.disp
     cleanTicks
     xlabel('{\itl}_{MB}');
     ylabel('{\its}_{MB}');
-    zlabel('{\itI}_{MB}');
+    zlabel('{\itI}');
 end
 
 if plt.print

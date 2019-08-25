@@ -57,5 +57,22 @@ if plt.print
 end
 
 %%
+clc % lots of warning messages from kmeans
+figure, hold on
+for n = 1:15
+    rng(4)
+    out(:,n) = kmeans(MB_star1(:,:)',10,'MaxIter',n);
+    cla
+    %gscatter(MB_star1(1,:),MB_star1(2,:),out(:,n))    
+    scatter(MB_star1(1,:),MB_star1(2,:),d.s,cols(out(:,n),:),'filled','MarkerFaceAlpha',d.MFA)
+    for i = 1:10
+        scatter(mean(MB_star1(1,out(:,n) == i)),mean(MB_star1(2,out(:,n) == i)),'k*')
+    end
+    xlabel('{\itl}_{MB} + {\itk_1i}_{MB}');
+    ylabel('{\its}_{MB} + {\itk_2i}_{MB}');
+    title(n)
+    drawnow      
+    pause(0.1)
+end
 
-kmeans(MB_star1(:,:)',10,'Replicates',20);
+

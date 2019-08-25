@@ -1,31 +1,60 @@
 clear, clc, close all
+d = DGdisplaydefaults;
 
-load('C:\Users\cege-user\Dropbox\UCL\Data\Reference Data\Granada Data\Granada_daylight_2600_161.mat');
-% http://colorimaginglab.ugr.es/pages/Data#__doku_granada_daylight_spectral_database
-% From: J. Hernández-Andrés, J. Romero& R.L. Lee, Jr., "Colorimetric and
-%       spectroradiometric characteristics of narrow-field-of-view
-%       clear skylight in Granada, Spain" (2001)
-T_SPD=final; clear final
-S_SPD=[300,5,161];
+[T_SPD, ~, T_SSF, ~, S_sh] = melcomp_loader('SRF','Vrhel_nat_extended','SSF','SP','Lum','SP');
 
-%%
+%% - %%
 
-S_SPD_e = SToWls(S_SPD);
-%T_SPD_e = T_SPD(21:81,:); %400-700nm
-T_SPD_e = T_SPD(17:97,:); %380-780nm
+% Copied from melomp_3 :
 
-[COEFF, SCORE, LATENT, TSQUARED, EXPLAINED] = pca(T_SPD_e');
+%% PCA of daylight
 
+% PCA of spectral Power distributions
+% compute pca variable weight
+vw = 0;
+if vw == 0 %no variable weights
+    pc_p.variableweights = ones(81,1);
+elseif vw == 1 %S + L and max in between
+    pc_p.variableweights = T_SSF(:,1)+T_SSF(:,3);
+    [~,t_p_locs] = findpeaks(pc_p.variableweights);
+    pc_p.variableweights(t_p_locs(1):t_p_locs(2)) = max(pc_p.variableweights);
+    pc_p.variableweights(pc_p.variableweights>1) = 1;
+elseif vw == 2 %S+M+L+I
+    pc_p.variableweights = sum(T_SSF');
+end
 
+plt_vw = 1;
+if plt_vw
+    figure,
+    axis tight
+    plot(SToWls(S_sh),pc_p.variableweights)
+    xlim([390 730]);
+    xticks(400:100:700);
+    %ylim([0 1]);
+    yticks(ylim);
+    ylabel('Weight')
+end
 
-%%
+[pc_p.coeff, pc_p.score, pc_p.latent, pc_p.tsquared, pc_p.explained, pc_p.mu] = pca(T_SPD','VariableWeights',pc_p.variableweights);
 
-load B_cieday.mat
+plt_pc_p = 1;
+if plt_pc_p
+    figure, hold on
+    axis tight
+    xlim([390 730]); xticks(400:100:700);
+    ylim([-0.55 0.55]); yticks([-0.5,0,0.5]);
+    %legend({'PC1','PC2','PC3'},'Location','Southwest')
+    
+    % highlights negative space
+    fill([min(xlim),max(xlim),max(xlim),min(xlim),min(xlim)],[-1,-1,0,0,-1],...
+        'k','LineStyle','none','FaceAlpha','0.03');
+    
+    %normalised PCs:
+    %plot(SToWls(S_sh),pc.coeff(:,1:3)./max(pc.coeff(:,1:3)))
+    
+    plot(SToWls(S_sh),pc_p.coeff(:,1:3))    
+   
+end
 
-figure, hold on
-
-plot(SToWls(S_cieday),B_cieday(:,1:3)./max(B_cieday(:,1:3)),'r:','LineWidth',3)
-plot(S_SPD_e(17:97),COEFF(:,1:3)./max(COEFF(:,1:3)))
-legend
 
 

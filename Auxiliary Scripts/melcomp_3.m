@@ -15,7 +15,7 @@ set(groot,'defaultFigureRenderer', 'painters') %renders pdfs as vectors
 set(groot,'defaultfigurecolor','white')
 
 ff = '-dpng'; %file format
-p  = 0; %print? (aka save?), set to 1 to begin saving
+p  = 1; %print? (aka save?), set to 1 to begin saving
 
 plot_where = [800,50];
 plot_size  = [800,375];
@@ -115,7 +115,7 @@ ms_val = S_full(ms_ind);
 
 % PCA of spectral Power distributions
 % compute pca variable weight
-vw = 1;
+vw = 0;
 if vw == 0 %no variable weights
     pc_p.variableweights = ones(81,1);
 elseif vw == 1 %S + L and max in between

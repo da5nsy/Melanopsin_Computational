@@ -55,3 +55,7 @@ ylabel('{\its}_{MB} + {\itk_2i}_{MB}');
 if plt.print
     save2pdf([base,'\2.pdf'])
 end
+
+%%
+
+kmeans(MB_star1(:,:)',10,'Replicates',20);

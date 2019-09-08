@@ -7,7 +7,7 @@ plot_size  = [800,400];
 
 base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\figs\nat_corr';
 
-p = 1; % 0 = figures display but don't save. 1 = figures display and save.
+p = 0; % 0 = figures display but don't save. 1 = figures display and save.
 set(0,'defaultAxesFontName', 'Courier')
 
 %% Load data

@@ -15,7 +15,7 @@ set(groot,'defaultFigureRenderer', 'painters') %renders pdfs as vectors
 set(groot,'defaultfigurecolor','white')
 
 ff = '-dpng'; %file format
-p  = 1; %print? (aka save?), set to 1 to begin saving
+p  = 0; %print? (aka save?), set to 1 to begin saving
 
 plot_where = [800,50];
 plot_size  = [800,375];
@@ -151,18 +151,18 @@ if plt_pc_p
     
     % highlights negative space
     fill([min(xlim),max(xlim),max(xlim),min(xlim),min(xlim)],[-1,-1,0,0,-1],...
-        'k','LineStyle','none','FaceAlpha','0.03');
+        'k','LineStyle','none','FaceAlpha','0.03','HandleVisibility','off');
     
     %normalised PCs:
     %plot(SToWls(S_sh),pc.coeff(:,1:3)./max(pc.coeff(:,1:3)))
     
-    plot(SToWls(S_sh),pc_p.coeff(:,1))
+    plot(SToWls(S_sh),pc_p.coeff(:,1),'DisplayName','PC1')
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
-    plot(SToWls(S_sh),pc_p.coeff(:,2))
+    plot(SToWls(S_sh),pc_p.coeff(:,2),'DisplayName','PC2')
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
-    plot(SToWls(S_sh),pc_p.coeff(:,3))
+    plot(SToWls(S_sh),pc_p.coeff(:,3),'DisplayName','PC3')
     if p, print([base,'\',num2str(p)],ff); p=p+1; end %save figure
     
     cla

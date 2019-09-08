@@ -11,7 +11,7 @@ d = DGdisplaydefaults;
 
 % PCA of spectral Power distributions
 % compute pca variable weight
-vw = 0;
+vw = 2;
 if vw == 0 %no variable weights
     pc_p.variableweights = ones(81,1);
 elseif vw == 1 %S + L and max in between

@@ -4,17 +4,7 @@ clear, clc, close all
 
 % Display Settings
 plt.disp = 1;         % Display figures?
-d.s=25;               % display, size
-d.MFA = 0.2;          % Marker Face Alpha
-d.mktrns = 0.3;       % Marker transparency
-set(groot,'defaultfigureposition',[100 100 500 400])
-set(groot,'defaultLineLineWidth',2)
-set(groot,'defaultAxesFontName', 'Courier')
-set(groot,'defaultAxesFontSize',12)
-set(groot,'defaultFigureRenderer', 'painters') %renders pdfs as vector graphics
-set(groot,'defaultfigurecolor','white')
-cols = hsv(10); rng(2);
-set(groot,'defaultAxesColorOrder',cols(randperm(size(cols,1)),:))
+d = DGdisplaydefaults;
 
 % MB settings
 min_l_scale = 0.62;
@@ -76,20 +66,24 @@ end
 %% First level signals
 
 if plt.disp
-    figure, hold on
-    drawChromaticity('MB10')
-    for i=1:size(T_SRF,2)
-        scatter3(lsri_neutral(1,1,:),lsri_neutral(2,1,:),LMSRI(5,i,:),d.s,'filled','MarkerFaceAlpha',d.MFA)
+    figure('Position',[100,100,500,800]), hold on
+    views = {2,[90,0],[0,0]};
+    for j = 1:3
+        subplot(3,1,j), hold on
+        %drawChromaticity('MB10')
+        for i=1:size(T_SRF,2)
+            scatter3(lsri_neutral(1,1,:),lsri_neutral(2,1,:),LMSRI(5,i,:),d.s,'filled','MarkerFaceAlpha',d.MFA)
+        end
+        scatter3(lsri_neutral(1,1,:),lsri_neutral(2,1,:),LMSRI_neutral(5,1,:),d.s,'k','filled','MarkerFaceAlpha',d.MFA)
+        
+        view(views{j})
+        xlim([min_l_scale, max_l_scale])
+        ylim([0, max_s_scale])
+        cleanTicks
+        xlabel('{\itl}_{MB}');
+        ylabel('{\its}_{MB}');
+        zlabel('{\itI}');
     end
-    scatter3(lsri_neutral(1,1,:),lsri_neutral(2,1,:),LMSRI_neutral(5,1,:),d.s,'k','filled','MarkerFaceAlpha',d.MFA)
-    
-    view(3)
-    xlim([min_l_scale, max_l_scale])
-    ylim([0, max_s_scale])
-    cleanTicks
-    xlabel('{\itl}_{MB}');
-    ylabel('{\its}_{MB}');
-    zlabel('{\itI}');
 end
 
 if plt.print
@@ -100,17 +94,13 @@ end
 
 if plt.disp
     plt.names={'L','M','S','R','I'}; 
-    plt.N1 = [1,NaN,NaN,1,2,NaN,1,2,3]; % Plot numbers
-    plt.N2 = [2,NaN,NaN,3,3,NaN,5,5,5];
+    plt.N1 = [1,3,1,2,1,2]; % Plot numbers
+    plt.N2 = [2,5,3,3,5,5];
+     
+    figure('Position',[100,100,500,800],'Renderer','opengl')
     
-    %figure('units','normalized','outerposition',[0 0 1 1])    
-    figure('units','normalized','outerposition',[0 0 1 1],'Renderer','opengl')
-    
-    for i=1:9
-        if isnan(plt.N1(i))
-            continue
-        end
-        sp(i)=subplot(3,3,i);
+    for i=1:6
+        sp(i)=subplot(3,2,i);
         hold on
         
         for j=1:size(T_SRF,2)
@@ -178,17 +168,13 @@ lsri_rand(4,:,:) = t_i(2,:,:); clear t_i
 
 if plt.disp
     plt.names={'L','M','S','R','I'}; 
-    plt.N1 = [1,NaN,NaN,1,2,NaN,1,2,3]; % Plot numbers
-    plt.N2 = [2,NaN,NaN,3,3,NaN,5,5,5];
+    plt.N1 = [1,3,1,2,1,2]; % Plot numbers
+    plt.N2 = [2,5,3,3,5,5];
+      
+    figure('Position',[100,100,500,800],'Renderer','opengl')
     
-    %figure('units','normalized','outerposition',[0 0 1 1])    
-    figure('units','normalized','outerposition',[0 0 1 1],'Renderer','opengl')
-    
-    for i=1:9
-        if isnan(plt.N1(i))
-            continue
-        end
-        sp(i)=subplot(3,3,i);
+    for i=1:6
+        sp(i)=subplot(3,2,i);
         hold on
         
         scatter3(sp(i),lsri_rand(1,1,:),lsri_rand(2,1,:),...
@@ -230,6 +216,9 @@ if plt.disp
         end
     end
 end
+
+view(sp(3),[99,5]) %these will change slightly - random data
+view(sp(4),[75,-10])
 
 if plt.print
     save2pdf([base,'\allComboSignals_rand.pdf'])

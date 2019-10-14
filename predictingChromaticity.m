@@ -38,7 +38,7 @@ base = 'C:\Users\cege-user\Dropbox\Documents\MATLAB\Melanopsin_Computational\fig
 
 if plt.disp
     figure, hold on
-    drawChromaticity('MB10')
+    DrawChromaticity('MB10')
     
     % Plot surfaces
     for i=1:size(T_SRF,2)
@@ -70,7 +70,7 @@ if plt.disp
     views = {2,[90,0],[0,0]};
     for j = 1:3
         subplot(3,1,j), hold on
-        %drawChromaticity('MB10')
+        %DrawChromaticity('MB10')
         for i=1:size(T_SRF,2)
             scatter3(lsri_neutral(1,1,:),lsri_neutral(2,1,:),LMSRI(5,i,:),d.s,'filled','MarkerFaceAlpha',d.MFA)
         end

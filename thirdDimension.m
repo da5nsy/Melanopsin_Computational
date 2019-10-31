@@ -17,7 +17,7 @@ cols = hsv(10); rng(2);
 set(groot,'defaultAxesColorOrder',cols(randperm(size(cols,1)),:))
 
 % Plot saving settings
-plt.print = 1; % Save 
+plt.print = 0; % Save 
 if plt.print
     warning('plt.print is enabled - you sure? This will overwrite existing figures.')
 end
@@ -64,6 +64,7 @@ if plt.print
     save2pdf([base,'\ZL.pdf'])
 end
 
+%%
 view(23,-38)
 
 if plt.print

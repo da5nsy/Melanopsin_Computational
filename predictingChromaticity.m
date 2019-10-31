@@ -12,7 +12,7 @@ max_l_scale = 0.82;
 max_s_scale = 0.05;
 
 % Plot saving settings
-plt.print = 1; % Save 
+plt.print = 0; % Save 
 if plt.print
     warning('plt.print is enabled - you sure? This will overwrite existing figures.')
 end
@@ -92,6 +92,8 @@ end
 
 %% Second level signals
 
+t = NaN;
+
 if plt.disp
     plt.names={'L','M','S','R','I'}; 
     plt.N1 = [1,3,1,2,1,2]; % Plot numbers
@@ -107,6 +109,7 @@ if plt.disp
             scatter3(sp(i),lsri_neutral(1,1,:),lsri_neutral(2,1,:),...
                 LMSRI(plt.N1(i),j,:)./LMSRI(plt.N2(i),j,:),...
                 d.s,'filled','MarkerFaceAlpha',d.MFA)
+            t(length(t)+1) = abs(min(min(corrcoef(lsri_neutral(2,1,:),LMSRI(plt.N1(i),j,:)./LMSRI(plt.N2(i),j,:)))));
         end
         scatter3(sp(i),lsri_neutral(1,1,:),lsri_neutral(2,1,:),...
             LMSRI_neutral(plt.N1(i),1,:)./LMSRI_neutral(plt.N2(i),1,:),...
@@ -151,6 +154,10 @@ end
 if plt.print
     save2pdf([base,'\allComboSignals.pdf'])
 end
+
+avcc = nanmean(t); %average correlation coefficient, for l_MB only
+stdcc = nanstd(t); %std correlation coefficient
+
 
 %% Random Data
 % Repeat of above, but with random data 

@@ -67,8 +67,16 @@ for pcSurf = [100,50]
                 d.s,'filled','MarkerFaceAlpha',d.MFA)
         end
         cleanTicks
+        if i == 1
+        xlabel('{\itl}_{MB}');
+        ylabel('{\its}_{MB}');
+        elseif i == 2 || i == 3
         xlabel('{\itl}_{MB}*');
         ylabel('{\its}_{MB}*');
+        elseif i == 4
+        xlabel('{\itl}_{MB} + {\itk}_{1}{\iti}_{MB}');
+        ylabel('{\its}_{MB} + {\itk}_{2}{\iti}_{MB}');
+        end
     end
     
     disp(mark)

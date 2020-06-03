@@ -1,4 +1,9 @@
 % Correlation matrices of natural reflectances
+% Requires:
+% - Foster et al. images (links below)
+% - PsychToolbox (for color data)
+% - 'Statistics and Machine Learning Toolbox' for 'corr' (would be nice to
+% use an alternative)
 
 clear, clc, close all
 
@@ -13,10 +18,11 @@ set(0,'defaultAxesFontName', 'Courier')
 %% Load data
 
 base = 'C:\Users\cege-user\Documents\Large data\Foster Images\';
-for i=1:4 %2002 images
+for i=1:4 %2002 images (https://personalpages.manchester.ac.uk/staff/david.foster/Hyperspectral_images_of_natural_scenes_02.html)
     ims(i)=load([base, '2002\scene',num2str(i),'.mat']); %imageS
 end
 %2004 images
+%(https://personalpages.manchester.ac.uk/staff/david.foster/Hyperspectral_images_of_natural_scenes_04.html)
 ims(5)=load([base,'2004\scene1\ref_crown3bb_reg1.mat']);
 ims(6)=load([base,'2004\scene2\ref_ruivaes1bb_reg1.mat']);
 ims(7)=load([base,'2004\scene3\ref_mosteiro4bb_reg1.mat']);
@@ -111,7 +117,7 @@ set(gca,'YTickLabel',S_refs_f(xticks))
 figure,
 
 subplot(2,2,1)
-sur_vrhel_c = corr(sur_vrhel');
+sur_vrhel_c = corr(sur_vrhel'); % Requires 'Statistics and Machine Learning Toolbox'
 imagesc(sur_vrhel_c)
 axis image
 colormap gray
